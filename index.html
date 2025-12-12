@@ -135,7 +135,7 @@
             <div class="mb-4"><input type="password" id="loginPass" class="form-control form-control-minimal" placeholder="PASSWORD"></div>
             <button onclick="window.attemptLogin()" class="btn-login">LOGIN</button>
             <div id="loginError" class="text-danger mt-3 small fw-bold" style="display:none;">ACCESS DENIED</div>
-            <div id="systemError" class="text-danger mt-3 small fw-bold" style="display:none;">DB ERROR - CHECK CSV</div>
+            <div id="statusMsg" class="text-secondary mt-3 small"></div>
         </div>
     </div>
 
@@ -231,14 +231,13 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // --- 1. CONFIGURATION ---
+        // --- 1. CONFIG & CATEGORY DEFINITIONS ---
         const orderLimit = 100000; 
-
-        // --- 2. CATEGORY DEFINITIONS (TAGGING SYSTEM) ---
-        // Format: "CATEGORY_NAME": ["KEYWORD1", "KEYWORD2", ...]
+        
+        // Define Categories and their Keywords
         const CATEGORY_DEFINITIONS = {
             "SHOCK ABSORBER": ["SHOCK ABSORBER"],
-            "SUSPENSION": ["TIE ROD END", "SHOCK ABSORBER", "BALL JOINT", "CONTROL ROD", "CONTROL ARM", "ARM BUSH", "RACK END", "STABILIZER LINK"],
+            "SUSPENSION": ["TIE ROD END", "SHOCK ABSORBER", "BALL JOINT", "CONTROL ROD", "CONTROL ARM", "ARM BUSH", "RACK END", "STABILIZER LINK", "ARM BUSH"],
             "STEERING": ["POWER STEERING PUMP", "POWER STEERING RACK", "STEERING"],
             "RADIATOR": ["RADIATOR", "CONDENSER", "FAN BLADE", "FAN CASE"],
             "ROCKMONT": ["MAN", "DAF", "SCANIA", "ROCKMONT"],
@@ -258,133 +257,123 @@
             "BRAKE DISC": ["BRAKE DISC"]
         };
 
-        // --- 3. USER ACCESS RIGHTS ---
-        // Format: { id, pass, name, allowedCategories: ["CAT1", "CAT2"] }
+        // --- 2. USER ACCESS ---
         const validUsers = [
-            { id: "GH98904", pass: "0000", name: "Client GH98904", allowedCategories: ["STEERING", "SUSPENSION"] },
+            { id: "GH98904", pass: "0000", name: "Client GH98904", allowed: ["STEERING", "SUSPENSION"] },
             
             // Radiator Group
-            { id: "GH10328", pass: "0000", name: "Yebford Radiator", allowedCategories: ["RADIATOR"] },
-            { id: "GH98791", pass: "0000", name: "K.auto", allowedCategories: ["RADIATOR"] },
-            { id: "GH10147", pass: "0000", name: "Qualiparts Ent", allowedCategories: ["RADIATOR"] },
-            { id: "GH10307", pass: "0000", name: "Yeboah Radiator", allowedCategories: ["RADIATOR"] },
-            { id: "GH98873", pass: "0000", name: "Pole to Pole", allowedCategories: ["RADIATOR"] },
-            { id: "GH10051", pass: "0000", name: "David Gyamfi", allowedCategories: ["RADIATOR"] },
+            { id: "GH10328", pass: "0000", name: "Yebford Radiator", allowed: ["RADIATOR"] },
+            { id: "GH98791", pass: "0000", name: "K.auto", allowed: ["RADIATOR"] },
+            { id: "GH10147", pass: "0000", name: "Qualiparts Ent", allowed: ["RADIATOR"] },
+            { id: "GH10307", pass: "0000", name: "Yeboah Radiator", allowed: ["RADIATOR"] },
+            { id: "GH98873", pass: "0000", name: "Pole to Pole", allowed: ["RADIATOR"] },
+            { id: "GH10051", pass: "0000", name: "David Gyamfi", allowed: ["RADIATOR"] },
 
-            { id: "GH10811", pass: "0000", name: "Client GH10811", allowedCategories: ["SUSPENSION", "TOP MOUNTING"] },
-            { id: "GH10112", pass: "0000", name: "Client GH10112", allowedCategories: ["SUSPENSION"] }
+            { id: "GH10811", pass: "0000", name: "Client GH10811", allowed: ["SUSPENSION", "TOP MOUNTING"] },
+            { id: "GH10112", pass: "0000", name: "Client GH10112", allowed: ["SUSPENSION"] }
         ];
 
-        // --- GLOBAL VARIABLES ---
+        // --- GLOBAL STATE ---
         window.cart = []; 
-        window.fullDatabase = []; // Contains ALL products with tags
-        window.userDatabase = []; // Contains products filtered for the logged-in user
+        window.fullDatabase = []; 
+        window.userDatabase = []; 
         window.loggedInUser = null;
 
-        // --- INITIALIZATION ---
+        // --- INIT ---
         document.addEventListener('DOMContentLoaded', function() {
-            window.productModal = new bootstrap.Modal(document.getElementById('productModal'));
-            window.cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
+            try {
+                window.productModal = new bootstrap.Modal(document.getElementById('productModal'));
+                window.cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
+                if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(console.log);
+            } catch(e) { console.log("Init warning", e); }
             
-            // Try Service Worker (PWA)
-            if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(console.log);
-            
-            // Load CSV
             loadDataFromCSV();
         });
 
-        // --- HELPER: ASSIGN TAGS TO PRODUCT ---
-        function getProductCategories(productName) {
-            const assignedCats = [];
-            const upperName = String(productName).toUpperCase();
-            
-            // Check against every category definition
-            for (const [category, keywords] of Object.entries(CATEGORY_DEFINITIONS)) {
-                // If ANY keyword matches, assign this category
-                const match = keywords.some(keyword => upperName.includes(keyword.toUpperCase()));
-                if (match) {
-                    assignedCats.push(category);
+        // --- HELPER: ASSIGN CATEGORIES ---
+        // This makes tag matching flexible (contains keyword)
+        function assignCategories(productName) {
+            let cats = [];
+            let name = String(productName).toUpperCase();
+            for (let [catName, keywords] of Object.entries(CATEGORY_DEFINITIONS)) {
+                // If ANY keyword matches, assign category
+                if (keywords.some(k => name.includes(k.toUpperCase()))) {
+                    cats.push(catName);
                 }
             }
-            return assignedCats;
+            return cats;
         }
 
-        // --- DATA LOADING & PARSING (ROBUST) ---
+        // --- DATA LOAD ---
         function loadDataFromCSV() {
             document.getElementById('loadingMsg').style.display = 'block';
+            document.getElementById('statusMsg').innerText = "Loading data...";
+            
             fetch('products.csv?v=' + Date.now())
-                .then(r => r.ok ? r.text() : Promise.reject())
+                .then(r => r.ok ? r.text() : Promise.reject("File not found"))
                 .then(t => {
                     const parsed = parseCSV(t);
                     window.fullDatabase = parsed;
                     document.getElementById('loadingMsg').style.display = 'none';
+                    document.getElementById('statusMsg').innerText = `System Ready. Loaded ${parsed.length} items.`;
                 })
                 .catch(e => {
-                    console.error("CSV Load Error:", e);
-                    // Safe fallback
+                    console.error(e);
                     window.fullDatabase = []; 
-                    document.getElementById('loadingMsg').innerText = "Database Load Failed";
+                    document.getElementById('loadingMsg').innerText = "Load Failed. Check CSV.";
+                    document.getElementById('statusMsg').innerText = "Data Error";
                 });
         }
 
+        // --- ROBUST CSV PARSER ---
         function parseCSV(text) {
-            const lines = text.split('\n');
+            // Split by ANY newline format to fix "0 items" issue
+            const lines = text.split(/\r\n|\n|\r/);
             const data = [];
             
             for(let i=1; i<lines.length; i++) {
                 const line = lines[i].trim();
                 if(!line) continue;
                 
-                // Safe split logic
                 const cols = line.split(',');
-                
-                // Need at least Code(0) and Name(1)
+                // Ensure min columns exist
                 if(cols.length >= 2) {
-                    const pName = cols[1] ? cols[1].trim() : "Unknown";
-                    
-                    const product = {
+                    let pName = cols[1] ? cols[1].trim() : "Unknown";
+                    data.push({
                         code: cols[0] ? cols[0].trim() : "N/A",
                         name: pName,
-                        stock: cols[2] ? (parseInt(cols[2].trim())||0) : 0,
-                        price: cols[3] ? (parseFloat(cols[3].trim())||0) : 0,
-                        promo: (cols.length>=5 && cols[4]) ? (parseFloat(cols[4].trim())||0) : 0,
-                        isNew: (cols.length>=6 && cols[5] && cols[5].trim()==='1') ? 1 : 0,
-                        // CRITICAL: Assign Categories immediately
-                        categories: getProductCategories(pName) 
-                    };
-                    data.push(product);
+                        stock: parseInt(cols[2]) || 0,
+                        price: parseFloat(cols[3]) || 0,
+                        promo: (cols.length>=5) ? (parseFloat(cols[4])||0) : 0,
+                        isNew: (cols.length>=6 && cols[5] && cols[5].trim()=='1') ? 1 : 0,
+                        // Assign tags now
+                        categories: assignCategories(pName)
+                    });
                 }
             }
             return data;
         }
 
-        // --- LOGIN & FILTERING ---
+        // --- LOGIN LOGIC ---
         window.attemptLogin = function() {
-            try {
-                const i = document.getElementById('loginId').value.trim().toUpperCase();
-                const p = document.getElementById('loginPass').value.trim();
-                const user = validUsers.find(x => x.id === i && x.pass === p);
+            const i = document.getElementById('loginId').value.trim().toUpperCase();
+            const p = document.getElementById('loginPass').value.trim();
+            const user = validUsers.find(x => x.id === i && x.pass === p);
+            
+            if(user) {
+                window.loggedInUser = user;
                 
-                if(user) {
-                    window.loggedInUser = user;
-                    
-                    // Filter Database: Keep product if it shares ANY category with user's allowed list
-                    window.userDatabase = window.fullDatabase.filter(product => {
-                        return product.categories.some(cat => user.allowedCategories.includes(cat));
-                    });
+                // Filter: Check if product has ANY category allowed for user
+                window.userDatabase = window.fullDatabase.filter(prod => {
+                    return prod.categories.some(c => user.allowed.includes(c));
+                });
 
-                    document.getElementById('userDisplay').innerText = user.name;
-                    document.getElementById('loginSection').style.display = 'none';
-                    document.getElementById('mainApp').style.display = 'block';
-                    window.handleSearch();
-                } else {
-                    document.getElementById('loginError').style.display = 'block';
-                    document.getElementById('systemError').style.display = 'none';
-                }
-            } catch(e) {
-                console.error("Login Error:", e);
-                document.getElementById('loginError').style.display = 'none';
-                document.getElementById('systemError').style.display = 'block';
+                document.getElementById('userDisplay').innerText = user.name;
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                window.handleSearch();
+            } else {
+                document.getElementById('loginError').style.display = 'block';
             }
         };
 
@@ -392,10 +381,10 @@
         window.handleSearch = function() {
             const val = document.getElementById('searchInput').value.toUpperCase().trim();
             const listDiv = document.getElementById('resultsList');
-            let results = window.userDatabase || [];
+            let results = window.userDatabase || []; // Use filtered list
             
             if(results.length === 0) { 
-                listDiv.innerHTML = `<div class="text-center text-muted mt-5 small">No authorized products found for your account.</div>`; 
+                listDiv.innerHTML = `<div class="text-center text-muted mt-5 small">No authorized products found.</div>`; 
                 return; 
             }
 
@@ -412,17 +401,16 @@
             }
             
             if(results.length === 0) { 
-                listDiv.innerHTML = `<div class="text-center text-muted mt-5 small">No items match your search</div>`; 
+                listDiv.innerHTML = `<div class="text-center text-muted mt-5 small">No items match.</div>`; 
                 return; 
             }
             
+            // Render limit to avoid UI lag
             const renderData = results.slice(0, 60);
             let html = '';
             
             renderData.forEach(i => {
-                // Find ORIGINAL index in userDatabase to avoid click mismatches
-                const idx = window.userDatabase.indexOf(i);
-                
+                const idx = window.userDatabase.indexOf(i); // Get correct index
                 let badgeClass = i.stock<=0 ? "bg-stock-zero" : (i.stock<=10 ? "bg-stock-low" : "bg-stock-high");
                 let badgeText = i.stock<=0 ? "OUT OF STOCK" : (i.stock<=10 ? "LOW STOCK" : "IN STOCK");
                 let newHtml = i.isNew ? `<span class="badge-new-manual">NEW</span>` : "";
@@ -443,8 +431,8 @@
         window.openProduct = function(idx) {
             window.currentItem = window.userDatabase[idx];
             if(!window.currentItem) return;
-            
             const d = window.currentItem;
+            
             document.getElementById('modalCode').innerText = d.code;
             document.getElementById('modalName').innerText = d.name;
             document.getElementById('modalImg').src = `images/${d.code}.jpg`;
@@ -458,22 +446,19 @@
             document.getElementById('modalNewBadge').style.display = d.isNew ? 'inline-block' : 'none';
 
             const stockBox = document.getElementById('modalStockContent');
-            const cartSec = document.getElementById('addToCartSection');
-            const outMsg = document.getElementById('outOfStockMsg');
-            
             if(d.stock <= 0) {
                 stockBox.innerHTML = `<span class="stock-tag bg-stock-zero">OUT OF STOCK</span>`;
-                cartSec.style.display = 'none';
-                outMsg.style.display = 'block';
+                document.getElementById('addToCartSection').style.display = 'none';
+                document.getElementById('outOfStockMsg').style.display = 'block';
             } else {
-                cartSec.style.display = 'block';
-                outMsg.style.display = 'none';
+                document.getElementById('addToCartSection').style.display = 'block';
+                document.getElementById('outOfStockMsg').style.display = 'none';
                 stockBox.innerHTML = d.stock<=10 ? `<span class="stock-tag bg-stock-low text-dark">LOW STOCK</span>` : `<span class="stock-tag bg-stock-high">IN STOCK</span>`;
             }
             window.productModal.show();
         };
 
-        // --- CART LOGIC ---
+        // --- CART & UTILS ---
         window.updateQty = function(delta) {
             let v = parseInt(document.getElementById('qtyInput').value) + delta;
             if(v<1) v=1; 
@@ -520,12 +505,10 @@
 
         window.changeCartQty = function(i, d) {
             let n = window.cart[i].qty + d; 
-            // Look up stock in fullDatabase to be safe
+            // Check stock from full DB
             const dbItem = window.fullDatabase.find(x=>x.code===window.cart[i].code);
-            const maxStock = dbItem ? dbItem.stock : 9999;
-            
-            if(n<1) return; 
-            if(n>maxStock) return alert("Stock Limit");
+            const max = dbItem ? dbItem.stock : 9999;
+            if(n<1) return; if(n>max) return alert("Stock Limit");
             window.cart[i].qty = n; window.openCartModal(); updateCartBadge();
         }
         window.remCart = function(i) { window.cart.splice(i, 1); window.openCartModal(); updateCartBadge(); }
