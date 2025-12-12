@@ -135,7 +135,7 @@
             <div class="mb-4"><input type="password" id="loginPass" class="form-control form-control-minimal" placeholder="PASSWORD"></div>
             <button onclick="window.attemptLogin()" class="btn-login">LOGIN</button>
             <div id="loginError" class="text-danger mt-3 small fw-bold" style="display:none;">ACCESS DENIED</div>
-            <div id="systemError" class="text-danger mt-3 small fw-bold" style="display:none;">DATA ERROR: Check CSV</div>
+            <div id="systemError" class="text-danger mt-3 small fw-bold" style="display:none;">DB ERROR - CHECK CSV</div>
         </div>
     </div>
 
@@ -231,102 +231,148 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // --- CONFIG & ACCESS ---
+        // --- 1. CONFIGURATION ---
         const orderLimit = 100000; 
-        const ACCESS_COOLING = ["RADIATOR", "FAN", "CONDENSER"];
-        const ACCESS_SUSPENSION_A = ["SHOCK", "STABILIZER", "MOUNTING"];
-        const ACCESS_MIXED_B = ["RACK", "SHOCK", "ARM"];
-        const ACCESS_SUSPENSION_FULL = [
-            "SHOCK", "IDLER", "STABILIZER", "BALL JOINT", "BUSH", 
-            "RACK END", "CONTROL ROD", "TIE ROD", "DRAG LINK", "CONTROL ARM"
-        ];
 
+        // --- 2. CATEGORY DEFINITIONS (TAGGING SYSTEM) ---
+        // Format: "CATEGORY_NAME": ["KEYWORD1", "KEYWORD2", ...]
+        const CATEGORY_DEFINITIONS = {
+            "SHOCK ABSORBER": ["SHOCK ABSORBER"],
+            "SUSPENSION": ["TIE ROD END", "SHOCK ABSORBER", "BALL JOINT", "CONTROL ROD", "CONTROL ARM", "ARM BUSH", "RACK END", "STABILIZER LINK"],
+            "STEERING": ["POWER STEERING PUMP", "POWER STEERING RACK", "STEERING"],
+            "RADIATOR": ["RADIATOR", "CONDENSER", "FAN BLADE", "FAN CASE"],
+            "ROCKMONT": ["MAN", "DAF", "SCANIA", "ROCKMONT"],
+            "MOUNTING": ["ENGINE MOUNTING", "GEARBOX MOUNTING"],
+            "CYLINDER": ["CLUTCH MASTER CYLINDER", "CLUTCH SLAVE CYLINDER", "BRAKE MASTER CYLINDER", "WHEEL CYLINDER"],
+            "PLATE": ["PRESSURE PLATE", "CLUTCH PLATE"],
+            "LIGHT": ["LAMP"],
+            "FILTER": ["FILTER", "ELEMENT"],
+            "TOP MOUNTING": ["TOP MOUNTING"],
+            "SPRINTER": ["SPRINTER"],
+            "BRAKE PAD": ["BRAKE PAD", "BRAKE SHOE"],
+            "WATER PUMP": ["WATER PUMP"],
+            "SPARK": ["SPARK PLUG", "IGNITION COIL"],
+            "GASKET": ["HEAD GASKET", "FULL GASKET", "VALVE COVER GASKET"],
+            "BUSH": ["BUSH"],
+            "ELECTRIC": ["ALTERNATOR", "STARTER"],
+            "BRAKE DISC": ["BRAKE DISC"]
+        };
+
+        // --- 3. USER ACCESS RIGHTS ---
+        // Format: { id, pass, name, allowedCategories: ["CAT1", "CAT2"] }
         const validUsers = [
-            { id: "GH10328", pass: "0000", name: "Yebford Radiator", access: ACCESS_COOLING },
-            { id: "GH98791", pass: "0000", name: "K.auto", access: ACCESS_COOLING },
-            { id: "GH10147", pass: "0000", name: "Qualiparts Ent", access: ACCESS_COOLING },
-            { id: "GH10307", pass: "0000", name: "Yeboah Radiator", access: ACCESS_COOLING },
-            { id: "GH98873", pass: "0000", name: "Pole to Pole", access: ACCESS_COOLING },
-            { id: "GH10051", pass: "0000", name: "David Gyamfi", access: ACCESS_COOLING },
-            { id: "GH10811", pass: "0000", name: "Client GH10811", access: ACCESS_SUSPENSION_A },
-            { id: "GH10112", pass: "0000", name: "Client GH10112", access: ACCESS_SUSPENSION_FULL },
-            { id: "GH98904", pass: "0000", name: "Client GH98904", access: ACCESS_MIXED_B }
+            { id: "GH98904", pass: "0000", name: "Client GH98904", allowedCategories: ["STEERING", "SUSPENSION"] },
+            
+            // Radiator Group
+            { id: "GH10328", pass: "0000", name: "Yebford Radiator", allowedCategories: ["RADIATOR"] },
+            { id: "GH98791", pass: "0000", name: "K.auto", allowedCategories: ["RADIATOR"] },
+            { id: "GH10147", pass: "0000", name: "Qualiparts Ent", allowedCategories: ["RADIATOR"] },
+            { id: "GH10307", pass: "0000", name: "Yeboah Radiator", allowedCategories: ["RADIATOR"] },
+            { id: "GH98873", pass: "0000", name: "Pole to Pole", allowedCategories: ["RADIATOR"] },
+            { id: "GH10051", pass: "0000", name: "David Gyamfi", allowedCategories: ["RADIATOR"] },
+
+            { id: "GH10811", pass: "0000", name: "Client GH10811", allowedCategories: ["SUSPENSION", "TOP MOUNTING"] },
+            { id: "GH10112", pass: "0000", name: "Client GH10112", allowedCategories: ["SUSPENSION"] }
         ];
 
-        window.cart = []; window.fullDatabase = []; window.userDatabase = []; window.loggedInUser = null;
+        // --- GLOBAL VARIABLES ---
+        window.cart = []; 
+        window.fullDatabase = []; // Contains ALL products with tags
+        window.userDatabase = []; // Contains products filtered for the logged-in user
+        window.loggedInUser = null;
 
+        // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', function() {
             window.productModal = new bootstrap.Modal(document.getElementById('productModal'));
             window.cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
+            
+            // Try Service Worker (PWA)
             if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(console.log);
+            
+            // Load CSV
             loadDataFromCSV();
         });
 
-        // --- SAFE DATABASE FILTER ---
-        function filterDatabaseForUser(user) {
-            try {
-                window.userDatabase = window.fullDatabase.filter(item => {
-                    // FORCE STRING CONVERSION TO PREVENT CRASHES
-                    const upperName = String(item.name || "").toUpperCase();
-                    return user.access.some(phrase => {
-                        const requiredWords = String(phrase || "").toUpperCase().split(/\s+/);
-                        return requiredWords.every(word => upperName.includes(word));
-                    });
-                });
-            } catch(e) { console.error("Filter Error", e); window.userDatabase = []; }
+        // --- HELPER: ASSIGN TAGS TO PRODUCT ---
+        function getProductCategories(productName) {
+            const assignedCats = [];
+            const upperName = String(productName).toUpperCase();
+            
+            // Check against every category definition
+            for (const [category, keywords] of Object.entries(CATEGORY_DEFINITIONS)) {
+                // If ANY keyword matches, assign this category
+                const match = keywords.some(keyword => upperName.includes(keyword.toUpperCase()));
+                if (match) {
+                    assignedCats.push(category);
+                }
+            }
+            return assignedCats;
         }
 
-        // --- SAFE CSV PARSING ---
+        // --- DATA LOADING & PARSING (ROBUST) ---
         function loadDataFromCSV() {
             document.getElementById('loadingMsg').style.display = 'block';
             fetch('products.csv?v=' + Date.now())
                 .then(r => r.ok ? r.text() : Promise.reject())
                 .then(t => {
-                    window.fullDatabase = parseCSV(t);
+                    const parsed = parseCSV(t);
+                    window.fullDatabase = parsed;
                     document.getElementById('loadingMsg').style.display = 'none';
                 })
                 .catch(e => {
                     console.error("CSV Load Error:", e);
-                    // Fallback to avoid app crash
-                    window.fullDatabase = [];
-                    document.getElementById('loadingMsg').style.display = 'none';
+                    // Safe fallback
+                    window.fullDatabase = []; 
+                    document.getElementById('loadingMsg').innerText = "Database Load Failed";
                 });
         }
 
         function parseCSV(text) {
             const lines = text.split('\n');
             const data = [];
+            
             for(let i=1; i<lines.length; i++) {
                 const line = lines[i].trim();
                 if(!line) continue;
                 
-                // Simple split that doesn't break on trailing empty commas
+                // Safe split logic
                 const cols = line.split(',');
                 
-                // FORCE TYPES for safety
+                // Need at least Code(0) and Name(1)
                 if(cols.length >= 2) {
-                    data.push({
-                        code: cols[0] ? String(cols[0].trim()) : "N/A",
-                        name: cols[1] ? String(cols[1].trim()) : "Unknown",
+                    const pName = cols[1] ? cols[1].trim() : "Unknown";
+                    
+                    const product = {
+                        code: cols[0] ? cols[0].trim() : "N/A",
+                        name: pName,
                         stock: cols[2] ? (parseInt(cols[2].trim())||0) : 0,
                         price: cols[3] ? (parseFloat(cols[3].trim())||0) : 0,
                         promo: (cols.length>=5 && cols[4]) ? (parseFloat(cols[4].trim())||0) : 0,
-                        isNew: (cols.length>=6 && cols[5] && cols[5].trim()==='1') ? 1 : 0
-                    });
+                        isNew: (cols.length>=6 && cols[5] && cols[5].trim()==='1') ? 1 : 0,
+                        // CRITICAL: Assign Categories immediately
+                        categories: getProductCategories(pName) 
+                    };
+                    data.push(product);
                 }
             }
             return data;
         }
 
-        // --- UI FUNCTIONS ---
+        // --- LOGIN & FILTERING ---
         window.attemptLogin = function() {
             try {
                 const i = document.getElementById('loginId').value.trim().toUpperCase();
                 const p = document.getElementById('loginPass').value.trim();
                 const user = validUsers.find(x => x.id === i && x.pass === p);
+                
                 if(user) {
                     window.loggedInUser = user;
-                    filterDatabaseForUser(user);
+                    
+                    // Filter Database: Keep product if it shares ANY category with user's allowed list
+                    window.userDatabase = window.fullDatabase.filter(product => {
+                        return product.categories.some(cat => user.allowedCategories.includes(cat));
+                    });
+
                     document.getElementById('userDisplay').innerText = user.name;
                     document.getElementById('loginSection').style.display = 'none';
                     document.getElementById('mainApp').style.display = 'block';
@@ -336,18 +382,22 @@
                     document.getElementById('systemError').style.display = 'none';
                 }
             } catch(e) {
-                console.error("Login Crash:", e);
+                console.error("Login Error:", e);
                 document.getElementById('loginError').style.display = 'none';
                 document.getElementById('systemError').style.display = 'block';
             }
         };
 
+        // --- SEARCH ---
         window.handleSearch = function() {
             const val = document.getElementById('searchInput').value.toUpperCase().trim();
             const listDiv = document.getElementById('resultsList');
-            let results = window.userDatabase;
+            let results = window.userDatabase || [];
             
-            if(!results || results.length === 0) { listDiv.innerHTML = `<div class="text-center text-muted mt-5 small">No authorized products found.</div>`; return; }
+            if(results.length === 0) { 
+                listDiv.innerHTML = `<div class="text-center text-muted mt-5 small">No authorized products found for your account.</div>`; 
+                return; 
+            }
 
             if(val.length > 0) {
                 if(val === 'STOCK') results = results.filter(i => i.stock > 0);
@@ -361,12 +411,16 @@
                 }
             }
             
-            if(results.length === 0) { listDiv.innerHTML = `<div class="text-center text-muted mt-5 small">No items match your search</div>`; return; }
+            if(results.length === 0) { 
+                listDiv.innerHTML = `<div class="text-center text-muted mt-5 small">No items match your search</div>`; 
+                return; 
+            }
             
             const renderData = results.slice(0, 60);
             let html = '';
             
             renderData.forEach(i => {
+                // Find ORIGINAL index in userDatabase to avoid click mismatches
                 const idx = window.userDatabase.indexOf(i);
                 
                 let badgeClass = i.stock<=0 ? "bg-stock-zero" : (i.stock<=10 ? "bg-stock-low" : "bg-stock-high");
@@ -385,6 +439,7 @@
             listDiv.innerHTML = html;
         }
 
+        // --- PRODUCT DETAILS ---
         window.openProduct = function(idx) {
             window.currentItem = window.userDatabase[idx];
             if(!window.currentItem) return;
@@ -418,13 +473,16 @@
             window.productModal.show();
         };
 
+        // --- CART LOGIC ---
         window.updateQty = function(delta) {
             let v = parseInt(document.getElementById('qtyInput').value) + delta;
-            if(v<1) v=1; if(v > window.currentItem.stock) { alert("Stock limit reached"); v=window.currentItem.stock; }
+            if(v<1) v=1; 
+            if(window.currentItem && v > window.currentItem.stock) { alert("Stock limit reached"); v=window.currentItem.stock; }
             document.getElementById('qtyInput').value = v;
         }
 
         window.addToCart = function() {
+            if(!window.currentItem) return;
             const qty = parseInt(document.getElementById('qtyInput').value);
             const exist = window.cart.find(x => x.code === window.currentItem.code);
             if(exist) {
@@ -437,10 +495,7 @@
         function updateCartBadge() {
             const c = window.cart.reduce((a,b)=>a+b.qty,0);
             const b = document.getElementById('cartBadge');
-            if(b) {
-                b.innerText = c;
-                b.style.display = c>0?'flex':'none';
-            }
+            if(b) { b.innerText = c; b.style.display = c>0?'flex':'none'; }
         }
 
         window.openCartModal = function() {
@@ -464,8 +519,13 @@
         }
 
         window.changeCartQty = function(i, d) {
-            let n = window.cart[i].qty + d; const dbItem = window.fullDatabase.find(x=>x.code===window.cart[i].code);
-            if(n<1) return; if(n>dbItem.stock) return alert("Stock Limit");
+            let n = window.cart[i].qty + d; 
+            // Look up stock in fullDatabase to be safe
+            const dbItem = window.fullDatabase.find(x=>x.code===window.cart[i].code);
+            const maxStock = dbItem ? dbItem.stock : 9999;
+            
+            if(n<1) return; 
+            if(n>maxStock) return alert("Stock Limit");
             window.cart[i].qty = n; window.openCartModal(); updateCartBadge();
         }
         window.remCart = function(i) { window.cart.splice(i, 1); window.openCartModal(); updateCartBadge(); }
