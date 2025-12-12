@@ -20,7 +20,7 @@
     <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
 
     <style>
-        /* --- BRANDING --- */
+        /* --- DESIGN SYSTEM --- */
         :root {
             --brand-primary: #0056b3; 
             --brand-gradient: linear-gradient(135deg, #0056b3 0%, #002855 100%);
@@ -32,217 +32,185 @@
             --stock-zero-bg: #fee2e2; --stock-zero-text: #b91c1c;
         }
 
-        body { background-color: var(--bg-main); font-family: "Inter", sans-serif; padding-bottom: 100px; -webkit-font-smoothing: antialiased; }
+        body { background-color: var(--bg-main); font-family: "Inter", -apple-system, sans-serif; padding-bottom: 100px; -webkit-font-smoothing: antialiased; }
         .fw-800 { font-weight: 800; }
-        .backdrop-blur { backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
-
-        /* --- LOGO --- */
-        .login-logo-img { max-width: 260px; height: auto; display: block; margin: 0 auto 30px auto; }
         
-        /* --- HEADER --- */
-        .header-bg {
-            background: var(--brand-gradient); color: white; padding: 0 0 60px 0;
-            border-bottom-left-radius: 35px; border-bottom-right-radius: 35px;
-            position: relative; overflow: hidden; box-shadow: 0 10px 40px -10px rgba(0, 53, 128, 0.4);
-        }
-        .header-bg::before {
-            content: ''; position: absolute; top: -60px; right: -40px;
-            width: 250px; height: 250px; border-radius: 50%;
-            background: rgba(255,255,255,0.06); pointer-events: none;
-        }
-        .header-top-row { display: flex; justify-content: space-between; align-items: center; padding: 20px 25px; }
-        .user-welcome { font-size: 0.85rem; color: rgba(255,255,255,0.7); font-weight: 500; }
-        .user-name-hl { color: white; font-weight: 700; margin-left: 5px; }
-        .logout-btn { color: rgba(255,255,255,0.8); background: none; border: none; font-size: 1.2rem; padding: 0;}
-
-        .brand-container { text-align: center; margin-top: 10px; margin-bottom: 30px; position: relative; z-index: 2; }
-        .brand-title {
-            font-family: 'Inter', sans-serif; font-weight: 800; font-size: 3rem; 
-            letter-spacing: 4px; color: #ffffff; margin: 0; line-height: 1;
-            text-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        .brand-subtitle { font-size: 0.75rem; color: rgba(255,255,255,0.5); letter-spacing: 5px; margin-top: 8px; text-transform: uppercase; }
-
         /* --- LOGIN --- */
-        #loginSection { height: 100vh; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #ffffff; position: fixed; top: 0; left: 0; z-index: 9999; }
-        .login-card { background: transparent; padding: 20px; width: 85%; max-width: 350px; text-align: center; }
-        .form-control-minimal {
-            border: none; border-bottom: 2px solid #e2e8f0; border-radius: 0; padding: 15px 10px; 
-            background: transparent; font-weight: 600; color: #334155; margin-bottom: 20px; text-align: center;
-        }
-        .form-control-minimal:focus { box-shadow: none; border-bottom-color: var(--brand-primary); outline: none; }
-        .btn-login { background-color: var(--brand-primary); border: none; padding: 15px; border-radius: 8px; width: 100%; font-weight: bold; color: white; margin-top: 10px; }
+        #loginSection { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .login-logo-img { max-width: 240px; margin-bottom: 30px; }
+        .form-control-minimal { border: none; border-bottom: 2px solid #e2e8f0; border-radius: 0; padding: 12px; text-align: center; background: transparent; font-weight: 600; margin-bottom: 20px; color: #334155; }
+        .form-control-minimal:focus { box-shadow: none; border-color: var(--brand-primary); }
+        .btn-login { background: var(--brand-primary); color: white; border: none; padding: 12px 0; width: 100%; border-radius: 8px; font-weight: 800; letter-spacing: 1px; }
 
-        /* --- LIST & SEARCH --- */
-        .search-card { margin-top: -50px; background: white; border-radius: 20px; padding: 10px; box-shadow: 0 15px 35px -10px rgba(0,0,0,0.08); position: relative; z-index: 10; margin-left: 20px; margin-right: 20px; }
-        .search-wrapper { background: white; border-radius: 15px; display: flex; align-items: center; }
-        .input-group-lg .form-control { height: 55px; font-size: 1.05rem; }
+        /* --- HEADER --- */
+        .header-bg { background: var(--brand-gradient); color: white; padding: 0 0 50px 0; border-radius: 0 0 30px 30px; box-shadow: 0 10px 30px rgba(0,53,128,0.3); overflow: hidden; position: relative; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; }
+        .header-brand { text-align: center; margin-top: 5px; }
+        .brand-title { font-family: 'Inter', sans-serif; font-weight: 900; font-size: 2.8rem; letter-spacing: 2px; margin: 0; text-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .brand-sub { font-size: 0.7rem; opacity: 0.6; letter-spacing: 4px; text-transform: uppercase; }
 
-        .result-item { background: white; border-radius: 16px; margin-bottom: 12px; padding: 18px 20px; border: 1px solid #f1f5f9; box-shadow: 0 2px 6px rgba(0,0,0,0.03); cursor: pointer; }
-        .result-item:active { transform: scale(0.98); background-color: #f8fafc; border-color: var(--brand-primary); }
+        /* --- SEARCH & LIST --- */
+        .search-card { margin: -35px 20px 20px; background: white; padding: 8px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); position: relative; z-index: 10; }
+        .search-input { border: none; height: 50px; font-size: 1.1rem; font-weight: 500; text-align: center; }
+        .search-input:focus { box-shadow: none; }
+
+        .result-item { background: white; border-radius: 12px; margin-bottom: 10px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); cursor: pointer; transition: transform 0.1s; border: 1px solid transparent; }
+        .result-item:active { transform: scale(0.98); border-color: var(--brand-primary); background: #f1f5f9; }
         
-        .part-code { color: var(--brand-primary); font-size: 1rem; font-weight: 800; letter-spacing: 0.5px;}
-        .part-name { font-weight: 600; color: #64748b; font-size: 0.9rem; margin-top: 4px; }
-        .badge-new-manual { background: linear-gradient(45deg, #0d6efd, #0a58ca); color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin-left: 8px; vertical-align: middle; font-weight: 800; }
+        .part-code { color: var(--brand-primary); font-weight: 800; font-size: 0.95rem; }
+        .part-name { color: #64748b; font-size: 0.85rem; font-weight: 600; line-height: 1.3; margin-top: 4px; }
+        .stock-tag { font-size: 0.6rem; padding: 2px 8px; border-radius: 4px; font-weight: 800; }
         
-        .stock-tag { font-size: 0.65rem; padding: 3px 8px; border-radius: 4px; font-weight: 800; text-transform: uppercase; }
-        .bg-stock-high { background-color: var(--stock-high-bg); color: var(--stock-high-text); }
-        .bg-stock-low { background-color: var(--stock-low-bg); color: var(--stock-low-text); }
-        .bg-stock-zero { background-color: var(--stock-zero-bg); color: var(--stock-zero-text); }
+        /* --- CART FAB --- */
+        .fab-cart { position: fixed; bottom: 30px; right: 30px; background: var(--brand-primary); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(0,86,179,0.4); z-index: 5000; cursor: pointer; }
+        .cart-badge { position: absolute; top: -2px; right: -2px; background: var(--promo); color: white; border: 2px solid white; border-radius: 50%; width: 24px; height: 24px; font-size: 0.75rem; font-weight: 800; display: flex; align-items: center; justify-content: center; }
 
-        .price-original { text-decoration: line-through; color: #94a3b8; font-size: 0.85rem; margin-right: 5px; font-weight: 600; }
-        .price-promo { color: var(--promo); font-weight: 800; font-size: 1.15rem; }
-        .price-normal { color: var(--text-dark); font-weight: 800; font-size: 1.15rem; }
-        .moq-tag { font-size: 0.6rem; background: #fee2e2; color: #b91c1c; padding: 2px 4px; border-radius: 4px; font-weight: bold; margin-left: 5px; }
-
+        /* --- UTILS --- */
+        .bg-stock-high { background: var(--stock-high-bg); color: var(--stock-high-text); }
+        .bg-stock-low { background: var(--stock-low-bg); color: var(--stock-low-text); }
+        .bg-stock-zero { background: var(--stock-zero-bg); color: var(--stock-zero-text); }
+        
         /* --- MODAL --- */
-        .modal-content { border-radius: 24px; border: none; }
-        .modal-header { border-bottom: none; padding: 15px 20px 0; background: white; }
-        .modal-img-wrapper { background: #f8fafc; border-radius: 16px; padding: 20px; margin-bottom: 20px; position: relative; min-height: 200px; display: flex; align-items: center; justify-content: center; }
-        .modal-img { width: 100%; max-height: 250px; object-fit: contain; }
-        .status-bar { background: #f8fafc; border-radius: 12px; padding: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-
-        /* --- CART --- */
-        .fab-cart { position: fixed; bottom: 30px; right: 30px; background: var(--brand-primary); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(0, 86, 179, 0.4); z-index: 9000; cursor: pointer; transition: transform 0.2s; }
-        .fab-cart:active { transform: scale(0.9); }
-        .cart-badge { position: absolute; top: -2px; right: -2px; background-color: var(--promo); color: white; border: 2px solid white; border-radius: 50%; width: 24px; height: 24px; font-size: 0.75rem; font-weight: bold; display: flex; align-items: center; justify-content: center; }
+        .modal-img-wrapper { background: #f8fafc; padding: 20px; border-radius: 15px; margin-bottom: 15px; display: flex; justify-content: center; }
+        .modal-img { max-height: 200px; max-width: 100%; object-fit: contain; }
+        #imageOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10000; display: none; justify-content: center; align-items: center; }
+        #fullImage { max-width: 100%; max-height: 90%; }
         
-        .qty-control { display: flex; align-items: center; justify-content: center; gap: 0; background: #f1f5f9; border-radius: 50px; padding: 4px;}
-        .qty-btn { width: 36px; height: 36px; border-radius: 50%; border: none; background: white; color: var(--text-dark); font-size: 1.2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .qty-display { width: 45px; text-align: center; border: none; font-weight: 800; font-size: 1.1rem; background: transparent; }
-
-        /* --- LIGHTBOX --- */
-        #imageOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); z-index: 10000; display: none; justify-content: center; align-items: center; }
-        #fullImage { max-width: 100%; max-height: 90%; object-fit: contain; }
-        .close-hint { position: absolute; bottom: 40px; color: rgba(255,255,255,0.5); width: 100%; text-align: center; text-transform: uppercase; letter-spacing: 2px; font-size: 0.8rem; }
-        #loadingMsg { text-align:center; padding: 40px; color: #94a3b8; display: none; font-weight: 500;}
-        .promo-hint { font-size: 0.7rem; color: var(--promo); font-weight: bold; display: block; margin-top: 2px;}
+        /* --- PRICE --- */
+        .p-orig { text-decoration: line-through; color: #94a3b8; font-size: 0.9rem; margin-right: 5px; }
+        .p-promo { color: var(--promo); font-weight: 800; font-size: 1.2rem; }
+        .p-norm { color: var(--text-dark); font-weight: 800; font-size: 1.2rem; }
     </style>
 </head>
 <body>
 
-    <!-- LIGHTBOX -->
-    <div id="imageOverlay" onclick="window.closeImageViewer()">
+    <!-- FULL IMAGE OVERLAY -->
+    <div id="imageOverlay" onclick="this.style.display='none'">
         <img id="fullImage" src="">
-        <div class="close-hint">Tap to close</div>
+        <div style="position:absolute; bottom:40px; color:white; font-size:0.8rem; letter-spacing:2px;">TAP TO CLOSE</div>
     </div>
 
-    <!-- LOGIN -->
+    <!-- LOGIN SCREEN -->
     <div id="loginSection">
-        <div class="login-card animate__animated animate__fadeInUp">
-            <img src="logo.png" alt="FROTISE" class="login-logo-img">
-            <div class="mb-2"><input type="text" id="loginId" class="form-control form-control-minimal" placeholder="ID CODE"></div>
-            <div class="mb-4"><input type="password" id="loginPass" class="form-control form-control-minimal" placeholder="PASSWORD"></div>
-            <button onclick="window.attemptLogin()" class="btn-login">LOGIN</button>
-            <div id="loginError" class="text-danger mt-3 small fw-bold" style="display:none;">ACCESS DENIED</div>
-            <div id="statusMsg" class="text-secondary mt-3 small"></div>
+        <img src="logo.png" alt="FROTISE" class="login-logo-img">
+        <div style="width: 80%; max-width: 320px;">
+            <input type="text" id="loginId" class="form-control form-control-minimal" placeholder="CLIENT CODE">
+            <input type="password" id="loginPass" class="form-control form-control-minimal" placeholder="PASSWORD">
+            <button onclick="app.login()" class="btn-login">ENTER SYSTEM</button>
+            <div id="loginMsg" class="text-danger mt-3 small fw-bold text-center"></div>
         </div>
     </div>
 
     <!-- MAIN APP -->
     <div id="mainApp" style="display:none;">
         <div class="header-bg">
-            <div class="header-top-row">
-                <div class="user-welcome">Hello, <span id="userDisplay" class="user-name-hl"></span></div>
-                <button onclick="window.logout()" class="logout-btn"><i class="bi bi-box-arrow-right"></i></button>
+            <div class="header-top">
+                <small style="opacity:0.8">Hi, <b id="uName">User</b></small>
+                <i class="bi bi-box-arrow-right fs-4" onclick="location.reload()" style="cursor:pointer; opacity:0.8;"></i>
             </div>
-            <div class="brand-container">
+            <div class="header-brand">
                 <h1 class="brand-title">FROTISE</h1>
-                <div class="brand-subtitle">PARTS SYSTEM</div>
+                <div class="brand-sub">PARTS SYSTEM</div>
             </div>
         </div>
 
-        <div class="container">
-            <div class="search-card">
-                <div class="search-wrapper p-1">
-                    <div class="input-group input-group-lg">
-                        <span class="input-group-text bg-transparent border-0 ps-3"><i class="bi bi-search text-muted"></i></span>
-                        <input type="text" id="searchInput" class="form-control border-0 shadow-none" placeholder="Search Part No..." onkeyup="window.handleSearch()">
-                    </div>
-                </div>
-            </div>
-            <div id="loadingMsg">Loading products...</div>
-            <div id="resultsList" class="mt-4 pb-4"></div>
+        <div class="search-card">
+            <input type="text" id="searchInput" class="form-control search-input" placeholder="Search Part Number..." onkeyup="app.search()">
         </div>
 
-        <div class="fab-cart" onclick="window.openCartModal()">
+        <div class="container pb-5">
+            <div id="loadingMsg" class="text-center text-muted py-5 small">Initializing Database...</div>
+            <div id="resultsList"></div>
+        </div>
+
+        <div class="fab-cart" onclick="app.openCart()">
             <i class="bi bi-cart-fill fs-4"></i>
-            <div id="cartBadge" class="cart-badge" style="display: none;">0</div>
+            <div id="cartBadge" class="cart-badge" style="display:none;">0</div>
         </div>
     </div>
 
     <!-- PRODUCT MODAL -->
-    <div class="modal fade" id="productModal" tabindex="-1">
+    <div class="modal fade" id="pModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content shadow-lg">
-                <div class="modal-header">
-                    <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"></button>
-                </div>
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+                <div class="modal-header border-0"><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body text-center pt-0">
-                    <div class="modal-img-wrapper" onclick="window.viewImage(document.getElementById('modalImg').src)">
-                        <img src="" id="modalImg" class="modal-img">
-                        <div class="position-absolute bottom-0 end-0 m-2 px-2 py-1 bg-dark text-white rounded small fw-bold" style="opacity: 0.7; font-size: 0.6rem;"><i class="bi bi-zoom-in"></i></div>
+                    <div class="modal-img-wrapper" onclick="app.viewImage(document.getElementById('mImg').src)">
+                        <img id="mImg" class="modal-img" src="" onerror="this.style.display='none'">
+                        <div class="position-absolute bottom-0 end-0 m-2 text-muted small"><i class="bi bi-zoom-in"></i></div>
                     </div>
-                    <div class="d-flex justify-content-center align-items-center mb-2">
-                        <h2 class="fw-800 text-dark mb-0 ls-1" id="modalCode"></h2>
-                        <div id="modalNewBadge" style="display:none;" class="ms-2 badge-new-manual">NEW</div>
-                    </div>
-                    <p class="text-muted fw-bold small text-uppercase mb-4" id="modalName"></p>
-
-                    <div class="status-bar">
-                        <div class="text-start"><span class="d-block text-muted text-uppercase" style="font-size:0.65rem; font-weight:700;">Unit Price</span><div id="modalPriceContainer"></div></div>
-                        <div class="text-end"><span class="d-block text-muted text-uppercase" style="font-size:0.65rem; font-weight:700;">Availability</span><div id="modalStockContent"></div></div>
-                    </div>
-                    <div id="promoNotice" class="alert alert-warning py-2 small fw-bold mb-3" style="display:none; color: #854d0e; background: #fef9c3; border:none;"><i class="bi bi-info-circle-fill me-1"></i> Add 5+ items to unlock Promo Price</div>
-
-                    <div id="addToCartSection">
-                        <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
-                            <div class="qty-control">
-                                <button class="qty-btn" onclick="window.updateQty(-1)"><i class="bi bi-dash"></i></button>
-                                <input type="number" id="qtyInput" class="qty-display" value="1" readonly>
-                                <button class="qty-btn" onclick="window.updateQty(1)"><i class="bi bi-plus"></i></button>
-                            </div>
-                            <button onclick="window.addToCart()" class="btn btn-primary flex-grow-1 rounded-pill py-2 fw-bold" style="background-color: var(--brand-primary); border:none; height: 45px;">ADD TO CART</button>
+                    <h3 id="mCode" class="fw-800 text-dark mb-1"></h3>
+                    <p id="mName" class="text-muted fw-bold small text-uppercase mb-3"></p>
+                    
+                    <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded-4 mb-3">
+                        <div class="text-start">
+                            <small class="d-block text-muted" style="font-size:0.65rem; font-weight:700;">PRICE</small>
+                            <div id="mPriceBox"></div>
+                        </div>
+                        <div class="text-end">
+                            <small class="d-block text-muted" style="font-size:0.65rem; font-weight:700;">STATUS</small>
+                            <div id="mStockBox"></div>
                         </div>
                     </div>
-                    <div id="outOfStockMsg" class="alert alert-danger mt-3 text-center" style="display:none;"><i class="bi bi-slash-circle"></i> Currently Unavailable</div>
+
+                    <div id="mPromoMsg" class="alert alert-warning py-1 small fw-bold mb-3" style="display:none; color:#854d0e; background:#fef9c3;">
+                        <i class="bi bi-tag-fill me-1"></i> Buy 5+ for Promo Price
+                    </div>
+
+                    <div id="mActionBox" class="d-flex gap-2">
+                        <div class="d-flex align-items-center bg-light rounded-pill px-2">
+                            <button class="btn btn-sm" onclick="app.adjQty(-1)"><i class="bi bi-dash fw-bold"></i></button>
+                            <input type="number" id="mQty" class="form-control border-0 bg-transparent text-center fw-bold p-0" style="width:40px;" value="1" readonly>
+                            <button class="btn btn-sm" onclick="app.adjQty(1)"><i class="bi bi-plus fw-bold"></i></button>
+                        </div>
+                        <button onclick="app.addToCart()" class="btn btn-primary flex-grow-1 rounded-pill fw-bold shadow-sm">ADD TO CART</button>
+                    </div>
+                    <div id="mOutStock" class="alert alert-danger mb-0 fw-bold small" style="display:none;">OUT OF STOCK</div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- CART MODAL -->
-    <div class="modal fade" id="cartModal" tabindex="-1">
+    <div class="modal fade" id="cModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-scrollable">
-            <div class="modal-content shadow-lg">
-                <div class="modal-header bg-light border-0"><h5 class="modal-title fw-800 ps-2" style="color: var(--brand-primary)">Your Order</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-                <div class="modal-body p-3" id="cartBody" style="background: #fff;"></div>
-                <div class="modal-footer d-block bg-white border-0 pt-2 pb-4 px-4">
-                    <div class="d-flex justify-content-between align-items-center mb-4"><span class="text-muted small fw-bold text-uppercase">Total</span><span class="fs-2 fw-800 text-dark" id="cartTotal">0</span></div>
-                    <div id="limitWarning" class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger small fw-bold text-center mb-3" style="display:none;">Limit exceeded (Max 100,000)</div>
-                    <div class="d-grid gap-2">
-                        <button onclick="window.confirmOrder()" class="btn btn-success btn-lg rounded-pill fw-bold shadow-sm" style="background-color: #25D366; border:none;"><i class="bi bi-whatsapp me-2"></i> Share via WhatsApp</button>
-                        <button onclick="window.downloadCSV()" class="btn btn-light btn-sm rounded-pill text-muted"><i class="bi bi-filetype-csv me-1"></i> Export CSV</button>
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+                <div class="modal-header border-0 bg-light">
+                    <h5 class="fw-800 m-0 text-primary ps-2">Your Order</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body bg-white p-3" id="cBody"></div>
+                <div class="modal-footer d-block border-0 pt-0 pb-4">
+                    <div class="d-flex justify-content-between mb-3 align-items-end">
+                        <span class="text-muted small fw-bold">TOTAL</span>
+                        <span id="cTotal" class="fs-2 fw-800 text-dark">0</span>
                     </div>
+                    <div id="limitAlert" class="alert alert-danger py-1 small text-center fw-bold mb-2" style="display:none;">Max Order Limit: 100,000</div>
+                    <button onclick="app.sendOrder()" class="btn btn-success w-100 rounded-pill fw-bold py-3 shadow-sm">
+                        <i class="bi bi-whatsapp me-2"></i> CONFIRM ORDER
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script>
-        // --- 1. CONFIG & CATEGORY DEFINITIONS ---
-        const orderLimit = 100000; 
+    const app = (function() {
+        // --- 1. CONFIGURATION ---
+        const ORDER_LIMIT = 100000;
         
-        // Define Categories and their Keywords
-        const CATEGORY_DEFINITIONS = {
+        // --- 2. CATEGORY RULES (Tagging System) ---
+        // "CategoryName": ["Keyword1", "Keyword2"]
+        const RULES = {
             "SHOCK ABSORBER": ["SHOCK ABSORBER"],
             "SUSPENSION": ["TIE ROD END", "SHOCK ABSORBER", "BALL JOINT", "CONTROL ROD", "CONTROL ARM", "ARM BUSH", "RACK END", "STABILIZER LINK", "ARM BUSH"],
             "STEERING": ["POWER STEERING PUMP", "POWER STEERING RACK", "STEERING"],
             "RADIATOR": ["RADIATOR", "CONDENSER", "FAN BLADE", "FAN CASE"],
             "ROCKMONT": ["MAN", "DAF", "SCANIA", "ROCKMONT"],
             "MOUNTING": ["ENGINE MOUNTING", "GEARBOX MOUNTING"],
-            "CYLINDER": ["CLUTCH MASTER CYLINDER", "CLUTCH SLAVE CYLINDER", "BRAKE MASTER CYLINDER", "WHEEL CYLINDER"],
+            "CYLINDER": ["CLUTCH MASTER", "CLUTCH SLAVE", "BRAKE MASTER", "WHEEL CYLINDER"],
             "PLATE": ["PRESSURE PLATE", "CLUTCH PLATE"],
             "LIGHT": ["LAMP"],
             "FILTER": ["FILTER", "ELEMENT"],
@@ -257,290 +225,307 @@
             "BRAKE DISC": ["BRAKE DISC"]
         };
 
-        // --- 2. USER ACCESS ---
-        const validUsers = [
-            { id: "GH98904", pass: "0000", name: "Client GH98904", allowed: ["STEERING", "SUSPENSION"] },
-            
-            // Radiator Group
-            { id: "GH10328", pass: "0000", name: "Yebford Radiator", allowed: ["RADIATOR"] },
-            { id: "GH98791", pass: "0000", name: "K.auto", allowed: ["RADIATOR"] },
-            { id: "GH10147", pass: "0000", name: "Qualiparts Ent", allowed: ["RADIATOR"] },
-            { id: "GH10307", pass: "0000", name: "Yeboah Radiator", allowed: ["RADIATOR"] },
-            { id: "GH98873", pass: "0000", name: "Pole to Pole", allowed: ["RADIATOR"] },
-            { id: "GH10051", pass: "0000", name: "David Gyamfi", allowed: ["RADIATOR"] },
-
-            { id: "GH10811", pass: "0000", name: "Client GH10811", allowed: ["SUSPENSION", "TOP MOUNTING"] },
-            { id: "GH10112", pass: "0000", name: "Client GH10112", allowed: ["SUSPENSION"] }
+        // --- 3. USERS ---
+        const USERS = [
+            { id: "GH98904", p: "0000", n: "Client GH98904", allow: ["STEERING", "SUSPENSION"] },
+            { id: "GH10328", p: "0000", n: "Yebford Radiator", allow: ["RADIATOR"] },
+            { id: "GH98791", p: "0000", n: "K.auto", allow: ["RADIATOR"] },
+            { id: "GH10147", p: "0000", n: "Qualiparts Ent", allow: ["RADIATOR"] },
+            { id: "GH10307", p: "0000", n: "Yeboah Radiator", allow: ["RADIATOR"] },
+            { id: "GH98873", p: "0000", n: "Pole to Pole", allow: ["RADIATOR"] },
+            { id: "GH10051", p: "0000", n: "David Gyamfi", allow: ["RADIATOR"] },
+            { id: "GH10811", p: "0000", n: "Client GH10811", allow: ["SUSPENSION", "TOP MOUNTING"] },
+            { id: "GH10112", p: "0000", n: "Client GH10112", allow: ["SUSPENSION"] }
         ];
 
-        // --- GLOBAL STATE ---
-        window.cart = []; 
-        window.fullDatabase = []; 
-        window.userDatabase = []; 
-        window.loggedInUser = null;
+        // --- STATE ---
+        let db = [];
+        let userDb = [];
+        let cart = [];
+        let curItem = null;
+        let curUser = null;
+        let pModal, cModal;
 
         // --- INIT ---
-        document.addEventListener('DOMContentLoaded', function() {
+        function init() {
             try {
-                window.productModal = new bootstrap.Modal(document.getElementById('productModal'));
-                window.cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
-                if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(console.log);
-            } catch(e) { console.log("Init warning", e); }
-            
-            loadDataFromCSV();
-        });
-
-        // --- HELPER: ASSIGN CATEGORIES ---
-        // This makes tag matching flexible (contains keyword)
-        function assignCategories(productName) {
-            let cats = [];
-            let name = String(productName).toUpperCase();
-            for (let [catName, keywords] of Object.entries(CATEGORY_DEFINITIONS)) {
-                // If ANY keyword matches, assign category
-                if (keywords.some(k => name.includes(k.toUpperCase()))) {
-                    cats.push(catName);
-                }
-            }
-            return cats;
+                pModal = new bootstrap.Modal(document.getElementById('pModal'));
+                cModal = new bootstrap.Modal(document.getElementById('cModal'));
+                loadCSV();
+            } catch(e) { console.error(e); }
         }
 
-        // --- DATA LOAD ---
-        function loadDataFromCSV() {
-            document.getElementById('loadingMsg').style.display = 'block';
-            document.getElementById('statusMsg').innerText = "Loading data...";
-            
+        // --- CSV PARSER (The Robust Engine) ---
+        function loadCSV() {
             fetch('products.csv?v=' + Date.now())
-                .then(r => r.ok ? r.text() : Promise.reject("File not found"))
-                .then(t => {
-                    const parsed = parseCSV(t);
-                    window.fullDatabase = parsed;
+                .then(r => { if(!r.ok) throw new Error("CSV Missing"); return r.text(); })
+                .then(txt => {
+                    db = parse(txt);
                     document.getElementById('loadingMsg').style.display = 'none';
-                    document.getElementById('statusMsg').innerText = `System Ready. Loaded ${parsed.length} items.`;
                 })
-                .catch(e => {
-                    console.error(e);
-                    window.fullDatabase = []; 
-                    document.getElementById('loadingMsg').innerText = "Load Failed. Check CSV.";
-                    document.getElementById('statusMsg').innerText = "Data Error";
+                .catch(err => {
+                    document.getElementById('loadingMsg').innerText = "System Error: Cannot load products.csv";
+                    console.error(err);
                 });
         }
 
-        // --- ROBUST CSV PARSER ---
-        function parseCSV(text) {
-            // Split by ANY newline format to fix "0 items" issue
-            const lines = text.split(/\r\n|\n|\r/);
-            const data = [];
+        function parse(csvText) {
+            // Normalize line breaks
+            const lines = csvText.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+            const result = [];
             
-            for(let i=1; i<lines.length; i++) {
+            for (let i = 1; i < lines.length; i++) {
                 const line = lines[i].trim();
-                if(!line) continue;
+                if (!line) continue;
+
+                // Simple regex to handle commas inside quotes: "Shock, Front",100
+                const matches = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+                if (!matches || matches.length < 2) continue; // Skip bad lines
+
+                const clean = (s) => s ? s.replace(/^"|"$/g, '').trim() : "";
                 
-                const cols = line.split(',');
-                // Ensure min columns exist
-                if(cols.length >= 2) {
-                    let pName = cols[1] ? cols[1].trim() : "Unknown";
-                    data.push({
-                        code: cols[0] ? cols[0].trim() : "N/A",
-                        name: pName,
-                        stock: parseInt(cols[2]) || 0,
-                        price: parseFloat(cols[3]) || 0,
-                        promo: (cols.length>=5) ? (parseFloat(cols[4])||0) : 0,
-                        isNew: (cols.length>=6 && cols[5] && cols[5].trim()=='1') ? 1 : 0,
-                        // Assign tags now
-                        categories: assignCategories(pName)
-                    });
-                }
+                const name = clean(matches[1]);
+                const cats = assignCats(name);
+
+                result.push({
+                    code: clean(matches[0]),
+                    name: name,
+                    stock: parseInt(matches[2]) || 0,
+                    price: parseFloat(matches[3]) || 0,
+                    promo: matches[4] ? parseFloat(matches[4]) : 0,
+                    new: (matches[5] && clean(matches[5]) === '1') ? 1 : 0,
+                    cats: cats
+                });
             }
-            return data;
+            return result;
         }
 
-        // --- LOGIN LOGIC ---
-        window.attemptLogin = function() {
-            const i = document.getElementById('loginId').value.trim().toUpperCase();
-            const p = document.getElementById('loginPass').value.trim();
-            const user = validUsers.find(x => x.id === i && x.pass === p);
-            
-            if(user) {
-                window.loggedInUser = user;
-                
-                // Filter: Check if product has ANY category allowed for user
-                window.userDatabase = window.fullDatabase.filter(prod => {
-                    return prod.categories.some(c => user.allowed.includes(c));
-                });
+        function assignCats(name) {
+            let tags = [];
+            let n = name.toUpperCase();
+            for (let [cat, keys] of Object.entries(RULES)) {
+                if (keys.some(k => n.includes(k))) tags.push(cat);
+            }
+            return tags;
+        }
 
-                document.getElementById('userDisplay').innerText = user.name;
+        // --- LOGIC ---
+        function login() {
+            let id = document.getElementById('loginId').value.toUpperCase().trim();
+            let pw = document.getElementById('loginPass').value.trim();
+            let u = USERS.find(x => x.id === id && x.p === pw);
+
+            if (u) {
+                curUser = u;
+                // Filter DB based on access
+                userDb = db.filter(p => p.cats.some(c => u.allow.includes(c)));
+                
+                document.getElementById('uName').innerText = u.n;
                 document.getElementById('loginSection').style.display = 'none';
                 document.getElementById('mainApp').style.display = 'block';
-                window.handleSearch();
+                search();
             } else {
-                document.getElementById('loginError').style.display = 'block';
+                document.getElementById('loginMsg').innerText = "Invalid ID or Password";
             }
-        };
+        }
 
-        // --- SEARCH ---
-        window.handleSearch = function() {
-            const val = document.getElementById('searchInput').value.toUpperCase().trim();
-            const listDiv = document.getElementById('resultsList');
-            let results = window.userDatabase || []; // Use filtered list
-            
-            if(results.length === 0) { 
-                listDiv.innerHTML = `<div class="text-center text-muted mt-5 small">No authorized products found.</div>`; 
-                return; 
+        function search() {
+            let term = document.getElementById('searchInput').value.toUpperCase().trim();
+            let list = document.getElementById('resultsList');
+            let data = userDb;
+
+            if (data.length === 0) {
+                list.innerHTML = `<div class="text-center text-muted mt-5">No products authorized for this account.</div>`;
+                return;
             }
 
-            if(val.length > 0) {
-                if(val === 'STOCK') results = results.filter(i => i.stock > 0);
-                else if (val === 'NEW') results = results.filter(i => i.isNew === 1);
+            if (term) {
+                if (term === 'NEW') data = data.filter(i => i.new === 1);
+                else if (term === 'STOCK') data = data.filter(i => i.stock > 0);
                 else {
-                    const tokens = val.split(/\s+/);
-                    results = results.filter(item => {
-                        const str = (String(item.code) + " " + String(item.name)).toUpperCase();
+                    let tokens = term.split(/\s+/);
+                    data = data.filter(i => {
+                        let str = (i.code + " " + i.name).toUpperCase();
                         return tokens.every(t => str.includes(t));
                     });
                 }
             }
-            
-            if(results.length === 0) { 
-                listDiv.innerHTML = `<div class="text-center text-muted mt-5 small">No items match.</div>`; 
-                return; 
-            }
-            
-            // Render limit to avoid UI lag
-            const renderData = results.slice(0, 60);
-            let html = '';
-            
-            renderData.forEach(i => {
-                const idx = window.userDatabase.indexOf(i); // Get correct index
-                let badgeClass = i.stock<=0 ? "bg-stock-zero" : (i.stock<=10 ? "bg-stock-low" : "bg-stock-high");
-                let badgeText = i.stock<=0 ? "OUT OF STOCK" : (i.stock<=10 ? "LOW STOCK" : "IN STOCK");
-                let newHtml = i.isNew ? `<span class="badge-new-manual">NEW</span>` : "";
-                
-                let priceDisplay = (i.promo>0 && i.promo<i.price) ? 
-                    `<div><span class="price-original">${currencyUnit}${i.price}</span><span class="price-promo">${currencyUnit}${i.promo}</span><span class="moq-tag">MOQ:5</span></div>` : 
-                    `<span class="price-normal">${currencyUnit}${i.price}</span>`;
 
-                html += `<div class="result-item" onclick="window.openProduct(${idx})">
-                    <div class="d-flex justify-content-between align-items-start mb-1"><div class="part-code">${i.code} ${newHtml}</div><span class="stock-tag ${badgeClass}">${badgeText}</span></div>
-                    <div class="d-flex justify-content-between align-items-end mt-2"><div class="part-name text-muted pe-2" style="max-width: 65%;">${i.name}</div><div class="text-end">${priceDisplay}</div></div>
+            if (data.length === 0) {
+                list.innerHTML = `<div class="text-center text-muted mt-5">No matches found.</div>`;
+                return;
+            }
+
+            // Render first 50
+            let html = "";
+            data.slice(0, 50).forEach((item, idx) => {
+                // IMPORTANT: We need a unique ID. Using code is safer than index.
+                let stockHtml = item.stock <= 0 ? `<span class="stock-tag bg-stock-zero">OUT</span>` : 
+                               (item.stock <= 10 ? `<span class="stock-tag bg-stock-low">LOW</span>` : `<span class="stock-tag bg-stock-high">IN STOCK</span>`);
+                
+                let priceHtml = `<span class="p-norm">${item.price}</span>`;
+                if(item.promo > 0 && item.promo < item.price) {
+                    priceHtml = `<div><span class="p-orig">${item.price}</span><span class="p-promo text-danger">${item.promo}</span></div>`;
+                }
+
+                html += `
+                <div class="result-item" onclick="app.openDetail('${item.code}')">
+                    <div class="d-flex justify-content-between mb-1">
+                        <div class="part-code">${item.code} ${item.new?'<span class="badge bg-primary ms-1" style="font-size:0.5rem">NEW</span>':''}</div>
+                        ${stockHtml}
+                    </div>
+                    <div class="part-name">${item.name}</div>
+                    <div class="text-end mt-1">${priceHtml}</div>
                 </div>`;
             });
-            listDiv.innerHTML = html;
+            list.innerHTML = html;
         }
 
-        // --- PRODUCT DETAILS ---
-        window.openProduct = function(idx) {
-            window.currentItem = window.userDatabase[idx];
-            if(!window.currentItem) return;
-            const d = window.currentItem;
-            
-            document.getElementById('modalCode').innerText = d.code;
-            document.getElementById('modalName').innerText = d.name;
-            document.getElementById('modalImg').src = `images/${d.code}.jpg`;
-            document.getElementById('qtyInput').value = 1;
-            
-            const hasPromo = (d.promo > 0 && d.promo < d.price);
-            document.getElementById('modalPriceContainer').innerHTML = hasPromo ? 
-                `<span class="price-original fs-5">${currencyUnit}${d.price}</span><span class="price-promo fs-2">${currencyUnit}${d.promo}</span>` : 
-                `<span class="price-normal fs-2">${currencyUnit}${d.price}</span>`;
-            document.getElementById('promoNotice').style.display = hasPromo ? 'block' : 'none';
-            document.getElementById('modalNewBadge').style.display = d.isNew ? 'inline-block' : 'none';
+        function openDetail(code) {
+            curItem = userDb.find(i => i.code === code);
+            if (!curItem) return;
 
-            const stockBox = document.getElementById('modalStockContent');
-            if(d.stock <= 0) {
-                stockBox.innerHTML = `<span class="stock-tag bg-stock-zero">OUT OF STOCK</span>`;
-                document.getElementById('addToCartSection').style.display = 'none';
-                document.getElementById('outOfStockMsg').style.display = 'block';
+            document.getElementById('mCode').innerText = curItem.code;
+            document.getElementById('mName').innerText = curItem.name;
+            let img = document.getElementById('mImg');
+            img.src = `images/${curItem.code}.jpg`;
+            img.style.display = 'block';
+            
+            // Logic
+            let hasPromo = (curItem.promo > 0 && curItem.promo < curItem.price);
+            let pBox = document.getElementById('mPriceBox');
+            if (hasPromo) {
+                pBox.innerHTML = `<span class="p-orig">${curItem.price}</span><span class="p-promo">${curItem.promo}</span>`;
+                document.getElementById('mPromoMsg').style.display = 'block';
             } else {
-                document.getElementById('addToCartSection').style.display = 'block';
-                document.getElementById('outOfStockMsg').style.display = 'none';
-                stockBox.innerHTML = d.stock<=10 ? `<span class="stock-tag bg-stock-low text-dark">LOW STOCK</span>` : `<span class="stock-tag bg-stock-high">IN STOCK</span>`;
+                pBox.innerHTML = `<span class="p-norm">${curItem.price}</span>`;
+                document.getElementById('mPromoMsg').style.display = 'none';
             }
-            window.productModal.show();
+
+            let sBox = document.getElementById('mStockBox');
+            let actBox = document.getElementById('mActionBox');
+            let outBox = document.getElementById('mOutStock');
+
+            if (curItem.stock > 0) {
+                sBox.innerHTML = curItem.stock <= 10 ? `<span class="stock-tag bg-stock-low">LOW STOCK</span>` : `<span class="stock-tag bg-stock-high">IN STOCK</span>`;
+                actBox.style.display = 'flex';
+                outBox.style.display = 'none';
+            } else {
+                sBox.innerHTML = `<span class="stock-tag bg-stock-zero">OUT OF STOCK</span>`;
+                actBox.style.display = 'none';
+                outBox.style.display = 'block';
+            }
+            
+            document.getElementById('mQty').value = 1;
+            pModal.show();
+        }
+
+        function adjQty(d) {
+            let q = parseInt(document.getElementById('mQty').value) + d;
+            if (q < 1) q = 1;
+            if (curItem && q > curItem.stock) { alert("Max stock reached"); q = curItem.stock; }
+            document.getElementById('mQty').value = q;
+        }
+
+        function addToCart() {
+            if (!curItem) return;
+            let qty = parseInt(document.getElementById('mQty').value);
+            let exist = cart.find(x => x.code === curItem.code);
+            
+            if (exist) {
+                if (exist.qty + qty > curItem.stock) return alert("Total quantity exceeds stock");
+                exist.qty += qty;
+            } else {
+                cart.push({ ...curItem, qty: qty });
+            }
+            pModal.hide();
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            let totalQty = cart.reduce((a, b) => a + b.qty, 0);
+            let badge = document.getElementById('cartBadge');
+            badge.innerText = totalQty;
+            badge.style.display = totalQty > 0 ? 'flex' : 'none';
+        }
+
+        function openCart() {
+            let body = document.getElementById('cBody');
+            let totalVal = 0;
+            
+            if (cart.length === 0) {
+                body.innerHTML = `<div class="text-center py-5 text-muted">Cart is empty</div>`;
+            } else {
+                let html = "";
+                cart.forEach((item, idx) => {
+                    let p = item.price;
+                    let isP = false;
+                    if (item.promo > 0 && item.qty >= 5) { p = item.promo; isP = true; }
+                    
+                    totalVal += p * item.qty;
+                    
+                    html += `
+                    <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                        <div style="width:60%">
+                            <div class="fw-bold small text-dark">${item.code}</div>
+                            <div class="text-muted" style="font-size:0.7rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.name}</div>
+                            <div class="fw-bold ${isP?'text-danger':''}">${p} x ${item.qty}</div>
+                            ${item.promo>0 && !isP ? `<small class="text-warning" style="font-size:0.6rem">Add ${5-item.qty} for Promo</small>` : ''}
+                        </div>
+                        <button onclick="app.delCart(${idx})" class="btn btn-sm text-danger fw-bold">REMOVE</button>
+                    </div>`;
+                });
+                body.innerHTML = html;
+            }
+            
+            document.getElementById('cTotal').innerText = totalVal;
+            document.getElementById('limitAlert').style.display = totalVal > ORDER_LIMIT ? 'block' : 'none';
+            cModal.show();
+        }
+
+        function delCart(i) {
+            cart.splice(i, 1);
+            updateCartUI();
+            openCart(); // refresh
+        }
+
+        function sendOrder() {
+            if (cart.length === 0) return;
+            let t = 0;
+            let lines = [];
+            cart.forEach(i => {
+                let p = (i.promo > 0 && i.qty >= 5) ? i.promo : i.price;
+                t += p * i.qty;
+                lines.push(`▪ ${i.code} (x${i.qty}) @ ${p}`);
+            });
+            
+            if(t > ORDER_LIMIT) return alert("Order limit exceeded!");
+
+            let msg = `🛒 *ORDER - ${curUser.n}*\n\n` + lines.join('\n') + `\n\n*TOTAL: ${t}*`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+            
+            // clear
+            cart = [];
+            updateCartUI();
+            cModal.hide();
+            // Local stock deduction simulation could happen here, but since CSV reloads on refresh, it's temporary.
+        }
+
+        function viewImage(src) {
+            document.getElementById('fullImage').src = src;
+            document.getElementById('imageOverlay').style.display = 'flex';
+        }
+
+        // Public API
+        return {
+            init, login, search, openDetail, adjQty, addToCart, openCart, delCart, sendOrder, viewImage
         };
 
-        // --- CART & UTILS ---
-        window.updateQty = function(delta) {
-            let v = parseInt(document.getElementById('qtyInput').value) + delta;
-            if(v<1) v=1; 
-            if(window.currentItem && v > window.currentItem.stock) { alert("Stock limit reached"); v=window.currentItem.stock; }
-            document.getElementById('qtyInput').value = v;
-        }
+    })();
 
-        window.addToCart = function() {
-            if(!window.currentItem) return;
-            const qty = parseInt(document.getElementById('qtyInput').value);
-            const exist = window.cart.find(x => x.code === window.currentItem.code);
-            if(exist) {
-                if(exist.qty + qty > window.currentItem.stock) return alert("Stock limit exceeded");
-                exist.qty += qty;
-            } else { window.cart.push({...window.currentItem, qty: qty}); }
-            window.productModal.hide(); updateCartBadge();
-        }
-
-        function updateCartBadge() {
-            const c = window.cart.reduce((a,b)=>a+b.qty,0);
-            const b = document.getElementById('cartBadge');
-            if(b) { b.innerText = c; b.style.display = c>0?'flex':'none'; }
-        }
-
-        window.openCartModal = function() {
-            const b = document.getElementById('cartBody'); b.innerHTML = ''; let total = 0;
-            if(window.cart.length === 0) { b.innerHTML = `<div class="text-center py-5 text-muted opacity-50">Cart is empty</div>`; } 
-            else {
-                window.cart.forEach((it,i) => {
-                    let price = it.price; let isPromo = false; let hint = "";
-                    if(it.promo>0) { if(it.qty>=5) {price=it.promo; isPromo=true;} else {hint=`<span class="promo-hint">Add ${5-it.qty} more for ${currencyUnit}${it.promo}</span>`;} }
-                    total += price * it.qty;
-                    b.innerHTML += `<div class="card mb-2 border-0 shadow-sm"><div class="card-body p-3 d-flex justify-content-between align-items-center">
-                        <div style="width:55%"><div class="fw-bold text-dark">${it.code}</div><div class="small text-truncate text-muted">${it.name}</div>
-                        <div class="${isPromo?'text-danger fw-bold':'text-dark fw-bold'} mt-1">${currencyUnit}${price} ${isPromo?'<span style="font-size:0.6rem;">PROMO</span>':''}</div>${hint}</div>
-                        <div class="text-end"><div class="qty-control mb-2 justify-content-end"><button class="qty-btn p-0" onclick="window.changeCartQty(${i}, -1)">-</button><span class="mx-2 fw-bold">${it.qty}</span><button class="qty-btn p-0" onclick="window.changeCartQty(${i}, 1)">+</button></div><small class="text-danger fw-bold cursor-pointer" onclick="window.remCart(${i})">REMOVE</small></div>
-                    </div></div>`;
-                });
-            }
-            document.getElementById('cartTotal').innerText = currencyUnit + total;
-            document.getElementById('limitWarning').style.display = total > orderLimit ? 'block':'none';
-            window.cartModal.show();
-        }
-
-        window.changeCartQty = function(i, d) {
-            let n = window.cart[i].qty + d; 
-            // Check stock from full DB
-            const dbItem = window.fullDatabase.find(x=>x.code===window.cart[i].code);
-            const max = dbItem ? dbItem.stock : 9999;
-            if(n<1) return; if(n>max) return alert("Stock Limit");
-            window.cart[i].qty = n; window.openCartModal(); updateCartBadge();
-        }
-        window.remCart = function(i) { window.cart.splice(i, 1); window.openCartModal(); updateCartBadge(); }
-        
-        window.confirmOrder = function() {
-            if(window.cart.length===0) return alert("Empty Cart");
-            let t = 0;
-            const finalCart = window.cart.map(it => {
-                let p = (it.promo>0 && it.qty>=5) ? it.promo : it.price; t += p*it.qty; return {...it, finalP: p};
-            });
-            if(t > orderLimit) return alert("Limit Exceeded");
-            let m = `🛒 *ORDER (${window.loggedInUser.name})*\n`;
-            finalCart.forEach(x => m += `▪ ${x.code} (x${x.qty}) @ ${x.finalP}\n`);
-            m += `\n*TOTAL: ${t}*`;
-            window.open(`https://wa.me/?text=${encodeURIComponent(m)}`, '_blank');
-            window.cart=[]; updateCartBadge(); window.cartModal.hide(); window.handleSearch();
-        }
-
-        window.downloadCSV = function() {
-             if(window.cart.length===0) return alert("Empty");
-             let c = "Client,Code,Qty,FinalPrice,Total\n";
-             window.cart.forEach(x => {
-                 let p = (x.promo>0 && x.qty>=5) ? x.promo : x.price;
-                 c+=`${window.loggedInUser.name},${x.code},${x.qty},${p},${p*x.qty}\n`
-             });
-             const a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,'+encodeURI(c); a.download='order.csv'; a.click();
-        }
-
-        document.getElementById('loginPass').addEventListener('keypress', (e)=>{ if(e.key==='Enter') window.attemptLogin(); });
-        window.viewImage = function(src) { if(!src || src.includes('placeholder')) return; document.getElementById('fullImage').src = src; document.getElementById('imageOverlay').style.display = 'flex'; };
-        window.closeImageViewer = function() { document.getElementById('imageOverlay').style.display = 'none'; };
-        window.logout = function() { location.reload(); }
+    // Boot
+    document.addEventListener('DOMContentLoaded', app.init);
+    document.getElementById('loginPass').addEventListener('keypress', (e)=>{ if(e.key==='Enter') app.login(); });
     </script>
 </body>
 </html>
