@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FROTISE RADIATOR SYSTEM</title>
+    <title>FROTISE PARTS SYSTEM</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Icons -->
@@ -16,6 +16,7 @@
         :root {
             --brand-bg: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             --accent: #f59e0b;
+            --promo: #db2777; /* Pink/Red for Promo */
             --text-dark: #1e293b;
             --bg-main: #f1f5f9;
             --stock-high-bg: #dcfce7; --stock-high-text: #15803d;
@@ -32,22 +33,20 @@
         /* --- NEW BADGE (Flashing) --- */
         .badge-new-manual {
             background: linear-gradient(45deg, #ff0055, #ff5500);
-            color: white;
-            font-size: 0.6rem;
-            padding: 2px 6px;
-            border-radius: 4px;
-            margin-left: 8px;
-            vertical-align: middle;
-            font-weight: 800;
-            letter-spacing: 1px;
-            box-shadow: 0 2px 5px rgba(255, 0, 85, 0.4);
-            animation: softPulse 2s infinite;
+            color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px;
+            margin-left: 8px; vertical-align: middle; font-weight: 800; letter-spacing: 1px;
+            box-shadow: 0 2px 5px rgba(255, 0, 85, 0.4); animation: softPulse 2s infinite;
         }
         @keyframes softPulse {
             0% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.85; transform: scale(1.05); }
             100% { opacity: 1; transform: scale(1); }
         }
+
+        /* --- PRICE STYLES --- */
+        .price-original { text-decoration: line-through; color: #94a3b8; font-size: 0.9rem; margin-right: 5px; font-weight: 600; }
+        .price-promo { color: var(--promo); font-weight: 800; font-size: 1.25rem; }
+        .price-normal { color: var(--text-dark); font-weight: 800; font-size: 1.25rem; }
 
         /* --- IMAGE LIGHTBOX --- */
         #imageOverlay {
@@ -56,22 +55,15 @@
             display: none; justify-content: center; align-items: center;
             cursor: zoom-out; animation: fadeIn 0.2s;
         }
-        #fullImage {
-            max-width: 100%; max-height: 90%; object-fit: contain;
-            transition: transform 0.1s;
-        }
-        .close-hint {
-            position: absolute; bottom: 40px; color: rgba(255,255,255,0.5);
-            font-size: 0.85rem; pointer-events: none; width: 100%; text-align: center; text-transform: uppercase; letter-spacing: 2px;
-        }
+        #fullImage { max-width: 100%; max-height: 90%; object-fit: contain; transition: transform 0.1s; }
+        .close-hint { position: absolute; bottom: 40px; color: rgba(255,255,255,0.5); font-size: 0.85rem; pointer-events: none; width: 100%; text-align: center; text-transform: uppercase; letter-spacing: 2px; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* --- LOGIN SECTION --- */
         #loginSection {
             height: 100vh; width: 100%;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: var(--brand-bg);
-            position: fixed; top: 0; left: 0; z-index: 9999;
+            background: var(--brand-bg); position: fixed; top: 0; left: 0; z-index: 9999;
         }
         .login-card {
             background: rgba(255,255,255,0.95); padding: 40px 30px; border-radius: 24px;
@@ -83,10 +75,8 @@
 
         /* --- MAIN HEADER --- */
         .header-bg {
-            background: var(--brand-bg);
-            color: white; padding: 25px 20px 80px;
-            border-bottom-left-radius: 40px; border-bottom-right-radius: 40px;
-            position: relative;
+            background: var(--brand-bg); color: white; padding: 25px 20px 80px;
+            border-bottom-left-radius: 40px; border-bottom-right-radius: 40px; position: relative;
         }
         .logout-btn {
             position: absolute; top: 20px; left: 20px;
@@ -117,17 +107,14 @@
         }
         .result-item:active { transform: scale(0.98); background-color: #f8fafc; border-color: #e2e8f0; }
 
-        /* STOCK TAGS */
         .stock-tag { 
             font-size: 0.65rem; padding: 4px 10px; border-radius: 20px; 
-            font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
-            display: inline-block;
+            font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block;
         }
         .bg-stock-high { background-color: var(--stock-high-bg); color: var(--stock-high-text); }
         .bg-stock-low { background-color: var(--stock-low-bg); color: var(--stock-low-text); }
         .bg-stock-zero { background-color: var(--stock-zero-bg); color: var(--stock-zero-text); }
 
-        .price-text { color: var(--text-dark); font-weight: 800; font-size: 1.25rem; }
         .part-code { color: #3b82f6; font-size: 0.9rem; font-weight: 800; letter-spacing: 0.5px;}
         .part-name { font-weight: 600; color: #64748b; font-size: 0.85rem; margin-top: 4px; line-height: 1.4; }
         
@@ -200,7 +187,7 @@
                 </svg>
             </div>
             <h3 class="fw-800 mb-1" style="color: var(--text-dark); letter-spacing: -0.5px;">FROTISE</h3>
-            <p class="text-muted mb-4 small fw-bold text-uppercase ls-1">Radiator System</p>
+            <p class="text-muted mb-4 small fw-bold text-uppercase ls-1">Parts Ordering System</p>
             
             <div class="mb-3 text-start">
                 <input type="text" id="loginId" class="form-control form-control-lg text-center fw-bold" placeholder="CODE">
@@ -229,7 +216,7 @@
             </svg>
 
             <h3 class="fw-800 mb-0 ls-1">FROTISE</h3>
-            <p class="opacity-50 small fw-bold ls-1 text-uppercase">Radiator System</p>
+            <p class="opacity-50 small fw-bold ls-1 text-uppercase">Parts System</p>
             
             <div class="mt-2 badge bg-white bg-opacity-10 px-3 py-2 rounded-pill backdrop-blur">
                 <span class="text-white-50 fw-normal">Welcome,</span> <span id="userDisplay" class="fw-bold text-white ms-1"></span>
@@ -286,7 +273,9 @@
                     <div class="status-bar">
                         <div class="text-start">
                             <span class="d-block text-muted text-uppercase" style="font-size:0.65rem; font-weight:700;">Price</span>
-                            <div id="modalPriceContainer" class="fw-800 fs-4" style="color: var(--text-dark)"></div>
+                            <div id="modalPriceContainer">
+                                <!-- Price injected via JS -->
+                            </div>
                         </div>
                         <div class="text-end">
                              <span class="d-block text-muted text-uppercase" style="font-size:0.65rem; font-weight:700;">Stock</span>
@@ -355,14 +344,34 @@
         const myWhatsAppNumber = "233550584720"; 
         const orderLimit = 100000; 
 
-        // VALID USERS
+        // ACCESS GROUPS
+        // 1. Radiator & Cooling Group
+        const ACCESS_COOLING = ["RADIATOR", "FAN CASE", "FAN BLADE", "CONDENSER"];
+        // 2. Suspension A Group
+        const ACCESS_SUSPENSION_A = ["SHOCK ABSORBER", "STABILIZER LINK", "TOP MOUNTING"];
+        // 3. Mixed/Specific Group (GH98904)
+        const ACCESS_MIXED_B = ["POWER STEERING RACK", "SHOCK ABSORBER", "CONTROL ARM"];
+        // 4. Suspension Full Group (GH10112)
+        const ACCESS_SUSPENSION_FULL = ["SHOCK ABSORBER", "IDLER ARM", "STABILIZER LINK", "BALL JOINT", "ARM BUSH", "RACK END", "CONTROL ROD", "TIE ROD END", "DRAG LINK", "CONTROL ARM"];
+
+        // VALID USERS WITH PERMISSIONS
         const validUsers = [
-            { id: "GH10328", pass: "0000", name: "Yebford Radiator" },
-            { id: "GH98791", pass: "0000", name: "K.auto" },
-            { id: "GH10147", pass: "0000", name: "Qualiparts Ent" },
-            { id: "GH10307", pass: "0000", name: "Yeboah Radiator" },
-            { id: "GH98873", pass: "0000", name: "Pole to Pole" },
-            { id: "GH10051", pass: "0000", name: "David Gyamfi" }
+            // Cooling Group
+            { id: "GH10328", pass: "0000", name: "Yebford Radiator", access: ACCESS_COOLING },
+            { id: "GH98791", pass: "0000", name: "K.auto", access: ACCESS_COOLING },
+            { id: "GH10147", pass: "0000", name: "Qualiparts Ent", access: ACCESS_COOLING },
+            { id: "GH10307", pass: "0000", name: "Yeboah Radiator", access: ACCESS_COOLING },
+            { id: "GH98873", pass: "0000", name: "Pole to Pole", access: ACCESS_COOLING },
+            { id: "GH10051", pass: "0000", name: "David Gyamfi", access: ACCESS_COOLING },
+            
+            // Suspension A
+            { id: "GH10811", pass: "0000", name: "Client GH10811", access: ACCESS_SUSPENSION_A },
+
+            // Suspension Full
+            { id: "GH10112", pass: "0000", name: "Client GH10112", access: ACCESS_SUSPENSION_FULL },
+
+            // Mixed Group
+            { id: "GH98904", pass: "0000", name: "Client GH98904", access: ACCESS_MIXED_B }
         ];
 
         // STATE
@@ -371,7 +380,8 @@
         window.loggedInUser = null;
         window.productModal = null;
         window.cartModal = null;
-        window.database = []; 
+        window.fullDatabase = []; // Holds everything loaded from CSV
+        window.userDatabase = []; // Holds items filtered for logged-in user
 
         // INIT
         document.addEventListener('DOMContentLoaded', function() {
@@ -388,13 +398,6 @@
         };
         window.closeImageViewer = function() { document.getElementById('imageOverlay').style.display = 'none'; };
 
-        // QUICK SEARCH BTN
-        window.setSearchToNew = function() {
-            const searchInput = document.getElementById('searchInput');
-            searchInput.value = 'NEW';
-            window.handleSearch();
-        }
-
         // CSV LOAD
         function loadDataFromCSV() {
             document.getElementById('loadingMsg').style.display = 'block';
@@ -402,17 +405,16 @@
                 .then(r => { if(!r.ok) throw new Error("CSV not found"); return r.text(); })
                 .then(t => {
                     const parsed = parseCSV(t);
-                    window.database = parsed;
-                    document.getElementById('totalCountBadge').innerText = parsed.length + " ITEMS";
+                    window.fullDatabase = parsed;
                     document.getElementById('loadingMsg').style.display = 'none';
-                    if(window.loggedInUser) window.handleSearch();
                 })
                 .catch(err => {
                     console.log(err);
-                    // Demo data fallback
-                    window.database = [
-                        {code:"1001", name:"DEMO RADIATOR", stock:50, price:100, isNew:1},
-                        {code:"1002", name:"OLD RADIATOR", stock:10, price:100, isNew:0}
+                    // Demo data for testing
+                    window.fullDatabase = [
+                        {code:"1001", name:"RADIATOR TOYOTA", stock:50, price:100, promo:0, isNew:1},
+                        {code:"1002", name:"SHOCK ABSORBER FRONT", stock:10, price:200, promo:150, isNew:0},
+                        {code:"1003", name:"POWER STEERING RACK", stock:5, price:500, promo:0, isNew:1}
                     ];
                     document.getElementById('loadingMsg').style.display = 'none';
                 });
@@ -421,18 +423,25 @@
         function parseCSV(text) {
             const lines = text.split('\n');
             const data = [];
-            // CSV Format: Code,Name,Stock,Price,NEW
-            // Start at index 1 to skip header
+            // UPDATED CSV Format: Code, Name, Stock, Price, PromoPrice, NEW
             for(let i=1; i<lines.length; i++) {
                 const l = lines[i].trim();
                 if(!l) continue;
                 const cols = l.split(',');
                 
                 if(cols.length >= 4) {
+                    let promoVal = 0;
                     let isNewVal = 0;
-                    // If 5th column exists and is '1'
+
+                    // Check Promo (Col 4)
                     if(cols.length >= 5) {
-                        isNewVal = (cols[4].trim() === '1') ? 1 : 0;
+                        const p = parseFloat(cols[4].trim());
+                        if(!isNaN(p) && p > 0) promoVal = p;
+                    }
+
+                    // Check New (Col 5)
+                    if(cols.length >= 6) {
+                        isNewVal = (cols[5].trim() === '1') ? 1 : 0;
                     }
 
                     data.push({
@@ -440,6 +449,7 @@
                         name: cols[1].trim(),
                         stock: parseInt(cols[2].trim())||0,
                         price: parseFloat(cols[3].trim())||0,
+                        promo: promoVal,
                         isNew: isNewVal
                     });
                 }
@@ -447,21 +457,35 @@
             return data;
         }
 
-        // LOGIN
+        // LOGIN AND FILTERING
         window.attemptLogin = function() {
             const i = document.getElementById('loginId').value.trim().toUpperCase();
             const p = document.getElementById('loginPass').value.trim();
             const user = validUsers.find(x => x.id === i && x.pass === p);
+            
             if(user) {
                 window.loggedInUser = user;
+                // Filter Database based on User Access
+                filterDatabaseForUser(user);
+                
                 document.getElementById('userDisplay').innerText = user.name;
                 document.getElementById('loginSection').style.display = 'none';
                 document.getElementById('mainApp').style.display = 'block';
+                
                 window.handleSearch();
             } else {
                 document.getElementById('loginError').style.display = 'block';
             }
         };
+
+        function filterDatabaseForUser(user) {
+            // Include item if its Name contains ANY of the allowed keywords
+            window.userDatabase = window.fullDatabase.filter(item => {
+                const upperName = item.name.toUpperCase();
+                return user.access.some(keyword => upperName.includes(keyword));
+            });
+            document.getElementById('totalCountBadge').innerText = window.userDatabase.length + " ITEMS";
+        }
         
         window.logout = function() { location.reload(); }
 
@@ -470,15 +494,19 @@
             const val = document.getElementById('searchInput').value.toUpperCase().trim();
             const listDiv = document.getElementById('resultsList');
             
-            if(window.database.length === 0) return;
+            // Search only within the filtered userDatabase
+            let results = window.userDatabase;
+            
+            if(results.length === 0) {
+                listDiv.innerHTML = `<div class="text-center text-muted mt-5 small">No authorized products found.</div>`;
+                return;
+            }
 
-            let results = window.database;
             if(val.length > 0) {
                 if(val === 'STOCK') {
                     results = results.filter(i => i.stock > 0);
                 } 
                 else if (val === 'NEW') {
-                    // Explicit NEW search filter based on CSV column
                     results = results.filter(i => i.isNew === 1);
                 }
                 else {
@@ -490,7 +518,6 @@
                 }
             }
 
-            // Render list
             if(results.length === 0) {
                 listDiv.innerHTML = `<div class="text-center text-muted mt-5 small">No items match your search</div>`;
                 return;
@@ -499,7 +526,8 @@
             const renderData = results.slice(0, 60);
             let html = '';
             renderData.forEach(i => {
-                const idx = window.database.indexOf(i);
+                // Find index in userDatabase to map clicks correctly
+                const idx = window.userDatabase.indexOf(i);
                 const imgSrc = `images/${i.code}.jpg`;
                 
                 let badgeClass = "", badgeText = "";
@@ -507,10 +535,17 @@
                 else if(i.stock <= 10) { badgeText="LOW STOCK"; badgeClass="bg-stock-low"; }
                 else { badgeText="IN STOCK"; badgeClass="bg-stock-high"; }
 
-                // NEW BADGE in LIST
-                let newHtml = "";
-                if(i.isNew === 1) {
-                    newHtml = `<span class="badge-new-manual">NEW</span>`;
+                let newHtml = (i.isNew === 1) ? `<span class="badge-new-manual">NEW</span>` : "";
+
+                // Price Logic
+                let priceDisplay = "";
+                if(i.promo > 0 && i.promo < i.price) {
+                    priceDisplay = `
+                        <span class="price-original">${currencyUnit}${i.price}</span>
+                        <span class="price-promo">${currencyUnit}${i.promo}</span>
+                    `;
+                } else {
+                    priceDisplay = `<span class="price-normal">${currencyUnit}${i.price}</span>`;
                 }
 
                 html += `
@@ -521,7 +556,7 @@
                              <span class="stock-tag ${badgeClass}">${badgeText}</span>
                         </div>
                         <div class="part-name text-muted">${i.name}</div>
-                        <div class="price-text text-end mt-1">${currencyUnit}${i.price}</div>
+                        <div class="text-end mt-1">${priceDisplay}</div>
                     </div>
                     <img src="${imgSrc}" class="product-img-thumb" onerror="this.src='https://via.placeholder.com/80?text=No+Img'">
                 </div>`;
@@ -531,19 +566,28 @@
 
         // OPEN MODAL
         window.openProduct = function(idx) {
-            window.currentItem = window.database[idx];
+            window.currentItem = window.userDatabase[idx]; // Use userDatabase
             const d = window.currentItem;
             
             document.getElementById('modalCode').innerText = d.code;
             document.getElementById('modalName').innerText = d.name;
-            document.getElementById('modalPriceContainer').innerText = currencyUnit + d.price;
             document.getElementById('modalImg').src = `images/${d.code}.jpg`;
             document.getElementById('qtyInput').value = 1;
 
-            // New Badge in Modal
+            // Price Display in Modal
+            const pCont = document.getElementById('modalPriceContainer');
+            if(d.promo > 0 && d.promo < d.price) {
+                pCont.innerHTML = `
+                    <span class="price-original fs-5">${currencyUnit}${d.price}</span>
+                    <span class="price-promo fs-2">${currencyUnit}${d.promo}</span>
+                `;
+            } else {
+                pCont.innerHTML = `<span class="price-normal fs-2">${currencyUnit}${d.price}</span>`;
+            }
+
+            // New Badge
             const newBadge = document.getElementById('modalNewBadge');
-            if(d.isNew === 1) newBadge.style.display = 'inline-block';
-            else newBadge.style.display = 'none';
+            newBadge.style.display = (d.isNew === 1) ? 'inline-block' : 'none';
 
             const stockBox = document.getElementById('modalStockContent');
             const addSec = document.getElementById('addToCartSection');
@@ -575,13 +619,18 @@
         window.addToCart = function() {
             const qty = parseInt(document.getElementById('qtyInput').value);
             const item = window.currentItem;
+            // Determine effective price
+            const effectivePrice = (item.promo > 0 && item.promo < item.price) ? item.promo : item.price;
+
             const exist = window.cart.find(x => x.code === item.code);
             
             if(exist) {
                 if(exist.qty + qty > item.stock) return alert("Stock limit exceeded");
                 exist.qty += qty;
+                // Update price just in case it changed
+                exist.price = effectivePrice; 
             } else {
-                window.cart.push({...item, qty: qty});
+                window.cart.push({...item, qty: qty, price: effectivePrice});
             }
             window.productModal.hide();
             updateCartBadge();
@@ -603,14 +652,23 @@
                 b.innerHTML = `<div class="text-center py-5 text-muted opacity-50">Cart is empty</div>`;
             } else {
                 window.cart.forEach((it,i) => {
-                    total += it.price * it.qty;
+                    const itemTotal = it.price * it.qty;
+                    total += itemTotal;
+                    
+                    // Check if it's a promo price for visual indication in cart
+                    const dbItem = window.fullDatabase.find(x => x.code === it.code);
+                    let priceClass = "text-danger"; // Default red for price
+                    if(dbItem && dbItem.promo > 0 && dbItem.promo == it.price) {
+                        priceClass = "text-primary"; // Or distinct color for promo in cart
+                    }
+
                     b.innerHTML += `
                     <div class="card mb-2 border-0 shadow-sm">
                         <div class="card-body p-3 d-flex justify-content-between align-items-center">
                             <div style="width:50%">
                                 <div class="fw-bold text-dark">${it.code}</div>
                                 <div class="small text-truncate text-muted">${it.name}</div>
-                                <div class="text-danger fw-bold mt-1">${currencyUnit}${it.price}</div>
+                                <div class="${priceClass} fw-bold mt-1">${currencyUnit}${it.price}</div>
                             </div>
                             
                             <div class="text-end">
@@ -632,7 +690,7 @@
 
         window.changeCartQty = function(i, d) {
             const cItem = window.cart[i];
-            const dbItem = window.database.find(x=>x.code === cItem.code);
+            const dbItem = window.fullDatabase.find(x=>x.code === cItem.code);
             let n = cItem.qty + d;
             if(n < 1) return;
             if(n > dbItem.stock) return alert("Stock Limit");
@@ -654,7 +712,7 @@
             
             // Local deduct
             window.cart.forEach(c => {
-                let d = window.database.find(x=>x.code === c.code);
+                let d = window.fullDatabase.find(x=>x.code === c.code);
                 if(d) d.stock = Math.max(0, d.stock - c.qty);
             });
 
