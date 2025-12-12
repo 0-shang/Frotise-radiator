@@ -27,7 +27,6 @@
             --promo: #dc3545; 
             --text-dark: #1e293b;
             --bg-main: #f8fafc;
-            
             --stock-high-bg: #dcfce7; --stock-high-text: #15803d;
             --stock-low-bg: #ffedd5; --stock-low-text: #c2410c;
             --stock-zero-bg: #fee2e2; --stock-zero-text: #b91c1c;
@@ -136,6 +135,7 @@
             <div class="mb-4"><input type="password" id="loginPass" class="form-control form-control-minimal" placeholder="PASSWORD"></div>
             <button onclick="window.attemptLogin()" class="btn-login">LOGIN</button>
             <div id="loginError" class="text-danger mt-3 small fw-bold" style="display:none;">ACCESS DENIED</div>
+            <div id="systemError" class="text-danger mt-3 small fw-bold" style="display:none;">DATA ERROR: Check CSV</div>
         </div>
     </div>
 
@@ -233,8 +233,6 @@
     <script>
         // --- CONFIG & ACCESS ---
         const orderLimit = 100000; 
-
-        // ACCESS GROUPS (KEYWORDS)
         const ACCESS_COOLING = ["RADIATOR", "FAN", "CONDENSER"];
         const ACCESS_SUSPENSION_A = ["SHOCK", "STABILIZER", "MOUNTING"];
         const ACCESS_MIXED_B = ["RACK", "SHOCK", "ARM"];
@@ -266,18 +264,16 @@
 
         // --- SAFE DATABASE FILTER ---
         function filterDatabaseForUser(user) {
-            window.userDatabase = window.fullDatabase.filter(item => {
-                // Safety check: if item has no name, skip it
-                if (!item.name) return false;
-                
-                const upperName = item.name.toUpperCase();
-                return user.access.some(phrase => {
-                    // Safety check: phrase must exist
-                    if(!phrase) return false;
-                    const requiredWords = phrase.toUpperCase().split(/\s+/);
-                    return requiredWords.every(word => upperName.includes(word));
+            try {
+                window.userDatabase = window.fullDatabase.filter(item => {
+                    // FORCE STRING CONVERSION TO PREVENT CRASHES
+                    const upperName = String(item.name || "").toUpperCase();
+                    return user.access.some(phrase => {
+                        const requiredWords = String(phrase || "").toUpperCase().split(/\s+/);
+                        return requiredWords.every(word => upperName.includes(word));
+                    });
                 });
-            });
+            } catch(e) { console.error("Filter Error", e); window.userDatabase = []; }
         }
 
         // --- SAFE CSV PARSING ---
@@ -290,9 +286,9 @@
                     document.getElementById('loadingMsg').style.display = 'none';
                 })
                 .catch(e => {
-                    console.error("Load Error:", e);
-                    // Fallback data so app doesn't crash completely
-                    window.fullDatabase = [{code:"ERR", name:"Data Load Failed", stock:0, price:0, promo:0, isNew:0}];
+                    console.error("CSV Load Error:", e);
+                    // Fallback to avoid app crash
+                    window.fullDatabase = [];
                     document.getElementById('loadingMsg').style.display = 'none';
                 });
         }
@@ -302,15 +298,16 @@
             const data = [];
             for(let i=1; i<lines.length; i++) {
                 const line = lines[i].trim();
-                if(!line) continue; // Skip empty lines
+                if(!line) continue;
                 
+                // Simple split that doesn't break on trailing empty commas
                 const cols = line.split(',');
                 
-                // Ensure at least Code and Name exist
+                // FORCE TYPES for safety
                 if(cols.length >= 2) {
                     data.push({
-                        code: cols[0] ? cols[0].trim() : "Unknown",
-                        name: cols[1] ? cols[1].trim() : "Unknown Product",
+                        code: cols[0] ? String(cols[0].trim()) : "N/A",
+                        name: cols[1] ? String(cols[1].trim()) : "Unknown",
                         stock: cols[2] ? (parseInt(cols[2].trim())||0) : 0,
                         price: cols[3] ? (parseFloat(cols[3].trim())||0) : 0,
                         promo: (cols.length>=5 && cols[4]) ? (parseFloat(cols[4].trim())||0) : 0,
@@ -336,10 +333,12 @@
                     window.handleSearch();
                 } else {
                     document.getElementById('loginError').style.display = 'block';
+                    document.getElementById('systemError').style.display = 'none';
                 }
             } catch(e) {
-                console.error("Login Error:", e);
-                alert("System Error. Check CSV format.");
+                console.error("Login Crash:", e);
+                document.getElementById('loginError').style.display = 'none';
+                document.getElementById('systemError').style.display = 'block';
             }
         };
 
@@ -356,9 +355,7 @@
                 else {
                     const tokens = val.split(/\s+/);
                     results = results.filter(item => {
-                        // Safety check inside search loop
-                        if(!item.code || !item.name) return false;
-                        const str = (item.code + " " + item.name).toUpperCase();
+                        const str = (String(item.code) + " " + String(item.name)).toUpperCase();
                         return tokens.every(t => str.includes(t));
                     });
                 }
@@ -366,12 +363,10 @@
             
             if(results.length === 0) { listDiv.innerHTML = `<div class="text-center text-muted mt-5 small">No items match your search</div>`; return; }
             
-            // Limit render to 60 for performance
             const renderData = results.slice(0, 60);
             let html = '';
             
             renderData.forEach(i => {
-                // Find index based on object reference
                 const idx = window.userDatabase.indexOf(i);
                 
                 let badgeClass = i.stock<=0 ? "bg-stock-zero" : (i.stock<=10 ? "bg-stock-low" : "bg-stock-high");
