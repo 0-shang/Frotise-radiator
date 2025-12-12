@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" translate="no">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- Disable Translation Prompt -->
+    <meta name="google" content="notranslate">
+    
     <!-- PWA Settings -->
     <meta name="theme-color" content="#0056b3">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
     <title>FROTISE SYSTEM</title>
     <!-- Bootstrap CSS -->
@@ -23,19 +25,19 @@
         :root {
             /* Frotise Official Blue Theme */
             --brand-primary: #0056b3; 
-            --brand-dark: #004494;
-            --brand-bg: linear-gradient(135deg, #0056b3 0%, #003366 100%);
+            --brand-dark: #003580;
+            --brand-gradient: linear-gradient(135deg, #0056b3 0%, #002855 100%);
             
             --promo: #dc3545; /* Red for Promo */
             --text-dark: #1e293b;
-            --bg-main: #f4f6f8; /* Very light grey for main app */
+            --bg-main: #f8fafc;
             
             --stock-high-bg: #dcfce7; --stock-high-text: #15803d;
             --stock-low-bg: #ffedd5; --stock-low-text: #c2410c;
             --stock-zero-bg: #fee2e2; --stock-zero-text: #b91c1c;
         }
 
-        body { background-color: var(--bg-main); font-family: "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding-bottom: 100px; }
+        body { background-color: var(--bg-main); font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding-bottom: 100px; -webkit-font-smoothing: antialiased; }
 
         /* --- UI UTILS --- */
         .fw-800 { font-weight: 800; }
@@ -43,23 +45,9 @@
 
         /* --- LOGO STYLES --- */
         .login-logo-img {
-            max-width: 260px;
-            height: auto;
-            display: block;
-            margin: 0 auto 30px auto;
+            max-width: 260px; height: auto; display: block; margin: 0 auto 30px auto;
         }
         
-        .brand-logo-text {
-            font-family: "Arial Black", "Impact", sans-serif;
-            font-weight: 900;
-            font-size: 2.5rem;
-            color: white;
-            letter-spacing: 1px;
-            margin: 0;
-            text-transform: uppercase;
-            text-shadow: 0 4px 6px rgba(0,0,0,0.2);
-        }
-
         /* --- NEW BADGE --- */
         .badge-new-manual {
             background: linear-gradient(45deg, #0d6efd, #0a58ca);
@@ -88,26 +76,16 @@
         #loginSection {
             height: 100vh; width: 100%;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: #ffffff;
-            position: fixed; top: 0; left: 0; z-index: 9999;
+            background: #ffffff; position: fixed; top: 0; left: 0; z-index: 9999;
         }
-        
-        .login-card {
-            background: transparent; padding: 20px; width: 85%; max-width: 350px; text-align: center;
-        }
-        
+        .login-card { background: transparent; padding: 20px; width: 85%; max-width: 350px; text-align: center; }
         .form-control-minimal {
             border: none; border-bottom: 2px solid #e2e8f0; border-radius: 0;
             padding: 15px 10px; background: transparent; font-weight: 600;
             color: #334155; margin-bottom: 20px; transition: all 0.3s; text-align: center;
         }
-        .form-control-minimal:focus {
-            box-shadow: none; border-bottom-color: var(--brand-primary); background: transparent;
-        }
-        .form-control-minimal::placeholder {
-            color: #94a3b8; font-weight: 500; letter-spacing: 1px; font-size: 0.9rem;
-        }
-
+        .form-control-minimal:focus { box-shadow: none; border-bottom-color: var(--brand-primary); background: transparent; }
+        .form-control-minimal::placeholder { color: #94a3b8; font-weight: 500; letter-spacing: 1px; font-size: 0.9rem; }
         .btn-login {
             background-color: var(--brand-primary); border: none; padding: 15px;
             border-radius: 8px; font-size: 1rem; letter-spacing: 1px;
@@ -115,32 +93,68 @@
         }
         .btn-login:active { transform: scale(0.98); }
 
-        /* --- MAIN HEADER --- */
+        /* --- REDESIGNED HEADER --- */
         .header-bg {
-            background: var(--brand-bg); color: white; padding: 25px 20px 80px;
-            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
-            position: relative; box-shadow: 0 10px 30px -10px rgba(0, 86, 179, 0.5);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: var(--brand-gradient);
+            color: white; 
+            padding: 0 0 60px 0; /* Space for search bar overlap */
+            border-bottom-left-radius: 35px; border-bottom-right-radius: 35px;
+            position: relative; overflow: hidden;
+            box-shadow: 0 10px 40px -10px rgba(0, 53, 128, 0.4);
         }
-        .logout-btn {
-            position: absolute; top: 20px; right: 20px;
-            color: rgba(255,255,255,0.6); font-size: 1.3rem; background: transparent; padding: 5px; border: none;
+
+        /* Subtle decorative circle for design depth */
+        .header-bg::before {
+            content: ''; position: absolute; top: -60px; right: -40px;
+            width: 250px; height: 250px; border-radius: 50%;
+            background: rgba(255,255,255,0.06); pointer-events: none;
+        }
+
+        .header-top-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px 25px;
+        }
+
+        .user-welcome { font-size: 0.85rem; color: rgba(255,255,255,0.7); font-weight: 500; }
+        .user-name-hl { color: white; font-weight: 700; margin-left: 5px; }
+        
+        .logout-btn { color: rgba(255,255,255,0.8); background: none; border: none; font-size: 1.2rem; padding: 0;}
+
+        .brand-container { text-align: center; margin-top: 10px; margin-bottom: 30px; position: relative; z-index: 2; }
+        
+        .brand-title {
+            font-family: 'Inter', sans-serif;
+            font-weight: 800;
+            font-size: 3rem; /* Large and bold */
+            letter-spacing: 4px; /* Wide spacing looks premium */
+            color: #ffffff;
+            margin: 0;
+            line-height: 1;
+            text-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
         
+        .brand-subtitle {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.5);
+            letter-spacing: 5px;
+            margin-top: 8px;
+            text-transform: uppercase;
+        }
+
         /* --- SEARCH BAR --- */
         .search-card {
-            margin-top: -60px; background: white; border-radius: 16px;
-            padding: 20px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.06);
-            position: relative; z-index: 10;
+            margin-top: -50px; background: white; border-radius: 20px;
+            padding: 10px; box-shadow: 0 15px 35px -10px rgba(0,0,0,0.08);
+            position: relative; z-index: 10; margin-left: 20px; margin-right: 20px;
         }
-        .search-wrapper { background: #f8fafc; border-radius: 12px; display: flex; align-items: center; border: 1px solid #e2e8f0; }
-        .search-wrapper:focus-within { border-color: var(--brand-primary); background: white; }
+        .search-wrapper { background: white; border-radius: 15px; display: flex; align-items: center; }
+        .input-group-lg .form-control { height: 55px; font-size: 1.05rem; }
 
         /* --- RESULT ITEM --- */
         .result-item {
-            background: white; border-radius: 12px; margin-bottom: 10px;
+            background: white; border-radius: 16px; margin-bottom: 12px;
             padding: 18px 20px; border: 1px solid #f1f5f9;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
             transition: all 0.1s; cursor: pointer; position: relative;
         }
         .result-item:active { transform: scale(0.98); background-color: #f8fafc; border-color: var(--brand-primary); }
@@ -232,12 +246,20 @@
     <div id="mainApp" style="display:none;">
         
         <div class="header-bg">
-            <a href="#" onclick="window.logout()" class="logout-btn"><i class="bi bi-box-arrow-right"></i></a>
-            
-            <h1 class="brand-logo-text">FROTISE</h1>
+            <!-- Top Row: User & Logout -->
+            <div class="header-top-row">
+                <div class="user-welcome">
+                    Hello, <span id="userDisplay" class="user-name-hl"></span>
+                </div>
+                <button onclick="window.logout()" class="logout-btn">
+                    <i class="bi bi-box-arrow-right"></i>
+                </button>
+            </div>
 
-            <div class="mt-3 badge bg-white bg-opacity-20 px-3 py-1 rounded-pill backdrop-blur">
-                <span id="userDisplay" class="fw-bold text-white small" style="letter-spacing: 0.5px;"></span>
+            <!-- Beautiful Text Logo -->
+            <div class="brand-container">
+                <h1 class="brand-title">FROTISE</h1>
+                <div class="brand-subtitle">PARTS SYSTEM</div>
             </div>
         </div>
 
