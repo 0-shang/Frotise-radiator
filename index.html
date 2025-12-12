@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- Disable Translation -->
     <meta name="google" content="notranslate">
     
     <!-- PWA Settings -->
@@ -235,11 +234,10 @@
         // --- CONFIG & ACCESS ---
         const orderLimit = 100000; 
 
-        // UPDATED KEYWORDS: Removed overly specific words to ensure partial matches work
+        // ACCESS GROUPS (KEYWORDS)
         const ACCESS_COOLING = ["RADIATOR", "FAN", "CONDENSER"];
         const ACCESS_SUSPENSION_A = ["SHOCK", "STABILIZER", "MOUNTING"];
         const ACCESS_MIXED_B = ["RACK", "SHOCK", "ARM"];
-        // Updated GH10112 list: Simplified keywords for better matching
         const ACCESS_SUSPENSION_FULL = [
             "SHOCK", "IDLER", "STABILIZER", "BALL JOINT", "BUSH", 
             "RACK END", "CONTROL ROD", "TIE ROD", "DRAG LINK", "CONTROL ARM"
@@ -266,20 +264,23 @@
             loadDataFromCSV();
         });
 
-        // --- NEW LOGIC: SMART KEYWORD MATCHING ---
-        // This splits keywords into words. Product name must contain ALL words in the keyword phrase, in any order.
-        // Example: Keyword "STABILIZER LINK" will match product "LINK STABILIZER" or "STABILIZER FRONT LINK".
+        // --- SAFE DATABASE FILTER ---
         function filterDatabaseForUser(user) {
             window.userDatabase = window.fullDatabase.filter(item => {
+                // Safety check: if item has no name, skip it
+                if (!item.name) return false;
+                
                 const upperName = item.name.toUpperCase();
-                // User has access if the product name matches ANY of their allowed phrases
                 return user.access.some(phrase => {
-                    const requiredWords = phrase.toUpperCase().split(/\s+/); // Split by space
+                    // Safety check: phrase must exist
+                    if(!phrase) return false;
+                    const requiredWords = phrase.toUpperCase().split(/\s+/);
                     return requiredWords.every(word => upperName.includes(word));
                 });
             });
         }
 
+        // --- SAFE CSV PARSING ---
         function loadDataFromCSV() {
             document.getElementById('loadingMsg').style.display = 'block';
             fetch('products.csv?v=' + Date.now())
@@ -288,8 +289,10 @@
                     window.fullDatabase = parseCSV(t);
                     document.getElementById('loadingMsg').style.display = 'none';
                 })
-                .catch(() => {
-                    window.fullDatabase = [{code:"DEMO", name:"DEMO PRODUCT", stock:100, price:100, promo:0, isNew:1}];
+                .catch(e => {
+                    console.error("Load Error:", e);
+                    // Fallback data so app doesn't crash completely
+                    window.fullDatabase = [{code:"ERR", name:"Data Load Failed", stock:0, price:0, promo:0, isNew:0}];
                     document.getElementById('loadingMsg').style.display = 'none';
                 });
         }
@@ -298,34 +301,45 @@
             const lines = text.split('\n');
             const data = [];
             for(let i=1; i<lines.length; i++) {
-                const cols = lines[i].trim().split(',');
-                if(cols.length >= 4) {
+                const line = lines[i].trim();
+                if(!line) continue; // Skip empty lines
+                
+                const cols = line.split(',');
+                
+                // Ensure at least Code and Name exist
+                if(cols.length >= 2) {
                     data.push({
-                        code: cols[0].trim(),
-                        name: cols[1].trim(),
-                        stock: parseInt(cols[2].trim())||0,
-                        price: parseFloat(cols[3].trim())||0,
-                        promo: (cols.length>=5)?parseFloat(cols[4].trim())||0 : 0,
-                        isNew: (cols.length>=6 && cols[5].trim()==='1') ? 1 : 0
+                        code: cols[0] ? cols[0].trim() : "Unknown",
+                        name: cols[1] ? cols[1].trim() : "Unknown Product",
+                        stock: cols[2] ? (parseInt(cols[2].trim())||0) : 0,
+                        price: cols[3] ? (parseFloat(cols[3].trim())||0) : 0,
+                        promo: (cols.length>=5 && cols[4]) ? (parseFloat(cols[4].trim())||0) : 0,
+                        isNew: (cols.length>=6 && cols[5] && cols[5].trim()==='1') ? 1 : 0
                     });
                 }
             }
             return data;
         }
 
+        // --- UI FUNCTIONS ---
         window.attemptLogin = function() {
-            const i = document.getElementById('loginId').value.trim().toUpperCase();
-            const p = document.getElementById('loginPass').value.trim();
-            const user = validUsers.find(x => x.id === i && x.pass === p);
-            if(user) {
-                window.loggedInUser = user;
-                filterDatabaseForUser(user);
-                document.getElementById('userDisplay').innerText = user.name;
-                document.getElementById('loginSection').style.display = 'none';
-                document.getElementById('mainApp').style.display = 'block';
-                window.handleSearch();
-            } else {
-                document.getElementById('loginError').style.display = 'block';
+            try {
+                const i = document.getElementById('loginId').value.trim().toUpperCase();
+                const p = document.getElementById('loginPass').value.trim();
+                const user = validUsers.find(x => x.id === i && x.pass === p);
+                if(user) {
+                    window.loggedInUser = user;
+                    filterDatabaseForUser(user);
+                    document.getElementById('userDisplay').innerText = user.name;
+                    document.getElementById('loginSection').style.display = 'none';
+                    document.getElementById('mainApp').style.display = 'block';
+                    window.handleSearch();
+                } else {
+                    document.getElementById('loginError').style.display = 'block';
+                }
+            } catch(e) {
+                console.error("Login Error:", e);
+                alert("System Error. Check CSV format.");
             }
         };
 
@@ -334,7 +348,7 @@
             const listDiv = document.getElementById('resultsList');
             let results = window.userDatabase;
             
-            if(results.length === 0) { listDiv.innerHTML = `<div class="text-center text-muted mt-5 small">No authorized products found.</div>`; return; }
+            if(!results || results.length === 0) { listDiv.innerHTML = `<div class="text-center text-muted mt-5 small">No authorized products found.</div>`; return; }
 
             if(val.length > 0) {
                 if(val === 'STOCK') results = results.filter(i => i.stock > 0);
@@ -342,6 +356,8 @@
                 else {
                     const tokens = val.split(/\s+/);
                     results = results.filter(item => {
+                        // Safety check inside search loop
+                        if(!item.code || !item.name) return false;
                         const str = (item.code + " " + item.name).toUpperCase();
                         return tokens.every(t => str.includes(t));
                     });
@@ -350,10 +366,14 @@
             
             if(results.length === 0) { listDiv.innerHTML = `<div class="text-center text-muted mt-5 small">No items match your search</div>`; return; }
             
+            // Limit render to 60 for performance
             const renderData = results.slice(0, 60);
             let html = '';
+            
             renderData.forEach(i => {
+                // Find index based on object reference
                 const idx = window.userDatabase.indexOf(i);
+                
                 let badgeClass = i.stock<=0 ? "bg-stock-zero" : (i.stock<=10 ? "bg-stock-low" : "bg-stock-high");
                 let badgeText = i.stock<=0 ? "OUT OF STOCK" : (i.stock<=10 ? "LOW STOCK" : "IN STOCK");
                 let newHtml = i.isNew ? `<span class="badge-new-manual">NEW</span>` : "";
@@ -372,6 +392,8 @@
 
         window.openProduct = function(idx) {
             window.currentItem = window.userDatabase[idx];
+            if(!window.currentItem) return;
+            
             const d = window.currentItem;
             document.getElementById('modalCode').innerText = d.code;
             document.getElementById('modalName').innerText = d.name;
@@ -386,13 +408,16 @@
             document.getElementById('modalNewBadge').style.display = d.isNew ? 'inline-block' : 'none';
 
             const stockBox = document.getElementById('modalStockContent');
+            const cartSec = document.getElementById('addToCartSection');
+            const outMsg = document.getElementById('outOfStockMsg');
+            
             if(d.stock <= 0) {
                 stockBox.innerHTML = `<span class="stock-tag bg-stock-zero">OUT OF STOCK</span>`;
-                document.getElementById('addToCartSection').style.display = 'none';
-                document.getElementById('outOfStockMsg').style.display = 'block';
+                cartSec.style.display = 'none';
+                outMsg.style.display = 'block';
             } else {
-                document.getElementById('addToCartSection').style.display = 'block';
-                document.getElementById('outOfStockMsg').style.display = 'none';
+                cartSec.style.display = 'block';
+                outMsg.style.display = 'none';
                 stockBox.innerHTML = d.stock<=10 ? `<span class="stock-tag bg-stock-low text-dark">LOW STOCK</span>` : `<span class="stock-tag bg-stock-high">IN STOCK</span>`;
             }
             window.productModal.show();
@@ -416,8 +441,11 @@
 
         function updateCartBadge() {
             const c = window.cart.reduce((a,b)=>a+b.qty,0);
-            document.getElementById('cartBadge').innerText = c;
-            document.getElementById('cartBadge').style.display = c>0?'flex':'none';
+            const b = document.getElementById('cartBadge');
+            if(b) {
+                b.innerText = c;
+                b.style.display = c>0?'flex':'none';
+            }
         }
 
         window.openCartModal = function() {
