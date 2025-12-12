@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- Disable Translation Prompt -->
+    <!-- Disable Translation -->
     <meta name="google" content="notranslate">
     
     <!-- PWA Settings -->
@@ -21,14 +21,11 @@
     <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
 
     <style>
-        /* --- BRANDING & DESIGN TOKENS --- */
+        /* --- BRANDING --- */
         :root {
-            /* Frotise Official Blue Theme */
             --brand-primary: #0056b3; 
-            --brand-dark: #003580;
             --brand-gradient: linear-gradient(135deg, #0056b3 0%, #002855 100%);
-            
-            --promo: #dc3545; /* Red for Promo */
+            --promo: #dc3545; 
             --text-dark: #1e293b;
             --bg-main: #f8fafc;
             
@@ -37,226 +34,119 @@
             --stock-zero-bg: #fee2e2; --stock-zero-text: #b91c1c;
         }
 
-        body { background-color: var(--bg-main); font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding-bottom: 100px; -webkit-font-smoothing: antialiased; }
-
-        /* --- UI UTILS --- */
+        body { background-color: var(--bg-main); font-family: "Inter", sans-serif; padding-bottom: 100px; -webkit-font-smoothing: antialiased; }
         .fw-800 { font-weight: 800; }
         .backdrop-blur { backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 
-        /* --- LOGO STYLES --- */
-        .login-logo-img {
-            max-width: 260px; height: auto; display: block; margin: 0 auto 30px auto;
-        }
+        /* --- LOGO --- */
+        .login-logo-img { max-width: 260px; height: auto; display: block; margin: 0 auto 30px auto; }
         
-        /* --- NEW BADGE --- */
-        .badge-new-manual {
-            background: linear-gradient(45deg, #0d6efd, #0a58ca);
-            color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px;
-            margin-left: 8px; vertical-align: middle; font-weight: 800; letter-spacing: 1px;
-        }
-
-        /* --- PRICE STYLES --- */
-        .price-original { text-decoration: line-through; color: #94a3b8; font-size: 0.85rem; margin-right: 5px; font-weight: 600; }
-        .price-promo { color: var(--promo); font-weight: 800; font-size: 1.15rem; }
-        .price-normal { color: var(--text-dark); font-weight: 800; font-size: 1.15rem; }
-        .moq-tag { font-size: 0.6rem; background: #fee2e2; color: #b91c1c; padding: 2px 4px; border-radius: 4px; font-weight: bold; margin-left: 5px; vertical-align: middle; }
-
-        /* --- IMAGE LIGHTBOX --- */
-        #imageOverlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.96); z-index: 10000;
-            display: none; justify-content: center; align-items: center;
-            cursor: zoom-out; animation: fadeIn 0.2s;
-        }
-        #fullImage { max-width: 100%; max-height: 90%; object-fit: contain; transition: transform 0.1s; }
-        .close-hint { position: absolute; bottom: 40px; color: rgba(255,255,255,0.5); font-size: 0.85rem; pointer-events: none; width: 100%; text-align: center; text-transform: uppercase; letter-spacing: 2px; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* --- LOGIN SECTION --- */
-        #loginSection {
-            height: 100vh; width: 100%;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: #ffffff; position: fixed; top: 0; left: 0; z-index: 9999;
-        }
-        .login-card { background: transparent; padding: 20px; width: 85%; max-width: 350px; text-align: center; }
-        .form-control-minimal {
-            border: none; border-bottom: 2px solid #e2e8f0; border-radius: 0;
-            padding: 15px 10px; background: transparent; font-weight: 600;
-            color: #334155; margin-bottom: 20px; transition: all 0.3s; text-align: center;
-        }
-        .form-control-minimal:focus { box-shadow: none; border-bottom-color: var(--brand-primary); background: transparent; }
-        .form-control-minimal::placeholder { color: #94a3b8; font-weight: 500; letter-spacing: 1px; font-size: 0.9rem; }
-        .btn-login {
-            background-color: var(--brand-primary); border: none; padding: 15px;
-            border-radius: 8px; font-size: 1rem; letter-spacing: 1px;
-            margin-top: 10px; box-shadow: 0 4px 12px rgba(0, 86, 179, 0.3); transition: transform 0.2s;
-        }
-        .btn-login:active { transform: scale(0.98); }
-
-        /* --- REDESIGNED HEADER --- */
+        /* --- HEADER --- */
         .header-bg {
-            background: var(--brand-gradient);
-            color: white; 
-            padding: 0 0 60px 0; /* Space for search bar overlap */
+            background: var(--brand-gradient); color: white; padding: 0 0 60px 0;
             border-bottom-left-radius: 35px; border-bottom-right-radius: 35px;
-            position: relative; overflow: hidden;
-            box-shadow: 0 10px 40px -10px rgba(0, 53, 128, 0.4);
+            position: relative; overflow: hidden; box-shadow: 0 10px 40px -10px rgba(0, 53, 128, 0.4);
         }
-
-        /* Subtle decorative circle for design depth */
         .header-bg::before {
             content: ''; position: absolute; top: -60px; right: -40px;
             width: 250px; height: 250px; border-radius: 50%;
             background: rgba(255,255,255,0.06); pointer-events: none;
         }
-
-        .header-top-row {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 20px 25px;
-        }
-
+        .header-top-row { display: flex; justify-content: space-between; align-items: center; padding: 20px 25px; }
         .user-welcome { font-size: 0.85rem; color: rgba(255,255,255,0.7); font-weight: 500; }
         .user-name-hl { color: white; font-weight: 700; margin-left: 5px; }
-        
         .logout-btn { color: rgba(255,255,255,0.8); background: none; border: none; font-size: 1.2rem; padding: 0;}
 
         .brand-container { text-align: center; margin-top: 10px; margin-bottom: 30px; position: relative; z-index: 2; }
-        
         .brand-title {
-            font-family: 'Inter', sans-serif;
-            font-weight: 800;
-            font-size: 3rem; /* Large and bold */
-            letter-spacing: 4px; /* Wide spacing looks premium */
-            color: #ffffff;
-            margin: 0;
-            line-height: 1;
+            font-family: 'Inter', sans-serif; font-weight: 800; font-size: 3rem; 
+            letter-spacing: 4px; color: #ffffff; margin: 0; line-height: 1;
             text-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
-        
-        .brand-subtitle {
-            font-size: 0.75rem;
-            color: rgba(255,255,255,0.5);
-            letter-spacing: 5px;
-            margin-top: 8px;
-            text-transform: uppercase;
-        }
+        .brand-subtitle { font-size: 0.75rem; color: rgba(255,255,255,0.5); letter-spacing: 5px; margin-top: 8px; text-transform: uppercase; }
 
-        /* --- SEARCH BAR --- */
-        .search-card {
-            margin-top: -50px; background: white; border-radius: 20px;
-            padding: 10px; box-shadow: 0 15px 35px -10px rgba(0,0,0,0.08);
-            position: relative; z-index: 10; margin-left: 20px; margin-right: 20px;
+        /* --- LOGIN --- */
+        #loginSection { height: 100vh; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #ffffff; position: fixed; top: 0; left: 0; z-index: 9999; }
+        .login-card { background: transparent; padding: 20px; width: 85%; max-width: 350px; text-align: center; }
+        .form-control-minimal {
+            border: none; border-bottom: 2px solid #e2e8f0; border-radius: 0; padding: 15px 10px; 
+            background: transparent; font-weight: 600; color: #334155; margin-bottom: 20px; text-align: center;
         }
+        .form-control-minimal:focus { box-shadow: none; border-bottom-color: var(--brand-primary); outline: none; }
+        .btn-login { background-color: var(--brand-primary); border: none; padding: 15px; border-radius: 8px; width: 100%; font-weight: bold; color: white; margin-top: 10px; }
+
+        /* --- LIST & SEARCH --- */
+        .search-card { margin-top: -50px; background: white; border-radius: 20px; padding: 10px; box-shadow: 0 15px 35px -10px rgba(0,0,0,0.08); position: relative; z-index: 10; margin-left: 20px; margin-right: 20px; }
         .search-wrapper { background: white; border-radius: 15px; display: flex; align-items: center; }
         .input-group-lg .form-control { height: 55px; font-size: 1.05rem; }
 
-        /* --- RESULT ITEM --- */
-        .result-item {
-            background: white; border-radius: 16px; margin-bottom: 12px;
-            padding: 18px 20px; border: 1px solid #f1f5f9;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-            transition: all 0.1s; cursor: pointer; position: relative;
-        }
+        .result-item { background: white; border-radius: 16px; margin-bottom: 12px; padding: 18px 20px; border: 1px solid #f1f5f9; box-shadow: 0 2px 6px rgba(0,0,0,0.03); cursor: pointer; }
         .result-item:active { transform: scale(0.98); background-color: #f8fafc; border-color: var(--brand-primary); }
-
-        .stock-tag { 
-            font-size: 0.65rem; padding: 3px 8px; border-radius: 4px; 
-            font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block;
-        }
+        
+        .part-code { color: var(--brand-primary); font-size: 1rem; font-weight: 800; letter-spacing: 0.5px;}
+        .part-name { font-weight: 600; color: #64748b; font-size: 0.9rem; margin-top: 4px; }
+        .badge-new-manual { background: linear-gradient(45deg, #0d6efd, #0a58ca); color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin-left: 8px; vertical-align: middle; font-weight: 800; }
+        
+        .stock-tag { font-size: 0.65rem; padding: 3px 8px; border-radius: 4px; font-weight: 800; text-transform: uppercase; }
         .bg-stock-high { background-color: var(--stock-high-bg); color: var(--stock-high-text); }
         .bg-stock-low { background-color: var(--stock-low-bg); color: var(--stock-low-text); }
         .bg-stock-zero { background-color: var(--stock-zero-bg); color: var(--stock-zero-text); }
 
-        .part-code { color: var(--brand-primary); font-size: 1rem; font-weight: 800; letter-spacing: 0.5px;}
-        .part-name { font-weight: 600; color: #64748b; font-size: 0.9rem; margin-top: 4px; }
-        
-        /* --- MODAL --- */
-        .modal-content { border-radius: 24px; border: none; overflow: hidden; }
-        .modal-header { border-bottom: none; padding: 15px 20px 0; background: white; }
-        .modal-body { padding: 10px 25px 25px; text-align: center;}
-        
-        .modal-img-wrapper { 
-            background: #f8fafc; border-radius: 16px; padding: 20px; margin-bottom: 20px;
-            position: relative; overflow: hidden; min-height: 200px; display: flex; align-items: center; justify-content: center;
-        }
-        .modal-img { width: 100%; max-height: 250px; object-fit: contain; }
+        .price-original { text-decoration: line-through; color: #94a3b8; font-size: 0.85rem; margin-right: 5px; font-weight: 600; }
+        .price-promo { color: var(--promo); font-weight: 800; font-size: 1.15rem; }
+        .price-normal { color: var(--text-dark); font-weight: 800; font-size: 1.15rem; }
+        .moq-tag { font-size: 0.6rem; background: #fee2e2; color: #b91c1c; padding: 2px 4px; border-radius: 4px; font-weight: bold; margin-left: 5px; }
 
-        .status-bar {
-            background: #f8fafc; border-radius: 12px; padding: 15px; margin-bottom: 20px;
-            display: flex; justify-content: space-between; align-items: center; border: 1px solid #e2e8f0;
-        }
+        /* --- MODAL --- */
+        .modal-content { border-radius: 24px; border: none; }
+        .modal-header { border-bottom: none; padding: 15px 20px 0; background: white; }
+        .modal-img-wrapper { background: #f8fafc; border-radius: 16px; padding: 20px; margin-bottom: 20px; position: relative; min-height: 200px; display: flex; align-items: center; justify-content: center; }
+        .modal-img { width: 100%; max-height: 250px; object-fit: contain; }
+        .status-bar { background: #f8fafc; border-radius: 12px; padding: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
 
         /* --- CART --- */
-        .fab-cart {
-            position: fixed; bottom: 30px; right: 30px;
-            background: var(--brand-primary); color: white;
-            width: 60px; height: 60px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 10px 25px rgba(0, 86, 179, 0.4);
-            z-index: 9000; cursor: pointer; transition: transform 0.2s;
-        }
+        .fab-cart { position: fixed; bottom: 30px; right: 30px; background: var(--brand-primary); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(0, 86, 179, 0.4); z-index: 9000; cursor: pointer; transition: transform 0.2s; }
         .fab-cart:active { transform: scale(0.9); }
-        .cart-badge {
-            position: absolute; top: -2px; right: -2px;
-            background-color: var(--promo); color: white; border: 2px solid white;
-            border-radius: 50%; width: 24px; height: 24px;
-            font-size: 0.75rem; font-weight: bold; display: flex; align-items: center; justify-content: center;
-        }
-
+        .cart-badge { position: absolute; top: -2px; right: -2px; background-color: var(--promo); color: white; border: 2px solid white; border-radius: 50%; width: 24px; height: 24px; font-size: 0.75rem; font-weight: bold; display: flex; align-items: center; justify-content: center; }
+        
         .qty-control { display: flex; align-items: center; justify-content: center; gap: 0; background: #f1f5f9; border-radius: 50px; padding: 4px;}
-        .qty-btn { 
-            width: 36px; height: 36px; border-radius: 50%; border: none; 
-            background: white; color: var(--text-dark); font-size: 1.2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.1s;
-        }
+        .qty-btn { width: 36px; height: 36px; border-radius: 50%; border: none; background: white; color: var(--text-dark); font-size: 1.2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .qty-display { width: 45px; text-align: center; border: none; font-weight: 800; font-size: 1.1rem; background: transparent; }
-        
+
+        /* --- LIGHTBOX --- */
+        #imageOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); z-index: 10000; display: none; justify-content: center; align-items: center; }
+        #fullImage { max-width: 100%; max-height: 90%; object-fit: contain; }
+        .close-hint { position: absolute; bottom: 40px; color: rgba(255,255,255,0.5); width: 100%; text-align: center; text-transform: uppercase; letter-spacing: 2px; font-size: 0.8rem; }
         #loadingMsg { text-align:center; padding: 40px; color: #94a3b8; display: none; font-weight: 500;}
-        
         .promo-hint { font-size: 0.7rem; color: var(--promo); font-weight: bold; display: block; margin-top: 2px;}
     </style>
 </head>
 <body>
 
-    <!-- IMAGE OVERLAY -->
+    <!-- LIGHTBOX -->
     <div id="imageOverlay" onclick="window.closeImageViewer()">
         <img id="fullImage" src="">
         <div class="close-hint">Tap to close</div>
     </div>
 
-    <!-- LOGIN SCREEN -->
+    <!-- LOGIN -->
     <div id="loginSection">
         <div class="login-card animate__animated animate__fadeInUp">
-            
             <img src="logo.png" alt="FROTISE" class="login-logo-img">
-            
-            <div class="mb-2 text-start">
-                <input type="text" id="loginId" class="form-control form-control-minimal" placeholder="ID CODE">
-            </div>
-            <div class="mb-4 text-start">
-                <input type="password" id="loginPass" class="form-control form-control-minimal" placeholder="PASSWORD">
-            </div>
-            
-            <button onclick="window.attemptLogin()" class="btn btn-primary w-100 fw-bold btn-login">LOGIN</button>
+            <div class="mb-2"><input type="text" id="loginId" class="form-control form-control-minimal" placeholder="ID CODE"></div>
+            <div class="mb-4"><input type="password" id="loginPass" class="form-control form-control-minimal" placeholder="PASSWORD"></div>
+            <button onclick="window.attemptLogin()" class="btn-login">LOGIN</button>
             <div id="loginError" class="text-danger mt-3 small fw-bold" style="display:none;">ACCESS DENIED</div>
         </div>
     </div>
 
     <!-- MAIN APP -->
     <div id="mainApp" style="display:none;">
-        
         <div class="header-bg">
-            <!-- Top Row: User & Logout -->
             <div class="header-top-row">
-                <div class="user-welcome">
-                    Hello, <span id="userDisplay" class="user-name-hl"></span>
-                </div>
-                <button onclick="window.logout()" class="logout-btn">
-                    <i class="bi bi-box-arrow-right"></i>
-                </button>
+                <div class="user-welcome">Hello, <span id="userDisplay" class="user-name-hl"></span></div>
+                <button onclick="window.logout()" class="logout-btn"><i class="bi bi-box-arrow-right"></i></button>
             </div>
-
-            <!-- Beautiful Text Logo -->
             <div class="brand-container">
                 <h1 class="brand-title">FROTISE</h1>
                 <div class="brand-subtitle">PARTS SYSTEM</div>
@@ -272,19 +162,17 @@
                     </div>
                 </div>
             </div>
-
-            <div id="loadingMsg">Syncing...</div>
+            <div id="loadingMsg">Loading products...</div>
             <div id="resultsList" class="mt-4 pb-4"></div>
         </div>
 
-        <!-- Floating Cart -->
         <div class="fab-cart" onclick="window.openCartModal()">
             <i class="bi bi-cart-fill fs-4"></i>
             <div id="cartBadge" class="cart-badge" style="display: none;">0</div>
         </div>
     </div>
 
-    <!-- DETAILS MODAL -->
+    <!-- PRODUCT MODAL -->
     <div class="modal fade" id="productModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content shadow-lg">
@@ -292,35 +180,21 @@
                     <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body text-center pt-0">
-                    
                     <div class="modal-img-wrapper" onclick="window.viewImage(document.getElementById('modalImg').src)">
                         <img src="" id="modalImg" class="modal-img">
-                        <div class="position-absolute bottom-0 end-0 m-2 px-2 py-1 bg-dark text-white rounded small fw-bold" style="opacity: 0.7; font-size: 0.6rem;">
-                            <i class="bi bi-zoom-in"></i>
-                        </div>
+                        <div class="position-absolute bottom-0 end-0 m-2 px-2 py-1 bg-dark text-white rounded small fw-bold" style="opacity: 0.7; font-size: 0.6rem;"><i class="bi bi-zoom-in"></i></div>
                     </div>
-
                     <div class="d-flex justify-content-center align-items-center mb-2">
                         <h2 class="fw-800 text-dark mb-0 ls-1" id="modalCode"></h2>
                         <div id="modalNewBadge" style="display:none;" class="ms-2 badge-new-manual">NEW</div>
                     </div>
-                    
                     <p class="text-muted fw-bold small text-uppercase mb-4" id="modalName"></p>
 
                     <div class="status-bar">
-                        <div class="text-start">
-                            <span class="d-block text-muted text-uppercase" style="font-size:0.65rem; font-weight:700;">Unit Price</span>
-                            <div id="modalPriceContainer"></div>
-                        </div>
-                        <div class="text-end">
-                             <span class="d-block text-muted text-uppercase" style="font-size:0.65rem; font-weight:700;">Availability</span>
-                            <div id="modalStockContent"></div>
-                        </div>
+                        <div class="text-start"><span class="d-block text-muted text-uppercase" style="font-size:0.65rem; font-weight:700;">Unit Price</span><div id="modalPriceContainer"></div></div>
+                        <div class="text-end"><span class="d-block text-muted text-uppercase" style="font-size:0.65rem; font-weight:700;">Availability</span><div id="modalStockContent"></div></div>
                     </div>
-                    
-                    <div id="promoNotice" class="alert alert-warning py-2 small fw-bold mb-3" style="display:none; color: #854d0e; background: #fef9c3; border:none;">
-                        <i class="bi bi-info-circle-fill me-1"></i> Add 5+ items to unlock Promo Price
-                    </div>
+                    <div id="promoNotice" class="alert alert-warning py-2 small fw-bold mb-3" style="display:none; color: #854d0e; background: #fef9c3; border:none;"><i class="bi bi-info-circle-fill me-1"></i> Add 5+ items to unlock Promo Price</div>
 
                     <div id="addToCartSection">
                         <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
@@ -329,15 +203,10 @@
                                 <input type="number" id="qtyInput" class="qty-display" value="1" readonly>
                                 <button class="qty-btn" onclick="window.updateQty(1)"><i class="bi bi-plus"></i></button>
                             </div>
-                            <button onclick="window.addToCart()" class="btn btn-primary flex-grow-1 rounded-pill py-2 fw-bold" style="background-color: var(--brand-primary); border:none; height: 45px; box-shadow: 0 4px 15px rgba(0, 86, 179, 0.2);">
-                                ADD TO CART
-                            </button>
+                            <button onclick="window.addToCart()" class="btn btn-primary flex-grow-1 rounded-pill py-2 fw-bold" style="background-color: var(--brand-primary); border:none; height: 45px;">ADD TO CART</button>
                         </div>
                     </div>
-                    
-                    <div id="outOfStockMsg" class="alert alert-danger mt-3 text-center" style="display:none;">
-                        <i class="bi bi-slash-circle"></i> Currently Unavailable
-                    </div>
+                    <div id="outOfStockMsg" class="alert alert-danger mt-3 text-center" style="display:none;"><i class="bi bi-slash-circle"></i> Currently Unavailable</div>
                 </div>
             </div>
         </div>
@@ -347,28 +216,14 @@
     <div class="modal fade" id="cartModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-scrollable">
             <div class="modal-content shadow-lg">
-                <div class="modal-header bg-light border-0">
-                    <h5 class="modal-title fw-800 ps-2" style="color: var(--brand-primary)">Your Order</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
+                <div class="modal-header bg-light border-0"><h5 class="modal-title fw-800 ps-2" style="color: var(--brand-primary)">Your Order</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body p-3" id="cartBody" style="background: #fff;"></div>
                 <div class="modal-footer d-block bg-white border-0 pt-2 pb-4 px-4">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <span class="text-muted small fw-bold text-uppercase">Total</span>
-                        <span class="fs-2 fw-800 text-dark" id="cartTotal">0</span>
-                    </div>
-                    
-                    <div id="limitWarning" class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger small fw-bold text-center mb-3" style="display:none;">
-                         Limit exceeded (Max 100,000)
-                    </div>
-                    
+                    <div class="d-flex justify-content-between align-items-center mb-4"><span class="text-muted small fw-bold text-uppercase">Total</span><span class="fs-2 fw-800 text-dark" id="cartTotal">0</span></div>
+                    <div id="limitWarning" class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger small fw-bold text-center mb-3" style="display:none;">Limit exceeded (Max 100,000)</div>
                     <div class="d-grid gap-2">
-                        <button onclick="window.confirmOrder()" class="btn btn-success btn-lg rounded-pill fw-bold shadow-sm" style="background-color: #25D366; border:none;">
-                            <i class="bi bi-whatsapp me-2"></i> Share via WhatsApp
-                        </button>
-                        <button onclick="window.downloadCSV()" class="btn btn-light btn-sm rounded-pill text-muted">
-                            <i class="bi bi-filetype-csv me-1"></i> Export CSV
-                        </button>
+                        <button onclick="window.confirmOrder()" class="btn btn-success btn-lg rounded-pill fw-bold shadow-sm" style="background-color: #25D366; border:none;"><i class="bi bi-whatsapp me-2"></i> Share via WhatsApp</button>
+                        <button onclick="window.downloadCSV()" class="btn btn-light btn-sm rounded-pill text-muted"><i class="bi bi-filetype-csv me-1"></i> Export CSV</button>
                     </div>
                 </div>
             </div>
@@ -376,19 +231,20 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
     <script>
-        // CONFIG
-        const currencyUnit = ""; 
+        // --- CONFIG & ACCESS ---
         const orderLimit = 100000; 
 
-        // ACCESS GROUPS
-        const ACCESS_COOLING = ["RADIATOR", "FAN CASE", "FAN BLADE", "CONDENSER"];
-        const ACCESS_SUSPENSION_A = ["SHOCK ABSORBER", "STABILIZER LINK", "TOP MOUNTING"];
-        const ACCESS_MIXED_B = ["POWER STEERING RACK", "SHOCK ABSORBER", "CONTROL ARM"];
-        const ACCESS_SUSPENSION_FULL = ["SHOCK ABSORBER", "IDLER ARM", "STABILIZER LINK", "BALL JOINT", "ARM BUSH", "RACK END", "CONTROL ROD", "TIE ROD END", "DRAG LINK", "CONTROL ARM"];
+        // UPDATED KEYWORDS: Removed overly specific words to ensure partial matches work
+        const ACCESS_COOLING = ["RADIATOR", "FAN", "CONDENSER"];
+        const ACCESS_SUSPENSION_A = ["SHOCK", "STABILIZER", "MOUNTING"];
+        const ACCESS_MIXED_B = ["RACK", "SHOCK", "ARM"];
+        // Updated GH10112 list: Simplified keywords for better matching
+        const ACCESS_SUSPENSION_FULL = [
+            "SHOCK", "IDLER", "STABILIZER", "BALL JOINT", "BUSH", 
+            "RACK END", "CONTROL ROD", "TIE ROD", "DRAG LINK", "CONTROL ARM"
+        ];
 
-        // VALID USERS
         const validUsers = [
             { id: "GH10328", pass: "0000", name: "Yebford Radiator", access: ACCESS_COOLING },
             { id: "GH98791", pass: "0000", name: "K.auto", access: ACCESS_COOLING },
@@ -401,53 +257,39 @@
             { id: "GH98904", pass: "0000", name: "Client GH98904", access: ACCESS_MIXED_B }
         ];
 
-        // STATE
-        window.cart = [];
-        window.currentItem = null;
-        window.loggedInUser = null;
-        window.productModal = null;
-        window.cartModal = null;
-        window.fullDatabase = []; 
-        window.userDatabase = []; 
+        window.cart = []; window.fullDatabase = []; window.userDatabase = []; window.loggedInUser = null;
 
-        // INIT
         document.addEventListener('DOMContentLoaded', function() {
             window.productModal = new bootstrap.Modal(document.getElementById('productModal'));
             window.cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
-            
-            // Register Service Worker
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Fail', err));
-            }
-            
+            if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(console.log);
             loadDataFromCSV();
         });
 
-        // LIGHTBOX
-        window.viewImage = function(src) {
-            if(!src || src.includes('placeholder')) return;
-            document.getElementById('fullImage').src = src;
-            document.getElementById('imageOverlay').style.display = 'flex';
-        };
-        window.closeImageViewer = function() { document.getElementById('imageOverlay').style.display = 'none'; };
+        // --- NEW LOGIC: SMART KEYWORD MATCHING ---
+        // This splits keywords into words. Product name must contain ALL words in the keyword phrase, in any order.
+        // Example: Keyword "STABILIZER LINK" will match product "LINK STABILIZER" or "STABILIZER FRONT LINK".
+        function filterDatabaseForUser(user) {
+            window.userDatabase = window.fullDatabase.filter(item => {
+                const upperName = item.name.toUpperCase();
+                // User has access if the product name matches ANY of their allowed phrases
+                return user.access.some(phrase => {
+                    const requiredWords = phrase.toUpperCase().split(/\s+/); // Split by space
+                    return requiredWords.every(word => upperName.includes(word));
+                });
+            });
+        }
 
-        // CSV LOAD
         function loadDataFromCSV() {
             document.getElementById('loadingMsg').style.display = 'block';
             fetch('products.csv?v=' + Date.now())
-                .then(r => { if(!r.ok) throw new Error("CSV not found"); return r.text(); })
+                .then(r => r.ok ? r.text() : Promise.reject())
                 .then(t => {
-                    const parsed = parseCSV(t);
-                    window.fullDatabase = parsed;
+                    window.fullDatabase = parseCSV(t);
                     document.getElementById('loadingMsg').style.display = 'none';
                 })
-                .catch(err => {
-                    console.log(err);
-                    window.fullDatabase = [
-                        {code:"1001", name:"RADIATOR TOYOTA", stock:50, price:100, promo:0, isNew:1},
-                        {code:"1002", name:"SHOCK ABSORBER FRONT", stock:10, price:200, promo:150, isNew:0},
-                        {code:"1003", name:"POWER STEERING RACK", stock:5, price:500, promo:450, isNew:1}
-                    ];
+                .catch(() => {
+                    window.fullDatabase = [{code:"DEMO", name:"DEMO PRODUCT", stock:100, price:100, promo:0, isNew:1}];
                     document.getElementById('loadingMsg').style.display = 'none';
                 });
         }
@@ -456,38 +298,25 @@
             const lines = text.split('\n');
             const data = [];
             for(let i=1; i<lines.length; i++) {
-                const l = lines[i].trim();
-                if(!l) continue;
-                const cols = l.split(',');
+                const cols = lines[i].trim().split(',');
                 if(cols.length >= 4) {
-                    let promoVal = 0;
-                    let isNewVal = 0;
-                    if(cols.length >= 5) {
-                        const p = parseFloat(cols[4].trim());
-                        if(!isNaN(p) && p > 0) promoVal = p;
-                    }
-                    if(cols.length >= 6) {
-                        isNewVal = (cols[5].trim() === '1') ? 1 : 0;
-                    }
                     data.push({
                         code: cols[0].trim(),
                         name: cols[1].trim(),
                         stock: parseInt(cols[2].trim())||0,
                         price: parseFloat(cols[3].trim())||0,
-                        promo: promoVal,
-                        isNew: isNewVal
+                        promo: (cols.length>=5)?parseFloat(cols[4].trim())||0 : 0,
+                        isNew: (cols.length>=6 && cols[5].trim()==='1') ? 1 : 0
                     });
                 }
             }
             return data;
         }
 
-        // LOGIN
         window.attemptLogin = function() {
             const i = document.getElementById('loginId').value.trim().toUpperCase();
             const p = document.getElementById('loginPass').value.trim();
             const user = validUsers.find(x => x.id === i && x.pass === p);
-            
             if(user) {
                 window.loggedInUser = user;
                 filterDatabaseForUser(user);
@@ -500,29 +329,16 @@
             }
         };
 
-        function filterDatabaseForUser(user) {
-            window.userDatabase = window.fullDatabase.filter(item => {
-                const upperName = item.name.toUpperCase();
-                return user.access.some(keyword => upperName.includes(keyword));
-            });
-        }
-        
-        window.logout = function() { location.reload(); }
-
-        // SEARCH
         window.handleSearch = function() {
             const val = document.getElementById('searchInput').value.toUpperCase().trim();
             const listDiv = document.getElementById('resultsList');
             let results = window.userDatabase;
             
-            if(results.length === 0) {
-                listDiv.innerHTML = `<div class="text-center text-muted mt-5 small">No authorized products found.</div>`;
-                return;
-            }
+            if(results.length === 0) { listDiv.innerHTML = `<div class="text-center text-muted mt-5 small">No authorized products found.</div>`; return; }
 
             if(val.length > 0) {
-                if(val === 'STOCK') { results = results.filter(i => i.stock > 0); } 
-                else if (val === 'NEW') { results = results.filter(i => i.isNew === 1); }
+                if(val === 'STOCK') results = results.filter(i => i.stock > 0);
+                else if (val === 'NEW') results = results.filter(i => i.isNew === 1);
                 else {
                     const tokens = val.split(/\s+/);
                     results = results.filter(item => {
@@ -531,175 +347,92 @@
                     });
                 }
             }
-
-            if(results.length === 0) {
-                listDiv.innerHTML = `<div class="text-center text-muted mt-5 small">No items match your search</div>`;
-                return;
-            }
+            
+            if(results.length === 0) { listDiv.innerHTML = `<div class="text-center text-muted mt-5 small">No items match your search</div>`; return; }
             
             const renderData = results.slice(0, 60);
             let html = '';
             renderData.forEach(i => {
                 const idx = window.userDatabase.indexOf(i);
+                let badgeClass = i.stock<=0 ? "bg-stock-zero" : (i.stock<=10 ? "bg-stock-low" : "bg-stock-high");
+                let badgeText = i.stock<=0 ? "OUT OF STOCK" : (i.stock<=10 ? "LOW STOCK" : "IN STOCK");
+                let newHtml = i.isNew ? `<span class="badge-new-manual">NEW</span>` : "";
                 
-                let badgeClass = "", badgeText = "";
-                if(i.stock <= 0) { badgeText="OUT OF STOCK"; badgeClass="bg-stock-zero"; }
-                else if(i.stock <= 10) { badgeText="LOW STOCK"; badgeClass="bg-stock-low"; }
-                else { badgeText="IN STOCK"; badgeClass="bg-stock-high"; }
+                let priceDisplay = (i.promo>0 && i.promo<i.price) ? 
+                    `<div><span class="price-original">${currencyUnit}${i.price}</span><span class="price-promo">${currencyUnit}${i.promo}</span><span class="moq-tag">MOQ:5</span></div>` : 
+                    `<span class="price-normal">${currencyUnit}${i.price}</span>`;
 
-                let newHtml = (i.isNew === 1) ? `<span class="badge-new-manual">NEW</span>` : "";
-
-                let priceDisplay = "";
-                if(i.promo > 0 && i.promo < i.price) {
-                    priceDisplay = `
-                        <div>
-                            <span class="price-original">${currencyUnit}${i.price}</span>
-                            <span class="price-promo">${currencyUnit}${i.promo}</span>
-                            <span class="moq-tag">MOQ:5</span>
-                        </div>
-                    `;
-                } else {
-                    priceDisplay = `<span class="price-normal">${currencyUnit}${i.price}</span>`;
-                }
-
-                html += `
-                <div class="result-item" onclick="window.openProduct(${idx})">
-                    <div class="d-flex justify-content-between align-items-start mb-1">
-                            <div class="part-code">${i.code} ${newHtml}</div>
-                            <span class="stock-tag ${badgeClass}">${badgeText}</span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-end mt-2">
-                        <div class="part-name text-muted pe-2" style="max-width: 65%;">${i.name}</div>
-                        <div class="text-end">${priceDisplay}</div>
-                    </div>
+                html += `<div class="result-item" onclick="window.openProduct(${idx})">
+                    <div class="d-flex justify-content-between align-items-start mb-1"><div class="part-code">${i.code} ${newHtml}</div><span class="stock-tag ${badgeClass}">${badgeText}</span></div>
+                    <div class="d-flex justify-content-between align-items-end mt-2"><div class="part-name text-muted pe-2" style="max-width: 65%;">${i.name}</div><div class="text-end">${priceDisplay}</div></div>
                 </div>`;
             });
             listDiv.innerHTML = html;
         }
 
-        // OPEN MODAL
         window.openProduct = function(idx) {
             window.currentItem = window.userDatabase[idx];
             const d = window.currentItem;
-            
             document.getElementById('modalCode').innerText = d.code;
             document.getElementById('modalName').innerText = d.name;
             document.getElementById('modalImg').src = `images/${d.code}.jpg`;
             document.getElementById('qtyInput').value = 1;
-
-            const pCont = document.getElementById('modalPriceContainer');
-            const promoNotice = document.getElementById('promoNotice');
             
-            if(d.promo > 0 && d.promo < d.price) {
-                pCont.innerHTML = `
-                    <span class="price-original fs-5">${currencyUnit}${d.price}</span>
-                    <span class="price-promo fs-2">${currencyUnit}${d.promo}</span>
-                `;
-                promoNotice.style.display = 'block';
-            } else {
-                pCont.innerHTML = `<span class="price-normal fs-2">${currencyUnit}${d.price}</span>`;
-                promoNotice.style.display = 'none';
-            }
-
-            const newBadge = document.getElementById('modalNewBadge');
-            newBadge.style.display = (d.isNew === 1) ? 'inline-block' : 'none';
+            const hasPromo = (d.promo > 0 && d.promo < d.price);
+            document.getElementById('modalPriceContainer').innerHTML = hasPromo ? 
+                `<span class="price-original fs-5">${currencyUnit}${d.price}</span><span class="price-promo fs-2">${currencyUnit}${d.promo}</span>` : 
+                `<span class="price-normal fs-2">${currencyUnit}${d.price}</span>`;
+            document.getElementById('promoNotice').style.display = hasPromo ? 'block' : 'none';
+            document.getElementById('modalNewBadge').style.display = d.isNew ? 'inline-block' : 'none';
 
             const stockBox = document.getElementById('modalStockContent');
-            const addSec = document.getElementById('addToCartSection');
-            const outSec = document.getElementById('outOfStockMsg');
-
             if(d.stock <= 0) {
                 stockBox.innerHTML = `<span class="stock-tag bg-stock-zero">OUT OF STOCK</span>`;
-                addSec.style.display = 'none';
-                outSec.style.display = 'block';
+                document.getElementById('addToCartSection').style.display = 'none';
+                document.getElementById('outOfStockMsg').style.display = 'block';
             } else {
-                addSec.style.display = 'block';
-                outSec.style.display = 'none';
-                if(d.stock <= 10) stockBox.innerHTML = `<span class="stock-tag bg-stock-low text-dark">LOW STOCK</span>`;
-                else stockBox.innerHTML = `<span class="stock-tag bg-stock-high">IN STOCK</span>`;
+                document.getElementById('addToCartSection').style.display = 'block';
+                document.getElementById('outOfStockMsg').style.display = 'none';
+                stockBox.innerHTML = d.stock<=10 ? `<span class="stock-tag bg-stock-low text-dark">LOW STOCK</span>` : `<span class="stock-tag bg-stock-high">IN STOCK</span>`;
             }
-            
             window.productModal.show();
         };
 
-        // CART ACTIONS
         window.updateQty = function(delta) {
-            const inp = document.getElementById('qtyInput');
-            let v = parseInt(inp.value) + delta;
-            if(v<1) v=1;
-            if(v > window.currentItem.stock) { alert("Stock limit reached"); v=window.currentItem.stock; }
-            inp.value = v;
+            let v = parseInt(document.getElementById('qtyInput').value) + delta;
+            if(v<1) v=1; if(v > window.currentItem.stock) { alert("Stock limit reached"); v=window.currentItem.stock; }
+            document.getElementById('qtyInput').value = v;
         }
 
         window.addToCart = function() {
             const qty = parseInt(document.getElementById('qtyInput').value);
-            const item = window.currentItem;
-            
-            const exist = window.cart.find(x => x.code === item.code);
+            const exist = window.cart.find(x => x.code === window.currentItem.code);
             if(exist) {
-                if(exist.qty + qty > item.stock) return alert("Stock limit exceeded");
+                if(exist.qty + qty > window.currentItem.stock) return alert("Stock limit exceeded");
                 exist.qty += qty;
-            } else {
-                window.cart.push({...item, qty: qty});
-            }
-            window.productModal.hide();
-            updateCartBadge();
+            } else { window.cart.push({...window.currentItem, qty: qty}); }
+            window.productModal.hide(); updateCartBadge();
         }
 
         function updateCartBadge() {
             const c = window.cart.reduce((a,b)=>a+b.qty,0);
-            const b = document.getElementById('cartBadge');
-            b.innerText = c;
-            b.style.display = c>0?'flex':'none';
+            document.getElementById('cartBadge').innerText = c;
+            document.getElementById('cartBadge').style.display = c>0?'flex':'none';
         }
 
         window.openCartModal = function() {
-            const b = document.getElementById('cartBody');
-            b.innerHTML = '';
-            let total = 0;
-
-            if(window.cart.length === 0) {
-                b.innerHTML = `<div class="text-center py-5 text-muted opacity-50">Cart is empty</div>`;
-            } else {
+            const b = document.getElementById('cartBody'); b.innerHTML = ''; let total = 0;
+            if(window.cart.length === 0) { b.innerHTML = `<div class="text-center py-5 text-muted opacity-50">Cart is empty</div>`; } 
+            else {
                 window.cart.forEach((it,i) => {
-                    let finalPrice = it.price;
-                    let isPromo = false;
-                    let promoMsg = "";
-
-                    if(it.promo > 0 && it.qty >= 5) {
-                        finalPrice = it.promo;
-                        isPromo = true;
-                    } else if (it.promo > 0 && it.qty < 5) {
-                        const need = 5 - it.qty;
-                        promoMsg = `<span class="promo-hint"><i class="bi bi-tag"></i> Add ${need} more for ${currencyUnit}${it.promo}</span>`;
-                    }
-
-                    const itemTotal = finalPrice * it.qty;
-                    total += itemTotal;
-                    
-                    const priceClass = isPromo ? "text-danger fw-bold" : "text-dark fw-bold";
-                    const priceLabel = isPromo ? "PROMO PRICE" : "";
-
-                    b.innerHTML += `
-                    <div class="card mb-2 border-0 shadow-sm">
-                        <div class="card-body p-3 d-flex justify-content-between align-items-center">
-                            <div style="width:55%">
-                                <div class="fw-bold text-dark">${it.code}</div>
-                                <div class="small text-truncate text-muted">${it.name}</div>
-                                <div class="${priceClass} mt-1">${currencyUnit}${finalPrice} <span style="font-size:0.6rem; color:#dc3545;">${priceLabel}</span></div>
-                                ${promoMsg}
-                            </div>
-                            
-                            <div class="text-end">
-                                <div class="qty-control mb-2 justify-content-end">
-                                    <button class="qty-btn p-0" onclick="window.changeCartQty(${i}, -1)">-</button>
-                                    <span class="mx-2 fw-bold">${it.qty}</span>
-                                    <button class="qty-btn p-0" onclick="window.changeCartQty(${i}, 1)">+</button>
-                                </div>
-                                <small class="text-danger fw-bold cursor-pointer" onclick="window.remCart(${i})">REMOVE</small>
-                            </div>
-                        </div>
-                    </div>`;
+                    let price = it.price; let isPromo = false; let hint = "";
+                    if(it.promo>0) { if(it.qty>=5) {price=it.promo; isPromo=true;} else {hint=`<span class="promo-hint">Add ${5-it.qty} more for ${currencyUnit}${it.promo}</span>`;} }
+                    total += price * it.qty;
+                    b.innerHTML += `<div class="card mb-2 border-0 shadow-sm"><div class="card-body p-3 d-flex justify-content-between align-items-center">
+                        <div style="width:55%"><div class="fw-bold text-dark">${it.code}</div><div class="small text-truncate text-muted">${it.name}</div>
+                        <div class="${isPromo?'text-danger fw-bold':'text-dark fw-bold'} mt-1">${currencyUnit}${price} ${isPromo?'<span style="font-size:0.6rem;">PROMO</span>':''}</div>${hint}</div>
+                        <div class="text-end"><div class="qty-control mb-2 justify-content-end"><button class="qty-btn p-0" onclick="window.changeCartQty(${i}, -1)">-</button><span class="mx-2 fw-bold">${it.qty}</span><button class="qty-btn p-0" onclick="window.changeCartQty(${i}, 1)">+</button></div><small class="text-danger fw-bold cursor-pointer" onclick="window.remCart(${i})">REMOVE</small></div>
+                    </div></div>`;
                 });
             }
             document.getElementById('cartTotal').innerText = currencyUnit + total;
@@ -708,72 +441,40 @@
         }
 
         window.changeCartQty = function(i, d) {
-            const cItem = window.cart[i];
-            const dbItem = window.fullDatabase.find(x=>x.code === cItem.code);
-            let n = cItem.qty + d;
-            if(n < 1) return;
-            if(n > dbItem.stock) return alert("Stock Limit");
-            cItem.qty = n;
-            window.openCartModal(); 
-            updateCartBadge();
+            let n = window.cart[i].qty + d; const dbItem = window.fullDatabase.find(x=>x.code===window.cart[i].code);
+            if(n<1) return; if(n>dbItem.stock) return alert("Stock Limit");
+            window.cart[i].qty = n; window.openCartModal(); updateCartBadge();
         }
-
-        window.remCart = function(i) {
-            window.cart.splice(i, 1);
-            window.openCartModal();
-            updateCartBadge();
-        }
-
+        window.remCart = function(i) { window.cart.splice(i, 1); window.openCartModal(); updateCartBadge(); }
+        
         window.confirmOrder = function() {
             if(window.cart.length===0) return alert("Empty Cart");
-            
             let t = 0;
             const finalCart = window.cart.map(it => {
-                let price = it.price;
-                if(it.promo > 0 && it.qty >= 5) price = it.promo;
-                t += price * it.qty;
-                return { ...it, finalPrice: price };
+                let p = (it.promo>0 && it.qty>=5) ? it.promo : it.price; t += p*it.qty; return {...it, finalP: p};
             });
-
-            if(t > orderLimit) return alert("Over 100,000 Limit");
-            
-            // Local deduct
-            window.cart.forEach(c => {
-                let d = window.fullDatabase.find(x=>x.code === c.code);
-                if(d) d.stock = Math.max(0, d.stock - c.qty);
-            });
-
+            if(t > orderLimit) return alert("Limit Exceeded");
             let m = `🛒 *ORDER (${window.loggedInUser.name})*\n`;
-            finalCart.forEach(x => {
-                m += `▪ ${x.code} (x${x.qty}) @ ${x.finalPrice}\n`;
-            });
+            finalCart.forEach(x => m += `▪ ${x.code} (x${x.qty}) @ ${x.finalP}\n`);
             m += `\n*TOTAL: ${t}*`;
-            
             window.open(`https://wa.me/?text=${encodeURIComponent(m)}`, '_blank');
-            
-            window.cart=[]; 
-            updateCartBadge(); 
-            window.cartModal.hide();
-            window.handleSearch();
+            window.cart=[]; updateCartBadge(); window.cartModal.hide(); window.handleSearch();
         }
 
         window.downloadCSV = function() {
              if(window.cart.length===0) return alert("Empty");
              let c = "Client,Code,Qty,FinalPrice,Total\n";
              window.cart.forEach(x => {
-                 let p = x.price;
-                 if(x.promo > 0 && x.qty >= 5) p = x.promo;
+                 let p = (x.promo>0 && x.qty>=5) ? x.promo : x.price;
                  c+=`${window.loggedInUser.name},${x.code},${x.qty},${p},${p*x.qty}\n`
              });
-             const a = document.createElement('a');
-             a.href = 'data:text/csv;charset=utf-8,' + encodeURI(c);
-             a.download = 'order.csv';
-             a.click();
+             const a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,'+encodeURI(c); a.download='order.csv'; a.click();
         }
-        
-        document.getElementById('loginPass').addEventListener('keypress', (e)=>{
-            if(e.key==='Enter') window.attemptLogin();
-        });
+
+        document.getElementById('loginPass').addEventListener('keypress', (e)=>{ if(e.key==='Enter') window.attemptLogin(); });
+        window.viewImage = function(src) { if(!src || src.includes('placeholder')) return; document.getElementById('fullImage').src = src; document.getElementById('imageOverlay').style.display = 'flex'; };
+        window.closeImageViewer = function() { document.getElementById('imageOverlay').style.display = 'none'; };
+        window.logout = function() { location.reload(); }
     </script>
 </body>
 </html>
