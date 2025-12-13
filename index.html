@@ -76,10 +76,12 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <script>
+   <script>
+        // --- 基础配置 ---
         const currencyUnit = ""; 
         const orderLimit = 1000000; 
 
+        // --- 全局状态 ---
         window.cart = [];
         window.currentItem = null;
         window.loggedInUser = null; 
@@ -96,44 +98,49 @@
             loadDatabases();
         });
 
-        // === 这里的加载逻辑增加了错误检测 ===
-        function loadDatabases() {
+        // --- 1. 数据加载逻辑 ---
+        async function loadDatabases() {
             const statusEl = document.getElementById('dbStatus');
-            statusEl.innerText = "Loading data...";
+            statusEl.innerText = "Loading CSV files...";
             
-            Promise.all([
-                fetch('products.csv?v=' + Date.now()).then(r => r.text()),
-                fetch('clients.csv?v=' + Date.now()).then(r => r.text())
-            ]).then(([prodText, clientText]) => {
+            try {
+                const [prodRes, clientRes] = await Promise.all([
+                    fetch('products.csv?v=' + Date.now()),
+                    fetch('clients.csv?v=' + Date.now())
+                ]);
+
+                if (!prodRes.ok || !clientRes.ok) throw new Error("File not found on server");
+
+                const prodText = await prodRes.text();
+                const clientText = await clientRes.text();
+
                 parseProducts(prodText);
                 parseClients(clientText);
-                statusEl.innerText = "Ready. (Loaded: " + window.allProducts.length + " products, " + window.validClients.length + " clients)";
-                statusEl.classList.add('text-success');
-                
-                // Debug log
-                console.log("Products Loaded:", window.allProducts);
-                console.log("Clients Loaded:", window.validClients);
 
-            }).catch(err => {
-                console.error(err);
-                statusEl.innerText = "Error: Check console. Files missing?";
+                statusEl.innerText = `Ready. (${window.allProducts.length} Products, ${window.validClients.length} Clients)`;
+                statusEl.classList.remove('text-danger');
+                statusEl.classList.add('text-success');
+
+            } catch (err) {
+                console.error("Load Error:", err);
+                statusEl.innerText = "Error: Cannot load CSV files. Make sure they are in the same folder.";
                 statusEl.classList.add('text-danger');
-            });
+            }
         }
 
+        // --- 2. 解析产品逻辑 (彻底清洗引号) ---
         function parseProducts(csvText) {
-            const lines = csvText.split('\n');
+            const lines = csvText.split(/\r?\n/);
             window.allProducts = [];
             
-            // 检测分隔符
-            if (lines.length > 1 && lines[1].includes(';') && !lines[1].includes(',')) {
-                alert("严重错误: products.csv 似乎使用了分号(;)作为分隔符。\n请用记事本打开csv，确保使用的是逗号(,)");
-            }
-
-            for(let i=1; i<lines.length; i++) {
-                const line = lines[i].trim();
+            for(let i = 1; i < lines.length; i++) {
+                let line = lines[i].trim();
                 if(!line) continue;
-                const cols = line.split(','); // 必须是逗号
+
+                // 核心：先删掉所有双引号，再按逗号切割
+                const cleanLine = line.replace(/"/g, "");
+                const cols = cleanLine.split(',');
+
                 if(cols.length >= 4) {
                     window.allProducts.push({
                         code: cols[0].trim(),
@@ -147,111 +154,78 @@
             }
         }
 
-function parseProducts(csvText) {
-            const lines = csvText.split('\n');
-            window.allProducts = [];
+        // --- 3. 解析客户逻辑 (彻底清洗引号) ---
+        function parseClients(csvText) {
+            const lines = csvText.split(/\r?\n/);
+            window.validClients = [];
             
-            // 检测分隔符
-            if (lines.length > 1 && lines[1].includes(';') && !lines[1].includes(',')) {
-                alert("严重错误: products.csv 似乎使用了分号(;)分隔。请保存为逗号分隔格式。");
-            }
-
-            for(let i=1; i<lines.length; i++) {
-                const line = lines[i].trim();
+            for(let i = 1; i < lines.length; i++) {
+                let line = lines[i].trim();
                 if(!line) continue;
-                
-                // 注意：如果产品名称里本身就有逗号（例如 "RACK, STEERING"），
-                // 简单的 split(',') 会导致数据错位。
-                // 这里我们假设产品名里没有逗号。如果经常出错，建议在Excel里把产品名里的逗号删掉。
-                const cols = line.split(','); 
-                
-                if(cols.length >= 4) {
-                    // === 修改开始：清洗数据，去掉引号 ===
-                    let pCode = cols[0].trim().replace(/['"]/g, ''); // 去掉Code里的引号
-                    let pName = cols[1].trim().replace(/['"]/g, ''); // 去掉Name里的引号
-                    // ===================================
 
-                    window.allProducts.push({
-                        code: pCode,
-                        name: pName,
-                        stock: parseInt(cols[2].trim()) || 0,
-                        price: parseFloat(cols[3].trim()) || 0,
-                        promo: cols[4] ? parseFloat(cols[4].trim()) : 0,
-                        isNew: cols[5] ? (cols[5].trim().toUpperCase() === 'YES') : false
-                    });
+                // 核心：先删掉所有双引号
+                const cleanLine = line.replace(/"/g, "");
+                const parts = cleanLine.split(',');
+
+                if(parts.length >= 2) {
+                    const clientCode = parts[0].trim().toUpperCase();
+                    // 剩下的所有列都是关键词
+                    const keywords = parts.slice(1)
+                                          .map(k => k.trim().toUpperCase())
+                                          .filter(k => k !== "");
+                    
+                    if(clientCode) {
+                        window.validClients.push({ id: clientCode, keywords: keywords });
+                    }
                 }
             }
         }
-        // --- LOGIN LOGIC (增加了调试弹窗) ---
+
+        // --- 4. 登录与关键词过滤 ---
         window.attemptLogin = function() {
             const idInput = document.getElementById('loginId').value.trim().toUpperCase();
             const passInput = document.getElementById('loginPass').value.trim();
             const errorDiv = document.getElementById('loginError');
 
             if (window.validClients.length === 0) {
-                errorDiv.innerText = "Error: No clients loaded. Check CSV format.";
-                errorDiv.style.display = 'block';
+                alert("Error: No clients loaded from clients.csv. Please check the file.");
                 return;
             }
 
             const user = window.validClients.find(u => u.id === idInput);
 
-            if (user) {
-                if(passInput.toUpperCase() === user.id || passInput === "1234") {
-                    window.loggedInUser = user; 
-                    filterDatabaseForUser(user);
-                    
-                   // === 调试代码：如果没有找到产品，告诉用户为什么 ===
-                    if (window.userAllowedProducts.length === 0) {
-                        let debugMsg = `Login Success, BUT 0 products found.\n`;
-                        debugMsg += `----------------------------\n`;
-                        debugMsg += `YOUR KEYWORDS: ${user.keywords.join(", ")}\n`;
-                        debugMsg += `----------------------------\n`;
-                        
-                        // 核心：显示系统读取到的前3个产品，看看是否正常
-                        debugMsg += `SYSTEM SEES THESE PRODUCTS (Check Name):\n`;
-                        if (window.allProducts.length > 0) {
-                            window.allProducts.slice(0, 3).forEach((p, idx) => {
-                                debugMsg += `${idx+1}. Code:[${p.code}] Name:[${p.name}]\n`;
-                            });
-                        } else {
-                            debugMsg += "No products loaded from CSV!\n";
-                        }
-                        
-                        debugMsg += `----------------------------\n`;
-                        debugMsg += `LOGIC: Does Name or Code contain Keyword?\n`;
-                        alert(debugMsg);
-                    }
-                    // ===========================================
+            if (user && (passInput.toUpperCase() === user.id || passInput === "1234")) {
+                window.loggedInUser = user; 
+                
+                // 过滤逻辑：只要产品名或代码包含任何一个关键词
+                window.userAllowedProducts = window.allProducts.filter(item => {
+                    const searchStr = (item.code + " " + item.name).toUpperCase();
+                    if (user.keywords.includes('ALL')) return true;
+                    return user.keywords.some(key => searchStr.includes(key));
+                });
 
-                    document.getElementById('userDisplay').innerText = user.id; 
-                    document.getElementById('loginSection').style.display = 'none';
-                    document.getElementById('mainApp').style.display = 'block';
-                    window.handleSearch();
-                    return;
+                // 调试弹窗：帮助你检查数据
+                if (window.userAllowedProducts.length === 0) {
+                    let debugMsg = `LOGIN SUCCESS, BUT 0 PRODUCTS FOUND.\n\n`;
+                    debugMsg += `Your Keywords: ${JSON.stringify(user.keywords)}\n\n`;
+                    debugMsg += `System sees first 2 products in DB:\n`;
+                    window.allProducts.slice(0, 2).forEach(p => {
+                        debugMsg += `- ${p.code} | ${p.name}\n`;
+                    });
+                    alert(debugMsg);
                 }
+
+                document.getElementById('userDisplay').innerText = user.id; 
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                window.handleSearch();
+            } else {
+                errorDiv.innerText = "Invalid Client Code or Password.";
+                errorDiv.style.display = 'block';
             }
-            errorDiv.innerText = "Invalid Client Code or Password.";
-            errorDiv.style.display = 'block';
         };
 
-        function filterDatabaseForUser(user) {
-            if(!user || !user.keywords) return;
-            const keywords = user.keywords;
-            
-            if(keywords.includes('ALL')) {
-                window.userAllowedProducts = [...window.allProducts];
-                return;
-            }
-
-            window.userAllowedProducts = window.allProducts.filter(item => {
-                const searchStr = (item.code + " " + item.name).toUpperCase();
-                return keywords.some(key => searchStr.includes(key));
-            });
-        }
-
-        window.logout = function() { location.reload(); };
-
+        // --- 5. 搜索功能 ---
         window.handleSearch = function() {
             const rawInput = document.getElementById('searchInput').value.toUpperCase().trim();
             const listDiv = document.getElementById('resultsList');
@@ -259,24 +233,19 @@ function parseProducts(csvText) {
 
             document.getElementById('totalCount').innerText = sourceData.length;
 
-            if(sourceData.length === 0) {
-                listDiv.innerHTML = '<div class="text-center mt-5 text-muted">No products available for your account.</div>';
-                return;
-            }
-
-            let results = [];
-            if(rawInput.length === 0) {
-                results = sourceData;
-            } else if (rawInput === 'STOCK') {
-                results = sourceData.filter(i => i.stock > 0);
-            } else if (rawInput === 'NEW') {
-                results = sourceData.filter(i => i.isNew);
-            } else {
-                const terms = rawInput.split(/\s+/);
-                results = sourceData.filter(item => {
-                    const text = (item.code + " " + item.name).toUpperCase();
-                    return terms.every(term => text.includes(term));
-                });
+            let results = sourceData;
+            if(rawInput.length > 0) {
+                if (rawInput === 'STOCK') {
+                    results = sourceData.filter(i => i.stock > 0);
+                } else if (rawInput === 'NEW') {
+                    results = sourceData.filter(i => i.isNew);
+                } else {
+                    const terms = rawInput.split(/\s+/);
+                    results = sourceData.filter(item => {
+                        const text = (item.code + " " + item.name).toUpperCase();
+                        return terms.every(term => text.includes(term));
+                    });
+                }
             }
 
             if (results.length === 0) {
@@ -284,25 +253,18 @@ function parseProducts(csvText) {
                 return;
             }
 
-            const displayList = (rawInput === "") ? results.slice(0, 50) : results;
-
             let html = '';
-            displayList.forEach(item => {
+            results.forEach(item => {
                 const imgSrc = `images/${item.code}.jpg`;
-                let stockBadge = '';
-                if (item.stock <= 0) stockBadge = `<span class="stock-tag bg-stock-zero">OUT OF STOCK</span>`;
-                else if (item.stock <= 5) stockBadge = `<span class="stock-tag bg-stock-low">LOW STOCK</span>`;
-                else stockBadge = `<span class="stock-tag bg-stock-high">IN STOCK</span>`;
+                let stockBadge = item.stock <= 0 ? `<span class="stock-tag bg-stock-zero">OUT OF STOCK</span>` : 
+                                (item.stock <= 5 ? `<span class="stock-tag bg-stock-low">LOW STOCK</span>` : `<span class="stock-tag bg-stock-high">IN STOCK</span>`);
 
-                let newBadge = item.isNew ? `<div class="badge-new">NEW</div>` : '';
-                let priceDisplay = `${currencyUnit}${item.price}`;
-                if(item.promo > 0 && item.promo < item.price) {
-                    priceDisplay = `<span class="price-old">${item.price}</span>${currencyUnit}${item.promo}`;
-                }
+                let priceDisplay = (item.promo > 0 && item.promo < item.price) ? 
+                                   `<span class="price-old">${item.price}</span>${currencyUnit}${item.promo}` : `${currencyUnit}${item.price}`;
 
                 html += `
                 <div class="result-item d-flex align-items-center bg-white rounded" onclick="window.openProduct('${item.code}')">
-                    ${newBadge}
+                    ${item.isNew ? '<div class="badge-new">NEW</div>' : ''}
                     <div class="flex-grow-1">
                         <div class="d-flex justify-content-between align-items-start">
                              <div class="part-code">${item.code}</div>
@@ -314,51 +276,28 @@ function parseProducts(csvText) {
                     <img src="${imgSrc}" class="product-img-thumb ms-3" onerror="this.src='https://via.placeholder.com/80?text=No+Img'">
                 </div>`;
             });
-            
-            if(rawInput === "" && results.length > 50) {
-                html += `<div class="text-center small text-muted mt-3">Showing first 50 items. Use search to find more.</div>`;
-            }
             listDiv.innerHTML = html;
         };
 
+        // --- 6. 其他 UI 功能 (详情、购物车等) ---
         window.openProduct = function(code) {
             window.currentItem = window.allProducts.find(p => p.code === code);
-            if(!window.currentItem) return;
-
             const item = window.currentItem;
             document.getElementById('modalName').innerText = item.name;
             document.getElementById('modalCode').innerText = item.code;
             document.getElementById('modalNewBadge').style.display = item.isNew ? 'block' : 'none';
-            
-            const imgPath = `images/${item.code}.jpg`;
-            const imgEl = document.getElementById('modalImg');
-            imgEl.src = imgPath;
-            imgEl.onerror = function(){ this.src = 'https://via.placeholder.com/300?text=No+Image'; }
-
+            document.getElementById('modalImg').src = `images/${item.code}.jpg`;
             document.getElementById('qtyInput').value = 1;
             
-            let finalPrice = item.price;
-            let priceHtml = `<span class="fs-3 fw-bold text-dark">${currencyUnit}${item.price}</span>`;
-            if(item.promo > 0 && item.promo < item.price) {
-                finalPrice = item.promo;
-                priceHtml = `<span class="text-decoration-line-through text-muted me-2 fs-5">${item.price}</span><span class="fs-3 fw-bold text-danger">${currencyUnit}${item.promo}</span>`;
-            }
-            window.currentItem.finalPrice = finalPrice; 
-            document.getElementById('modalPriceContainer').innerHTML = priceHtml;
+            let finalPrice = (item.promo > 0 && item.promo < item.price) ? item.promo : item.price;
+            window.currentItem.finalPrice = finalPrice;
+            document.getElementById('modalPriceContainer').innerHTML = (item.promo > 0 && item.promo < item.price) ? 
+                `<span class="text-decoration-line-through text-muted me-2 fs-5">${item.price}</span><span class="fs-3 fw-bold text-danger">${currencyUnit}${item.promo}</span>` :
+                `<span class="fs-3 fw-bold text-dark">${currencyUnit}${item.price}</span>`;
 
-            const statusDiv = document.getElementById('modalStockContent');
-            const addBtnDiv = document.getElementById('addToCartSection');
-            const msgDiv = document.getElementById('outOfStockMsg');
-
-            if(item.stock <= 0) {
-                statusDiv.innerHTML = `<span class="badge bg-stock-zero">OUT OF STOCK</span>`;
-                addBtnDiv.style.display = 'none';
-                msgDiv.style.display = 'block';
-            } else {
-                addBtnDiv.style.display = 'block';
-                msgDiv.style.display = 'none';
-                statusDiv.innerHTML = `<span class="badge bg-stock-high">AVAILABLE: ${item.stock}</span>`;
-            }
+            document.getElementById('addToCartSection').style.display = item.stock <= 0 ? 'none' : 'block';
+            document.getElementById('outOfStockMsg').style.display = item.stock <= 0 ? 'block' : 'none';
+            document.getElementById('modalStockContent').innerHTML = `<span class="badge ${item.stock <= 0 ? 'bg-danger' : 'bg-success'}">Stock: ${item.stock}</span>`;
             
             window.productModal.show();
         };
@@ -375,9 +314,8 @@ function parseProducts(csvText) {
             const qty = parseInt(document.getElementById('qtyInput').value);
             const item = window.currentItem;
             const exist = window.cart.find(c => c.code === item.code);
-
             if(exist) {
-                if((exist.qty + qty) > item.stock) return alert('Total exceeds stock limit');
+                if((exist.qty + qty) > item.stock) return alert('Exceeds stock');
                 exist.qty += qty;
             } else {
                 window.cart.push({...item, qty: qty, price: item.finalPrice});
@@ -394,84 +332,46 @@ function parseProducts(csvText) {
         };
 
         window.openCartModal = function() {
-            window.renderCartItems();
+            const modalBody = document.getElementById('cartBody');
+            modalBody.innerHTML = '';
+            let total = 0;
+            if (window.cart.length === 0) {
+                modalBody.innerHTML = '<p class="text-center py-5">Cart is empty</p>';
+            } else {
+                window.cart.forEach((item, index) => {
+                    total += item.price * item.qty;
+                    modalBody.innerHTML += `
+                        <div class="card mb-2 border-0 shadow-sm"><div class="card-body p-2 d-flex justify-content-between align-items-center">
+                            <div style="width:60%"><div class="fw-bold small">${item.code}</div><div class="small text-muted">${item.name}</div></div>
+                            <div class="text-end"><div>${item.qty} x ${item.price}</div><button class="btn btn-sm text-danger" onclick="window.removeCartItem(${index})">Remove</button></div>
+                        </div></div>`;
+                });
+            }
+            document.getElementById('cartTotal').innerText = total.toLocaleString();
             window.cartModal.show();
         };
 
-        window.renderCartItems = function() {
-            const modalBody = document.getElementById('cartBody');
-            modalBody.innerHTML = '';
-            let totalAmount = 0;
-
-            if (window.cart.length === 0) {
-                modalBody.innerHTML = '<div class="text-center py-5 text-muted"><i class="bi bi-cart-x fs-1"></i><p class="mt-2">Cart is empty</p></div>';
-            } else {
-                window.cart.forEach((item, index) => {
-                    totalAmount += item.price * item.qty;
-                    modalBody.innerHTML += `
-                        <div class="card mb-2 border-0 shadow-sm"><div class="card-body p-2 d-flex justify-content-between align-items-center"><div style="width:55%"><div class="fw-bold small">${item.code}</div><div class="small text-muted text-truncate">${item.name}</div><div class="text-danger fw-bold mt-1">${currencyUnit}${item.price} <span class="text-muted small fw-normal">x ${item.qty}</span></div></div><div class="d-flex flex-column align-items-end"><div class="qty-control mb-1"><button class="qty-btn p-0" onclick="window.updateCartItemQty(${index}, -1)">-</button><span class="fw-bold mx-2">${item.qty}</span><button class="qty-btn p-0" onclick="window.updateCartItemQty(${index}, 1)">+</button></div><button class="btn btn-sm btn-outline-danger" onclick="window.removeCartItem(${index})"><i class="bi bi-trash"></i></button></div></div></div>`;
-                });
-            }
-            document.getElementById('cartTotal').innerText = currencyUnit + totalAmount.toLocaleString();
-        };
-
-        window.updateCartItemQty = function(index, change) {
-            const item = window.cart[index];
-            let newQty = item.qty + change;
-            if (newQty < 1) return; 
-            if (newQty > item.stock) return alert(`Max stock available is ${item.stock}`);
-            item.qty = newQty;
-            window.updateCartUI();
-            window.renderCartItems(); 
-        };
-
         window.removeCartItem = function(index) {
-            if(confirm('Remove this item?')) {
-                window.cart.splice(index, 1);
-                window.updateCartUI();
-                window.renderCartItems();
-            }
+            window.cart.splice(index, 1);
+            window.updateCartUI();
+            window.openCartModal();
         };
 
         window.confirmOrder = function() {
-            if (window.cart.length === 0) return alert("Cart is empty");
-            const totalAmount = window.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            
-            let msg = `🛒 *FROTISE ORDER (${window.loggedInUser.id})* \n\n`;
-            window.cart.forEach(i => {
-                msg += `▪️ ${i.code} (x${i.qty}) - ${currencyUnit}${i.price}\n`;
-            });
-            msg += `\n💰 *TOTAL: ${currencyUnit}${totalAmount.toLocaleString()}*`;
+            if (window.cart.length === 0) return;
+            let msg = `🛒 *FROTISE ORDER (${window.loggedInUser.id})*\n\n`;
+            window.cart.forEach(i => msg += `▪️ ${i.code} (x${i.qty}) - ${i.price}\n`);
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
-            window.cart = [];
-            window.updateCartUI();
-            window.cartModal.hide();
-            window.handleSearch(); 
         };
 
         window.downloadCSV = function() {
-            if (window.cart.length === 0) return alert("Cart is empty");
-            let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "Client,PartCode,Quantity,Price,LineTotal\n"; 
-            window.cart.forEach(item => {
-                csvContent += `${window.loggedInUser.id},${item.code},${item.qty},${item.price},${item.price * item.qty}\n`;
-            });
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `Order_${window.loggedInUser.id}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            let csv = "PartCode,Qty,Price\n" + window.cart.map(i => `${i.code},${i.qty},${i.price}`).join("\n");
+            window.open("data:text/csv;charset=utf-8," + encodeURI(csv));
         };
 
-        window.viewImage = function(src) {
-            if(!src || src.includes('placeholder')) return;
-            document.getElementById('fullImage').src = src;
-            document.getElementById('imageOverlay').style.display = 'flex';
-        };
+        window.logout = function() { location.reload(); };
+        window.viewImage = function(src) { document.getElementById('fullImage').src = src; document.getElementById('imageOverlay').style.display = 'flex'; };
         window.closeImageViewer = function() { document.getElementById('imageOverlay').style.display = 'none'; };
-        document.getElementById('loginPass').addEventListener('keypress', function (e) { if (e.key === 'Enter') window.attemptLogin(); });
     </script>
 </body>
 </html>
