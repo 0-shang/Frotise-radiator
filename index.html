@@ -147,7 +147,7 @@
             }
         }
 
-        function parseClients(csvText) {
+       function parseClients(csvText) {
             const lines = csvText.split('\n');
             window.validClients = [];
             
@@ -159,11 +159,24 @@
             for(let i=1; i<lines.length; i++) {
                 const line = lines[i].trim();
                 if(!line) continue;
+                
                 const firstCommaIndex = line.indexOf(',');
                 if(firstCommaIndex > -1) {
                     const clientCode = line.substring(0, firstCommaIndex).trim().toUpperCase();
-                    const keywordsStr = line.substring(firstCommaIndex + 1).trim();
-                    const keywords = keywordsStr.split(',').map(k => k.trim().toUpperCase()).filter(k => k !== "");
+                    
+                    // === 修改开始：处理 Excel 自动添加的引号 ===
+                    let keywordsStr = line.substring(firstCommaIndex + 1).trim();
+                    
+                    // 1. 如果整个字符串被引号包围，去掉首尾引号
+                    if (keywordsStr.startsWith('"') && keywordsStr.endsWith('"')) {
+                        keywordsStr = keywordsStr.substring(1, keywordsStr.length - 1);
+                    }
+                    
+                    // 2. 分割后，再次清理每个关键词可能残留的引号
+                    const keywords = keywordsStr.split(',').map(k => {
+                        return k.trim().toUpperCase().replace(/['"]/g, ''); // 彻底删掉所有引号
+                    }).filter(k => k !== "");
+                    // === 修改结束 ===
                     
                     if(clientCode) {
                         window.validClients.push({ id: clientCode, keywords: keywords });
