@@ -20,152 +20,149 @@
     <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
 
     <style>
-        /* --- DESIGN SYSTEM --- */
+        /* --- BRANDING & UI --- */
         :root {
-            --brand-primary: #0056b3; 
-            --brand-gradient: linear-gradient(135deg, #0056b3 0%, #002855 100%);
+            --brand: #0056b3; 
+            --brand-dark: #002855;
             --promo: #dc3545; 
-            --text-dark: #1e293b;
-            --bg-main: #f8fafc;
-            --stock-high-bg: #dcfce7; --stock-high-text: #15803d;
-            --stock-low-bg: #ffedd5; --stock-low-text: #c2410c;
-            --stock-zero-bg: #fee2e2; --stock-zero-text: #b91c1c;
+            --bg: #f8fafc;
         }
 
-        body { background-color: var(--bg-main); font-family: "Inter", -apple-system, sans-serif; padding-bottom: 100px; -webkit-font-smoothing: antialiased; }
+        body { background-color: var(--bg); font-family: "Inter", sans-serif; padding-bottom: 100px; -webkit-font-smoothing: antialiased; }
         .fw-800 { font-weight: 800; }
         
-        /* --- LOGIN --- */
-        #loginSection { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .login-logo-img { max-width: 240px; margin-bottom: 30px; }
-        .form-control-minimal { border: none; border-bottom: 2px solid #e2e8f0; border-radius: 0; padding: 12px; text-align: center; background: transparent; font-weight: 600; margin-bottom: 20px; color: #334155; }
-        .form-control-minimal:focus { box-shadow: none; border-color: var(--brand-primary); }
-        .btn-login { background: var(--brand-primary); color: white; border: none; padding: 12px 0; width: 100%; border-radius: 8px; font-weight: 800; letter-spacing: 1px; }
-
-        /* --- HEADER --- */
-        .header-bg { background: var(--brand-gradient); color: white; padding: 0 0 50px 0; border-radius: 0 0 30px 30px; box-shadow: 0 10px 30px rgba(0,53,128,0.3); overflow: hidden; position: relative; }
-        .header-top { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; }
-        .header-brand { text-align: center; margin-top: 5px; }
-        .brand-title { font-family: 'Inter', sans-serif; font-weight: 900; font-size: 2.8rem; letter-spacing: 2px; margin: 0; text-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .brand-sub { font-size: 0.7rem; opacity: 0.6; letter-spacing: 4px; text-transform: uppercase; }
-
-        /* --- SEARCH & LIST --- */
-        .search-card { margin: -35px 20px 20px; background: white; padding: 8px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); position: relative; z-index: 10; }
-        .search-input { border: none; height: 50px; font-size: 1.1rem; font-weight: 500; text-align: center; }
-        .search-input:focus { box-shadow: none; }
-
-        .result-item { background: white; border-radius: 12px; margin-bottom: 10px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); cursor: pointer; transition: transform 0.1s; border: 1px solid transparent; }
-        .result-item:active { transform: scale(0.98); border-color: var(--brand-primary); background: #f1f5f9; }
+        /* HEADER */
+        .header-bg {
+            background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
+            color: white; padding: 0 0 60px 0;
+            border-radius: 0 0 30px 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .brand-title { font-weight: 900; font-size: 2.5rem; letter-spacing: 2px; margin: 0; }
         
-        .part-code { color: var(--brand-primary); font-weight: 800; font-size: 0.95rem; }
-        .part-name { color: #64748b; font-size: 0.85rem; font-weight: 600; line-height: 1.3; margin-top: 4px; }
-        .stock-tag { font-size: 0.6rem; padding: 2px 8px; border-radius: 4px; font-weight: 800; }
-        
-        /* --- CART FAB --- */
-        .fab-cart { position: fixed; bottom: 30px; right: 30px; background: var(--brand-primary); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(0,86,179,0.4); z-index: 5000; cursor: pointer; }
-        .cart-badge { position: absolute; top: -2px; right: -2px; background: var(--promo); color: white; border: 2px solid white; border-radius: 50%; width: 24px; height: 24px; font-size: 0.75rem; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+        /* LOGIN */
+        #loginSection { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .login-logo { max-width: 240px; margin-bottom: 20px; }
+        .login-input { border: none; border-bottom: 2px solid #eee; width: 100%; padding: 15px; text-align: center; font-weight: bold; margin-bottom: 15px; outline: none; }
+        .login-input:focus { border-color: var(--brand); }
+        .btn-main { background: var(--brand); color: white; width: 100%; padding: 15px; border-radius: 50px; border: none; font-weight: 800; letter-spacing: 1px; }
 
-        /* --- UTILS --- */
-        .bg-stock-high { background: var(--stock-high-bg); color: var(--stock-high-text); }
-        .bg-stock-low { background: var(--stock-low-bg); color: var(--stock-low-text); }
-        .bg-stock-zero { background: var(--stock-zero-bg); color: var(--stock-zero-text); }
+        /* LIST */
+        .search-card { margin: -40px 20px 20px; background: white; padding: 10px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); position: relative; z-index: 10; }
+        .search-input { border: none; height: 50px; text-align: center; font-weight: 600; width: 100%; outline: none; font-size: 1.1rem; }
         
-        /* --- MODAL --- */
-        .modal-img-wrapper { background: #f8fafc; padding: 20px; border-radius: 15px; margin-bottom: 15px; display: flex; justify-content: center; }
+        .result-item { background: white; border-radius: 15px; margin-bottom: 10px; padding: 15px; border: 1px solid #f0f0f0; box-shadow: 0 2px 5px rgba(0,0,0,0.02); transition: transform 0.1s; }
+        .result-item:active { transform: scale(0.98); background: #f1f5f9; }
+        
+        .part-code { color: var(--brand); font-weight: 800; font-size: 1rem; }
+        .part-type { font-size: 0.65rem; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; margin-right: 5px; }
+        
+        /* STOCK BADGES */
+        .badge-stock { font-size: 0.65rem; padding: 3px 8px; border-radius: 4px; font-weight: 800; float: right; }
+        .st-ok { background: #dcfce7; color: #15803d; }
+        .st-low { background: #ffedd5; color: #c2410c; }
+        .st-out { background: #fee2e2; color: #b91c1c; }
+
+        /* CART FAB */
+        .fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--brand); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 5000; cursor: pointer; }
+        .cart-count { position: absolute; top: 0; right: 0; background: var(--promo); color: white; width: 24px; height: 24px; border-radius: 50%; font-size: 0.75rem; font-weight: bold; display: flex; align-items: center; justify-content: center; border: 2px solid white; }
+
+        /* MODAL */
+        .modal-img-box { background: #f1f5f9; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 15px; }
         .modal-img { max-height: 200px; max-width: 100%; object-fit: contain; }
-        #imageOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10000; display: none; justify-content: center; align-items: center; }
+        #fullImageView { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10000; display: none; justify-content: center; align-items: center; }
         #fullImage { max-width: 100%; max-height: 90%; }
-        
-        /* --- PRICE --- */
-        .p-orig { text-decoration: line-through; color: #94a3b8; font-size: 0.9rem; margin-right: 5px; }
-        .p-promo { color: var(--promo); font-weight: 800; font-size: 1.2rem; }
-        .p-norm { color: var(--text-dark); font-weight: 800; font-size: 1.2rem; }
+
+        /* DEBUG */
+        #debugLog { font-size: 0.7rem; color: #94a3b8; text-align: center; margin-top: 20px; }
     </style>
 </head>
 <body>
 
-    <!-- FULL IMAGE OVERLAY -->
-    <div id="imageOverlay" onclick="this.style.display='none'">
+    <!-- IMAGE VIEWER -->
+    <div id="fullImageView" onclick="this.style.display='none'">
         <img id="fullImage" src="">
-        <div style="position:absolute; bottom:40px; color:white; font-size:0.8rem; letter-spacing:2px;">TAP TO CLOSE</div>
+        <div style="position:absolute; bottom:50px; color:white; font-size:0.8rem;">TAP TO CLOSE</div>
     </div>
 
-    <!-- LOGIN SCREEN -->
+    <!-- LOGIN -->
     <div id="loginSection">
-        <img src="logo.png" alt="FROTISE" class="login-logo-img">
-        <div style="width: 80%; max-width: 320px;">
-            <input type="text" id="loginId" class="form-control form-control-minimal" placeholder="CLIENT CODE">
-            <input type="password" id="loginPass" class="form-control form-control-minimal" placeholder="PASSWORD">
-            <button onclick="app.login()" class="btn-login">ENTER SYSTEM</button>
+        <img src="logo.png" alt="FROTISE" class="login-logo">
+        <div style="width: 80%; max-width: 300px;">
+            <input type="text" id="loginId" class="login-input" placeholder="ID CODE">
+            <input type="password" id="loginPass" class="login-input" placeholder="PASSWORD">
+            <button onclick="app.login()" class="btn-main">ENTER SYSTEM</button>
             <div id="loginMsg" class="text-danger mt-3 small fw-bold text-center"></div>
+            <div id="fileStatus" class="text-muted mt-2 small text-center">Checking data...</div>
         </div>
     </div>
 
     <!-- MAIN APP -->
     <div id="mainApp" style="display:none;">
         <div class="header-bg">
-            <div class="header-top">
-                <small style="opacity:0.8">Hi, <b id="uName">User</b></small>
-                <i class="bi bi-box-arrow-right fs-4" onclick="location.reload()" style="cursor:pointer; opacity:0.8;"></i>
+            <div class="d-flex justify-content-between px-4 pt-3 align-items-center">
+                <small class="opacity-75">Hi, <b id="uName">User</b></small>
+                <i class="bi bi-box-arrow-right fs-4 cursor-pointer" onclick="location.reload()"></i>
             </div>
-            <div class="header-brand">
+            <div class="text-center mt-2">
                 <h1 class="brand-title">FROTISE</h1>
-                <div class="brand-sub">PARTS SYSTEM</div>
+                <small class="opacity-50 letter-spacing-2" style="letter-spacing: 3px;">PARTS SYSTEM</small>
             </div>
         </div>
 
         <div class="search-card">
-            <input type="text" id="searchInput" class="form-control search-input" placeholder="Search Part Number..." onkeyup="app.search()">
+            <input type="text" id="searchInput" class="search-input" placeholder="Type Code, Name or Type..." onkeyup="app.search()">
         </div>
 
-        <div class="container pb-5">
-            <div id="loadingMsg" class="text-center text-muted py-5 small">Initializing Database...</div>
+        <div class="container">
             <div id="resultsList"></div>
+            <div id="debugLog"></div>
         </div>
 
-        <div class="fab-cart" onclick="app.openCart()">
+        <div class="fab" onclick="app.openCart()">
             <i class="bi bi-cart-fill fs-4"></i>
-            <div id="cartBadge" class="cart-badge" style="display:none;">0</div>
+            <div id="cartBadge" class="cart-count" style="display:none;">0</div>
         </div>
     </div>
 
-    <!-- PRODUCT MODAL -->
+    <!-- PRODUCT DETAIL MODAL -->
     <div class="modal fade" id="pModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
                 <div class="modal-header border-0"><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-                <div class="modal-body text-center pt-0">
-                    <div class="modal-img-wrapper" onclick="app.viewImage(document.getElementById('mImg').src)">
+                <div class="modal-body pt-0">
+                    <div class="modal-img-box" onclick="app.zoomImg(document.getElementById('mImg').src)">
                         <img id="mImg" class="modal-img" src="" onerror="this.style.display='none'">
-                        <div class="position-absolute bottom-0 end-0 m-2 text-muted small"><i class="bi bi-zoom-in"></i></div>
                     </div>
-                    <h3 id="mCode" class="fw-800 text-dark mb-1"></h3>
-                    <p id="mName" class="text-muted fw-bold small text-uppercase mb-3"></p>
+                    <div class="text-center">
+                        <h2 id="mCode" class="fw-800 mb-1"></h2>
+                        <span id="mType" class="badge bg-secondary mb-2"></span>
+                        <p id="mName" class="text-muted fw-bold small"></p>
+                    </div>
                     
-                    <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded-4 mb-3">
-                        <div class="text-start">
-                            <small class="d-block text-muted" style="font-size:0.65rem; font-weight:700;">PRICE</small>
-                            <div id="mPriceBox"></div>
+                    <div class="bg-light p-3 rounded-4 mb-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <small class="text-muted fw-bold" style="font-size:0.65rem">PRICE</small>
+                            <div id="mPriceBox" class="fw-800 fs-5"></div>
                         </div>
                         <div class="text-end">
-                            <small class="d-block text-muted" style="font-size:0.65rem; font-weight:700;">STATUS</small>
+                            <small class="text-muted fw-bold" style="font-size:0.65rem">STOCK</small>
                             <div id="mStockBox"></div>
                         </div>
                     </div>
 
-                    <div id="mPromoMsg" class="alert alert-warning py-1 small fw-bold mb-3" style="display:none; color:#854d0e; background:#fef9c3;">
-                        <i class="bi bi-tag-fill me-1"></i> Buy 5+ for Promo Price
+                    <div id="mPromoAlert" class="alert alert-warning py-1 small fw-bold mb-3 text-center" style="display:none;">
+                        Buy 5+ for Promo Price!
                     </div>
 
-                    <div id="mActionBox" class="d-flex gap-2">
-                        <div class="d-flex align-items-center bg-light rounded-pill px-2">
-                            <button class="btn btn-sm" onclick="app.adjQty(-1)"><i class="bi bi-dash fw-bold"></i></button>
-                            <input type="number" id="mQty" class="form-control border-0 bg-transparent text-center fw-bold p-0" style="width:40px;" value="1" readonly>
-                            <button class="btn btn-sm" onclick="app.adjQty(1)"><i class="bi bi-plus fw-bold"></i></button>
+                    <div id="mCartActions" class="d-flex gap-2">
+                        <div class="bg-light rounded-pill d-flex align-items-center px-2">
+                            <button class="btn btn-sm" onclick="app.adjQty(-1)"><b>-</b></button>
+                            <input id="mQty" class="form-control border-0 bg-transparent text-center p-0 fw-bold" style="width:40px" value="1" readonly>
+                            <button class="btn btn-sm" onclick="app.adjQty(1)"><b>+</b></button>
                         </div>
-                        <button onclick="app.addToCart()" class="btn btn-primary flex-grow-1 rounded-pill fw-bold shadow-sm">ADD TO CART</button>
+                        <button onclick="app.addToCart()" class="btn btn-primary flex-grow-1 rounded-pill fw-bold">ADD TO CART</button>
                     </div>
-                    <div id="mOutStock" class="alert alert-danger mb-0 fw-bold small" style="display:none;">OUT OF STOCK</div>
+                    <div id="mOutMsg" class="alert alert-danger text-center fw-bold small mb-0" style="display:none;">Currently Unavailable</div>
                 </div>
             </div>
         </div>
@@ -179,15 +176,15 @@
                     <h5 class="fw-800 m-0 text-primary ps-2">Your Order</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body bg-white p-3" id="cBody"></div>
+                <div class="modal-body bg-white" id="cBody"></div>
                 <div class="modal-footer d-block border-0 pt-0 pb-4">
                     <div class="d-flex justify-content-between mb-3 align-items-end">
-                        <span class="text-muted small fw-bold">TOTAL</span>
+                        <span class="text-muted small fw-bold">TOTAL ESTIMATE</span>
                         <span id="cTotal" class="fs-2 fw-800 text-dark">0</span>
                     </div>
-                    <div id="limitAlert" class="alert alert-danger py-1 small text-center fw-bold mb-2" style="display:none;">Max Order Limit: 100,000</div>
-                    <button onclick="app.sendOrder()" class="btn btn-success w-100 rounded-pill fw-bold py-3 shadow-sm">
-                        <i class="bi bi-whatsapp me-2"></i> CONFIRM ORDER
+                    <div id="limitMsg" class="text-danger text-center small fw-bold mb-2" style="display:none;">Limit Exceeded (100,000)</div>
+                    <button onclick="app.send()" class="btn btn-success w-100 rounded-pill fw-bold py-3">
+                        <i class="bi bi-whatsapp me-2"></i> SEND VIA WHATSAPP
                     </button>
                 </div>
             </div>
@@ -198,49 +195,26 @@
     
     <script>
     const app = (function() {
-        // --- 1. CONFIGURATION ---
+        // --- CONFIG ---
         const ORDER_LIMIT = 100000;
         
-        // --- 2. CATEGORY RULES (Tagging System) ---
-        // "CategoryName": ["Keyword1", "Keyword2"]
-        const RULES = {
-            "SHOCK ABSORBER": ["SHOCK ABSORBER"],
-            "SUSPENSION": ["TIE ROD END", "SHOCK ABSORBER", "BALL JOINT", "CONTROL ROD", "CONTROL ARM", "ARM BUSH", "RACK END", "STABILIZER LINK", "ARM BUSH"],
-            "STEERING": ["POWER STEERING PUMP", "POWER STEERING RACK", "STEERING"],
-            "RADIATOR": ["RADIATOR", "CONDENSER", "FAN BLADE", "FAN CASE"],
-            "ROCKMONT": ["MAN", "DAF", "SCANIA", "ROCKMONT"],
-            "MOUNTING": ["ENGINE MOUNTING", "GEARBOX MOUNTING"],
-            "CYLINDER": ["CLUTCH MASTER", "CLUTCH SLAVE", "BRAKE MASTER", "WHEEL CYLINDER"],
-            "PLATE": ["PRESSURE PLATE", "CLUTCH PLATE"],
-            "LIGHT": ["LAMP"],
-            "FILTER": ["FILTER", "ELEMENT"],
-            "TOP MOUNTING": ["TOP MOUNTING"],
-            "SPRINTER": ["SPRINTER"],
-            "BRAKE PAD": ["BRAKE PAD", "BRAKE SHOE"],
-            "WATER PUMP": ["WATER PUMP"],
-            "SPARK": ["SPARK PLUG", "IGNITION COIL"],
-            "GASKET": ["HEAD GASKET", "FULL GASKET", "VALVE COVER GASKET"],
-            "BUSH": ["BUSH"],
-            "ELECTRIC": ["ALTERNATOR", "STARTER"],
-            "BRAKE DISC": ["BRAKE DISC"]
-        };
-
-        // --- 3. USERS ---
+        // --- USERS (ID/Pass Only - Permissions now in CSV) ---
         const USERS = [
-            { id: "GH98904", p: "0000", n: "Client GH98904", allow: ["STEERING", "SUSPENSION"] },
-            { id: "GH10328", p: "0000", n: "Yebford Radiator", allow: ["RADIATOR"] },
-            { id: "GH98791", p: "0000", n: "K.auto", allow: ["RADIATOR"] },
-            { id: "GH10147", p: "0000", n: "Qualiparts Ent", allow: ["RADIATOR"] },
-            { id: "GH10307", p: "0000", n: "Yeboah Radiator", allow: ["RADIATOR"] },
-            { id: "GH98873", p: "0000", n: "Pole to Pole", allow: ["RADIATOR"] },
-            { id: "GH10051", p: "0000", n: "David Gyamfi", allow: ["RADIATOR"] },
-            { id: "GH10811", p: "0000", n: "Client GH10811", allow: ["SUSPENSION", "TOP MOUNTING"] },
-            { id: "GH10112", p: "0000", n: "Client GH10112", allow: ["SUSPENSION"] }
+            { id: "GH98904", p: "0000", n: "Client GH98904" },
+            { id: "GH10328", p: "0000", n: "Yebford Radiator" },
+            { id: "GH98791", p: "0000", n: "K.auto" },
+            { id: "GH10147", p: "0000", n: "Qualiparts Ent" },
+            { id: "GH10307", p: "0000", n: "Yeboah Radiator" },
+            { id: "GH98873", p: "0000", n: "Pole to Pole" },
+            { id: "GH10051", p: "0000", n: "David Gyamfi" },
+            { id: "GH10811", p: "0000", n: "Client GH10811" },
+            { id: "GH10112", p: "0000", n: "Client GH10112" },
+            { id: "ADMIN",   p: "8888", n: "Admin Mode" } // See all
         ];
 
         // --- STATE ---
-        let db = [];
-        let userDb = [];
+        let rawData = [];
+        let filteredData = [];
         let cart = [];
         let curItem = null;
         let curUser = null;
@@ -251,279 +225,299 @@
             try {
                 pModal = new bootstrap.Modal(document.getElementById('pModal'));
                 cModal = new bootstrap.Modal(document.getElementById('cModal'));
-                loadCSV();
+                if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+                
+                loadCSV(); // Start loading immediately
             } catch(e) { console.error(e); }
         }
 
-        // --- CSV PARSER (The Robust Engine) ---
+        // --- CSV ENGINE ---
         function loadCSV() {
+            const status = document.getElementById('fileStatus');
+            status.innerText = "Downloading CSV...";
+            
             fetch('products.csv?v=' + Date.now())
-                .then(r => { if(!r.ok) throw new Error("CSV Missing"); return r.text(); })
-                .then(txt => {
-                    db = parse(txt);
-                    document.getElementById('loadingMsg').style.display = 'none';
+                .then(r => {
+                    if (!r.ok) throw new Error("products.csv not found");
+                    return r.text();
+                })
+                .then(text => {
+                    rawData = parseCSV(text);
+                    status.innerText = `Ready. Loaded ${rawData.length} products.`;
+                    status.className = "text-success mt-2 small text-center fw-bold";
                 })
                 .catch(err => {
-                    document.getElementById('loadingMsg').innerText = "System Error: Cannot load products.csv";
-                    console.error(err);
+                    status.innerText = "Error: " + err.message;
+                    status.className = "text-danger mt-2 small text-center fw-bold";
                 });
         }
 
-        function parse(csvText) {
-            // Normalize line breaks
-            const lines = csvText.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
-            const result = [];
+        function parseCSV(text) {
+            // Robust parsing dealing with Excel quotes
+            const lines = text.split(/\r\n|\n|\r/);
+            const data = [];
             
-            for (let i = 1; i < lines.length; i++) {
+            for (let i = 1; i < lines.length; i++) { // Skip header
                 const line = lines[i].trim();
                 if (!line) continue;
 
-                // Simple regex to handle commas inside quotes: "Shock, Front",100
+                // Regex to split by comma ONLY if not inside quotes
                 const matches = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-                if (!matches || matches.length < 2) continue; // Skip bad lines
+                
+                // We need at least 4 columns (Visible, Type, Code, Name)
+                if (!matches || matches.length < 4) continue;
 
                 const clean = (s) => s ? s.replace(/^"|"$/g, '').trim() : "";
-                
-                const name = clean(matches[1]);
-                const cats = assignCats(name);
 
-                result.push({
-                    code: clean(matches[0]),
-                    name: name,
-                    stock: parseInt(matches[2]) || 0,
-                    price: parseFloat(matches[3]) || 0,
-                    promo: matches[4] ? parseFloat(matches[4]) : 0,
-                    new: (matches[5] && clean(matches[5]) === '1') ? 1 : 0,
-                    cats: cats
+                // MAPPING COLUMNS (A=0, B=1, C=2, D=3, E=4, F=5, G=6, H=7)
+                // A: VisibleTo | B: Type | C: Code | D: Name | E: Stock | F: Price | G: Promo | H: New
+                data.push({
+                    visible: clean(matches[0]).toUpperCase(), // Column A
+                    type: clean(matches[1]).toUpperCase(),    // Column B
+                    code: clean(matches[2]),                  // Column C
+                    name: clean(matches[3]),                  // Column D
+                    stock: parseInt(clean(matches[4])) || 0,  // Column E
+                    price: parseFloat(clean(matches[5])) || 0,// Column F
+                    promo: matches[6] ? parseFloat(clean(matches[6])) : 0, // Column G
+                    new: (matches[7] && clean(matches[7]) === '1') ? 1 : 0 // Column H
                 });
             }
-            return result;
+            return data;
         }
 
-        function assignCats(name) {
-            let tags = [];
-            let n = name.toUpperCase();
-            for (let [cat, keys] of Object.entries(RULES)) {
-                if (keys.some(k => n.includes(k))) tags.push(cat);
-            }
-            return tags;
-        }
-
-        // --- LOGIC ---
+        // --- LOGIN & FILTER ---
         function login() {
-            let id = document.getElementById('loginId').value.toUpperCase().trim();
-            let pw = document.getElementById('loginPass').value.trim();
-            let u = USERS.find(x => x.id === id && x.p === pw);
+            const id = document.getElementById('loginId').value.trim().toUpperCase();
+            const pw = document.getElementById('loginPass').value.trim();
+            const user = USERS.find(u => u.id === id && u.p === pw);
 
-            if (u) {
-                curUser = u;
-                // Filter DB based on access
-                userDb = db.filter(p => p.cats.some(c => u.allow.includes(c)));
+            if (user) {
+                curUser = user;
                 
-                document.getElementById('uName').innerText = u.n;
+                // CORE LOGIC: Check Column A
+                if (user.id === 'ADMIN') {
+                    filteredData = rawData;
+                } else {
+                    filteredData = rawData.filter(item => {
+                        // Keep if VisibleTo is 'ALL' OR contains UserID
+                        return item.visible === 'ALL' || item.visible.includes(user.id);
+                    });
+                }
+
+                document.getElementById('uName').innerText = user.n;
                 document.getElementById('loginSection').style.display = 'none';
                 document.getElementById('mainApp').style.display = 'block';
+                
+                // Diagnostics
+                document.getElementById('debugLog').innerText = `Database: ${rawData.length} | Visible to you: ${filteredData.length}`;
+                
                 search();
             } else {
-                document.getElementById('loginMsg').innerText = "Invalid ID or Password";
+                document.getElementById('loginMsg').innerText = "Access Denied";
             }
         }
 
+        // --- SEARCH ---
         function search() {
-            let term = document.getElementById('searchInput').value.toUpperCase().trim();
-            let list = document.getElementById('resultsList');
-            let data = userDb;
+            const term = document.getElementById('searchInput').value.toUpperCase().trim();
+            const container = document.getElementById('resultsList');
+            let data = filteredData;
 
             if (data.length === 0) {
-                list.innerHTML = `<div class="text-center text-muted mt-5">No products authorized for this account.</div>`;
+                container.innerHTML = `<div class="text-center text-muted mt-5">No products available for your account.</div>`;
                 return;
             }
 
             if (term) {
-                if (term === 'NEW') data = data.filter(i => i.new === 1);
-                else if (term === 'STOCK') data = data.filter(i => i.stock > 0);
-                else {
-                    let tokens = term.split(/\s+/);
-                    data = data.filter(i => {
-                        let str = (i.code + " " + i.name).toUpperCase();
-                        return tokens.every(t => str.includes(t));
-                    });
-                }
+                const terms = term.split(/\s+/);
+                data = data.filter(item => {
+                    const str = `${item.code} ${item.name} ${item.type}`.toUpperCase();
+                    return terms.every(t => str.includes(t));
+                });
             }
 
             if (data.length === 0) {
-                list.innerHTML = `<div class="text-center text-muted mt-5">No matches found.</div>`;
+                container.innerHTML = `<div class="text-center text-muted mt-5">No matches found.</div>`;
                 return;
             }
 
-            // Render first 50
+            // Render Max 50
             let html = "";
-            data.slice(0, 50).forEach((item, idx) => {
-                // IMPORTANT: We need a unique ID. Using code is safer than index.
-                let stockHtml = item.stock <= 0 ? `<span class="stock-tag bg-stock-zero">OUT</span>` : 
-                               (item.stock <= 10 ? `<span class="stock-tag bg-stock-low">LOW</span>` : `<span class="stock-tag bg-stock-high">IN STOCK</span>`);
-                
-                let priceHtml = `<span class="p-norm">${item.price}</span>`;
+            data.slice(0, 50).forEach(item => {
+                let badge = "";
+                if(item.stock <= 0) badge = `<span class="badge-stock st-out">OUT</span>`;
+                else if(item.stock <= 10) badge = `<span class="badge-stock st-low">LOW</span>`;
+                else badge = `<span class="badge-stock st-ok">IN STOCK</span>`;
+
+                let priceDisplay = `<span class="fw-bold">${item.price}</span>`;
                 if(item.promo > 0 && item.promo < item.price) {
-                    priceHtml = `<div><span class="p-orig">${item.price}</span><span class="p-promo text-danger">${item.promo}</span></div>`;
+                    priceDisplay = `<span class="p-orig small">${item.price}</span><span class="text-danger fw-bold">${item.promo}</span>`;
                 }
 
+                // Use Code as unique ID for onclick (Safe because we filter duplicates usually)
+                // Note: passing item.code directly requires quotes
                 html += `
                 <div class="result-item" onclick="app.openDetail('${item.code}')">
                     <div class="d-flex justify-content-between mb-1">
-                        <div class="part-code">${item.code} ${item.new?'<span class="badge bg-primary ms-1" style="font-size:0.5rem">NEW</span>':''}</div>
-                        ${stockHtml}
+                        <div class="part-code">
+                            ${item.code} 
+                            ${item.new ? '<span class="badge bg-primary ms-1" style="font-size:0.5rem">NEW</span>' : ''}
+                        </div>
+                        ${badge}
                     </div>
+                    <div class="mb-1"><span class="part-type">${item.type}</span></div>
                     <div class="part-name">${item.name}</div>
-                    <div class="text-end mt-1">${priceHtml}</div>
+                    <div class="text-end mt-2">${priceDisplay}</div>
                 </div>`;
             });
-            list.innerHTML = html;
+            container.innerHTML = html;
         }
 
+        // --- DETAIL ---
         function openDetail(code) {
-            curItem = userDb.find(i => i.code === code);
+            curItem = filteredData.find(i => i.code === code);
             if (!curItem) return;
 
             document.getElementById('mCode').innerText = curItem.code;
             document.getElementById('mName').innerText = curItem.name;
-            let img = document.getElementById('mImg');
+            document.getElementById('mType').innerText = curItem.type;
+            
+            const img = document.getElementById('mImg');
             img.src = `images/${curItem.code}.jpg`;
             img.style.display = 'block';
+
+            // Price Logic
+            const pBox = document.getElementById('mPriceBox');
+            const hasPromo = curItem.promo > 0 && curItem.promo < curItem.price;
             
-            // Logic
-            let hasPromo = (curItem.promo > 0 && curItem.promo < curItem.price);
-            let pBox = document.getElementById('mPriceBox');
             if (hasPromo) {
-                pBox.innerHTML = `<span class="p-orig">${curItem.price}</span><span class="p-promo">${curItem.promo}</span>`;
-                document.getElementById('mPromoMsg').style.display = 'block';
+                pBox.innerHTML = `<span class="p-orig text-muted fs-6">${curItem.price}</span> <span class="text-danger">${curItem.promo}</span>`;
+                document.getElementById('mPromoAlert').style.display = 'block';
             } else {
-                pBox.innerHTML = `<span class="p-norm">${curItem.price}</span>`;
-                document.getElementById('mPromoMsg').style.display = 'none';
+                pBox.innerHTML = curItem.price;
+                document.getElementById('mPromoAlert').style.display = 'none';
             }
 
-            let sBox = document.getElementById('mStockBox');
-            let actBox = document.getElementById('mActionBox');
-            let outBox = document.getElementById('mOutStock');
+            // Stock Logic
+            const sBox = document.getElementById('mStockBox');
+            const actions = document.getElementById('mCartActions');
+            const outMsg = document.getElementById('mOutMsg');
 
             if (curItem.stock > 0) {
-                sBox.innerHTML = curItem.stock <= 10 ? `<span class="stock-tag bg-stock-low">LOW STOCK</span>` : `<span class="stock-tag bg-stock-high">IN STOCK</span>`;
-                actBox.style.display = 'flex';
-                outBox.style.display = 'none';
+                sBox.innerHTML = curItem.stock <= 10 ? `<span class="text-warning fw-bold">LOW STOCK</span>` : `<span class="text-success fw-bold">IN STOCK</span>`;
+                actions.style.display = 'flex';
+                outMsg.style.display = 'none';
             } else {
-                sBox.innerHTML = `<span class="stock-tag bg-stock-zero">OUT OF STOCK</span>`;
-                actBox.style.display = 'none';
-                outBox.style.display = 'block';
+                sBox.innerHTML = `<span class="text-danger fw-bold">OUT OF STOCK</span>`;
+                actions.style.display = 'none';
+                outMsg.style.display = 'block';
             }
-            
+
             document.getElementById('mQty').value = 1;
             pModal.show();
         }
 
+        // --- CART ---
         function adjQty(d) {
-            let q = parseInt(document.getElementById('mQty').value) + d;
-            if (q < 1) q = 1;
-            if (curItem && q > curItem.stock) { alert("Max stock reached"); q = curItem.stock; }
-            document.getElementById('mQty').value = q;
+            let v = parseInt(document.getElementById('mQty').value) + d;
+            if (v < 1) v = 1;
+            if (curItem && v > curItem.stock) { alert("Max stock reached"); v = curItem.stock; }
+            document.getElementById('mQty').value = v;
         }
 
         function addToCart() {
             if (!curItem) return;
-            let qty = parseInt(document.getElementById('mQty').value);
-            let exist = cart.find(x => x.code === curItem.code);
+            const qty = parseInt(document.getElementById('mQty').value);
+            const exists = cart.find(x => x.code === curItem.code);
             
-            if (exist) {
-                if (exist.qty + qty > curItem.stock) return alert("Total quantity exceeds stock");
-                exist.qty += qty;
+            if (exists) {
+                if (exists.qty + qty > curItem.stock) return alert("Total quantity exceeds stock");
+                exists.qty += qty;
             } else {
-                cart.push({ ...curItem, qty: qty });
+                cart.push({...curItem, qty: qty});
             }
             pModal.hide();
-            updateCartUI();
+            updBadge();
         }
 
-        function updateCartUI() {
-            let totalQty = cart.reduce((a, b) => a + b.qty, 0);
-            let badge = document.getElementById('cartBadge');
-            badge.innerText = totalQty;
-            badge.style.display = totalQty > 0 ? 'flex' : 'none';
+        function updBadge() {
+            const t = cart.reduce((a, b) => a + b.qty, 0);
+            const b = document.getElementById('cartBadge');
+            b.innerText = t;
+            b.style.display = t > 0 ? 'flex' : 'none';
         }
 
         function openCart() {
-            let body = document.getElementById('cBody');
-            let totalVal = 0;
-            
+            const body = document.getElementById('cBody');
+            let total = 0;
+            let html = "";
+
             if (cart.length === 0) {
                 body.innerHTML = `<div class="text-center py-5 text-muted">Cart is empty</div>`;
             } else {
-                let html = "";
                 cart.forEach((item, idx) => {
                     let p = item.price;
-                    let isP = false;
-                    if (item.promo > 0 && item.qty >= 5) { p = item.promo; isP = true; }
+                    let isPromoApplied = false;
                     
-                    totalVal += p * item.qty;
-                    
+                    if (item.promo > 0 && item.qty >= 5) {
+                        p = item.promo;
+                        isPromoApplied = true;
+                    }
+                    total += p * item.qty;
+
                     html += `
-                    <div class="d-flex justify-content-between align-items-center border-bottom py-2">
-                        <div style="width:60%">
-                            <div class="fw-bold small text-dark">${item.code}</div>
-                            <div class="text-muted" style="font-size:0.7rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.name}</div>
-                            <div class="fw-bold ${isP?'text-danger':''}">${p} x ${item.qty}</div>
-                            ${item.promo>0 && !isP ? `<small class="text-warning" style="font-size:0.6rem">Add ${5-item.qty} for Promo</small>` : ''}
+                    <div class="d-flex justify-content-between align-items-center border-bottom py-3">
+                        <div style="width:65%">
+                            <div class="fw-bold text-dark small">${item.code}</div>
+                            <div class="text-muted small text-truncate">${item.name}</div>
+                            <div class="fw-bold mt-1 ${isPromoApplied?'text-danger':''}">${p} x ${item.qty}</div>
+                            ${item.promo>0 && !isPromoApplied ? `<small class="text-warning fw-bold" style="font-size:0.6rem">Add ${5-item.qty} more for Promo</small>` : ''}
                         </div>
-                        <button onclick="app.delCart(${idx})" class="btn btn-sm text-danger fw-bold">REMOVE</button>
+                        <button onclick="app.delItem(${idx})" class="btn btn-sm btn-outline-danger border-0 fw-bold">REMOVE</button>
                     </div>`;
                 });
                 body.innerHTML = html;
             }
-            
-            document.getElementById('cTotal').innerText = totalVal;
-            document.getElementById('limitAlert').style.display = totalVal > ORDER_LIMIT ? 'block' : 'none';
+            document.getElementById('cTotal').innerText = total;
+            document.getElementById('limitMsg').style.display = total > ORDER_LIMIT ? 'block' : 'none';
             cModal.show();
         }
 
-        function delCart(i) {
+        function delItem(i) {
             cart.splice(i, 1);
-            updateCartUI();
-            openCart(); // refresh
+            updBadge();
+            openCart();
         }
 
-        function sendOrder() {
+        function send() {
             if (cart.length === 0) return;
             let t = 0;
-            let lines = [];
+            let items = [];
             cart.forEach(i => {
                 let p = (i.promo > 0 && i.qty >= 5) ? i.promo : i.price;
                 t += p * i.qty;
-                lines.push(`▪ ${i.code} (x${i.qty}) @ ${p}`);
+                items.push(`▪ ${i.code} (x${i.qty}) @ ${p}`);
             });
-            
-            if(t > ORDER_LIMIT) return alert("Order limit exceeded!");
 
-            let msg = `🛒 *ORDER - ${curUser.n}*\n\n` + lines.join('\n') + `\n\n*TOTAL: ${t}*`;
-            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+            if(t > ORDER_LIMIT) return alert("Order value exceeds limit!");
+
+            const msg = `🛒 *ORDER: ${curUser.n}*\n\n` + items.join('\n') + `\n\n*TOTAL: ${t}*`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
             
-            // clear
             cart = [];
-            updateCartUI();
+            updBadge();
             cModal.hide();
-            // Local stock deduction simulation could happen here, but since CSV reloads on refresh, it's temporary.
         }
 
         function viewImage(src) {
+            if(!src || src.includes('placeholder')) return;
             document.getElementById('fullImage').src = src;
-            document.getElementById('imageOverlay').style.display = 'flex';
+            document.getElementById('fullImageView').style.display = 'flex';
         }
 
-        // Public API
-        return {
-            init, login, search, openDetail, adjQty, addToCart, openCart, delCart, sendOrder, viewImage
-        };
-
+        return { init, login, search, openDetail, viewImage, adjQty, addToCart, openCart, delItem, send };
     })();
 
-    // Boot
     document.addEventListener('DOMContentLoaded', app.init);
     document.getElementById('loginPass').addEventListener('keypress', (e)=>{ if(e.key==='Enter') app.login(); });
     </script>
