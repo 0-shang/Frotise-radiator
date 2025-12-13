@@ -147,46 +147,41 @@
             }
         }
 
-      function parseClients(csvText) {
+function parseProducts(csvText) {
             const lines = csvText.split('\n');
-            window.validClients = [];
+            window.allProducts = [];
             
-            // 简单检测
+            // 检测分隔符
             if (lines.length > 1 && lines[1].includes(';') && !lines[1].includes(',')) {
-                alert("严重错误: CSV 使用了分号(;)，请确保保存为逗号分隔格式。");
+                alert("严重错误: products.csv 似乎使用了分号(;)分隔。请保存为逗号分隔格式。");
             }
 
             for(let i=1; i<lines.length; i++) {
                 const line = lines[i].trim();
                 if(!line) continue;
                 
-                // 1. 找到第一个逗号的位置（区分客户代码和关键词）
-                const firstCommaIndex = line.indexOf(',');
+                // 注意：如果产品名称里本身就有逗号（例如 "RACK, STEERING"），
+                // 简单的 split(',') 会导致数据错位。
+                // 这里我们假设产品名里没有逗号。如果经常出错，建议在Excel里把产品名里的逗号删掉。
+                const cols = line.split(','); 
                 
-                if(firstCommaIndex > -1) {
-                    const clientCode = line.substring(0, firstCommaIndex).trim().toUpperCase();
-                    
-                    // 2. 截取逗号后面所有的内容
-                    let rawKeywords = line.substring(firstCommaIndex + 1);
-                    
-                    // === 核心修改：简单粗暴的清洗逻辑 ===
-                    // A. 把所有的 双引号 (") 和 单引号 (') 全部删掉
-                    rawKeywords = rawKeywords.replace(/['"]/g, '');
-                    
-                    // B. 此时变成了纯净的 STEERING, SHOCK, ARM
-                    // C. 按照逗号分割
-                    const keywords = rawKeywords.split(',').map(k => {
-                        return k.trim().toUpperCase(); // 去掉首尾空格并转大写
-                    }).filter(k => k !== ""); // 去掉空项
+                if(cols.length >= 4) {
+                    // === 修改开始：清洗数据，去掉引号 ===
+                    let pCode = cols[0].trim().replace(/['"]/g, ''); // 去掉Code里的引号
+                    let pName = cols[1].trim().replace(/['"]/g, ''); // 去掉Name里的引号
                     // ===================================
-                    
-                    if(clientCode) {
-                        window.validClients.push({ id: clientCode, keywords: keywords });
-                    }
+
+                    window.allProducts.push({
+                        code: pCode,
+                        name: pName,
+                        stock: parseInt(cols[2].trim()) || 0,
+                        price: parseFloat(cols[3].trim()) || 0,
+                        promo: cols[4] ? parseFloat(cols[4].trim()) : 0,
+                        isNew: cols[5] ? (cols[5].trim().toUpperCase() === 'YES') : false
+                    });
                 }
             }
         }
-
         // --- LOGIN LOGIC (增加了调试弹窗) ---
         window.attemptLogin = function() {
             const idInput = document.getElementById('loginId').value.trim().toUpperCase();
@@ -206,15 +201,25 @@
                     window.loggedInUser = user; 
                     filterDatabaseForUser(user);
                     
-                    // === 调试代码：如果没有找到产品，告诉用户为什么 ===
+                   // === 调试代码：如果没有找到产品，告诉用户为什么 ===
                     if (window.userAllowedProducts.length === 0) {
                         let debugMsg = `Login Success, BUT 0 products found.\n`;
                         debugMsg += `----------------------------\n`;
-                        // 这里使用 JSON.stringify，能看清数组结构
-                        debugMsg += `Recognized Keywords: \n${JSON.stringify(user.keywords)}\n`; 
+                        debugMsg += `YOUR KEYWORDS: ${user.keywords.join(", ")}\n`;
                         debugMsg += `----------------------------\n`;
-                        debugMsg += `Total Products in DB: ${window.allProducts.length}\n`;
-                        debugMsg += `Test Check: Does product names match these keywords?`;
+                        
+                        // 核心：显示系统读取到的前3个产品，看看是否正常
+                        debugMsg += `SYSTEM SEES THESE PRODUCTS (Check Name):\n`;
+                        if (window.allProducts.length > 0) {
+                            window.allProducts.slice(0, 3).forEach((p, idx) => {
+                                debugMsg += `${idx+1}. Code:[${p.code}] Name:[${p.name}]\n`;
+                            });
+                        } else {
+                            debugMsg += "No products loaded from CSV!\n";
+                        }
+                        
+                        debugMsg += `----------------------------\n`;
+                        debugMsg += `LOGIC: Does Name or Code contain Keyword?\n`;
                         alert(debugMsg);
                     }
                     // ===========================================
