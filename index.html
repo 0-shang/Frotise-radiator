@@ -195,10 +195,11 @@
     
     <script>
     const app = (function() {
-        // --- CONFIG ---
+        // --- 配置 ---
         const ORDER_LIMIT = 100000;
         
-        // --- USERS (ID/Pass Only - Permissions now in CSV) ---
+        // --- 用户列表 (ID/密码) ---
+        // 这里只是登录验证，具体的"能不能看"取决于 CSV 表格里的 CLIENT 列
         const USERS = [
             { id: "GH98904", p: "0000", n: "Client GH98904" },
             { id: "GH10328", p: "0000", n: "Yebford Radiator" },
@@ -209,10 +210,10 @@
             { id: "GH10051", p: "0000", n: "David Gyamfi" },
             { id: "GH10811", p: "0000", n: "Client GH10811" },
             { id: "GH10112", p: "0000", n: "Client GH10112" },
-            { id: "ADMIN",   p: "8888", n: "Admin Mode" } // See all
+            { id: "ADMIN",   p: "8888", n: "Admin Mode" } // 管理员可以看到所有
         ];
 
-        // --- STATE ---
+        // --- 状态变量 ---
         let rawData = [];
         let filteredData = [];
         let cart = [];
@@ -220,22 +221,23 @@
         let curUser = null;
         let pModal, cModal;
 
-        // --- INIT ---
+        // --- 初始化 ---
         function init() {
             try {
                 pModal = new bootstrap.Modal(document.getElementById('pModal'));
                 cModal = new bootstrap.Modal(document.getElementById('cModal'));
                 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
                 
-                loadCSV(); // Start loading immediately
+                loadCSV(); // 立即加载 CSV
             } catch(e) { console.error(e); }
         }
 
-        // --- CSV ENGINE ---
+        // --- CSV 处理引擎 ---
         function loadCSV() {
             const status = document.getElementById('fileStatus');
             status.innerText = "Downloading CSV...";
             
+            // 加载 products.csv
             fetch('products.csv?v=' + Date.now())
                 .then(r => {
                     if (!r.ok) throw new Error("products.csv not found");
@@ -253,39 +255,46 @@
         }
 
         function parseCSV(text) {
-            // Robust parsing dealing with Excel quotes
             const lines = text.split(/\r\n|\n|\r/);
             const data = [];
             
-            for (let i = 1; i < lines.length; i++) { // Skip header
+            for (let i = 1; i < lines.length; i++) { // 跳过第一行表头
                 const line = lines[i].trim();
                 if (!line) continue;
 
-                // Regex to split by comma ONLY if not inside quotes
+                // 正则处理 CSV 引号
                 const matches = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
                 
-                // We need at least 4 columns (Visible, Type, Code, Name)
+                // 确保至少有足够的列
                 if (!matches || matches.length < 4) continue;
 
                 const clean = (s) => s ? s.replace(/^"|"$/g, '').trim() : "";
 
-                // MAPPING COLUMNS (A=0, B=1, C=2, D=3, E=4, F=5, G=6, H=7)
-                // A: VisibleTo | B: Type | C: Code | D: Name | E: Stock | F: Price | G: Promo | H: New
+                // --- 关键修改：列的对应关系 ---
+                // 0: CLIENT (可见性)
+                // 1: TYPE (类型)
+                // 2: Code (编码)
+                // 3: Name (名称)
+                // 4: Stock (库存)
+                // 5: Price (价格)
+                // 6: Promoprice (促销价)
+                // 7: New (新品标识)
+                
                 data.push({
-                    visible: clean(matches[0]).toUpperCase(), // Column A
-                    type: clean(matches[1]).toUpperCase(),    // Column B
-                    code: clean(matches[2]),                  // Column C
-                    name: clean(matches[3]),                  // Column D
-                    stock: parseInt(clean(matches[4])) || 0,  // Column E
-                    price: parseFloat(clean(matches[5])) || 0,// Column F
-                    promo: matches[6] ? parseFloat(clean(matches[6])) : 0, // Column G
-                    new: (matches[7] && clean(matches[7]) === '1') ? 1 : 0 // Column H
+                    clientStr: clean(matches[0]).toUpperCase(), // Column 0: CLIENT
+                    type:      clean(matches[1]).toUpperCase(), // Column 1: TYPE
+                    code:      clean(matches[2]),               // Column 2: Code
+                    name:      clean(matches[3]),               // Column 3: Name
+                    stock:     parseInt(clean(matches[4])) || 0,// Column 4: Stock
+                    price:     parseFloat(clean(matches[5])) || 0,// Column 5: Price
+                    promo:     matches[6] ? parseFloat(clean(matches[6])) : 0, // Column 6: Promoprice
+                    new:       (matches[7] && clean(matches[7]) === '1') ? 1 : 0 // Column 7: New
                 });
             }
             return data;
         }
 
-        // --- LOGIN & FILTER ---
+        // --- 登录 & 核心过滤逻辑 ---
         function login() {
             const id = document.getElementById('loginId').value.trim().toUpperCase();
             const pw = document.getElementById('loginPass').value.trim();
@@ -294,13 +303,23 @@
             if (user) {
                 curUser = user;
                 
-                // CORE LOGIC: Check Column A
+                // --- 这里的逻辑实现了你的要求 ---
                 if (user.id === 'ADMIN') {
+                    // 如果是管理员，看所有数据（包括空白的）
                     filteredData = rawData;
                 } else {
                     filteredData = rawData.filter(item => {
-                        // Keep if VisibleTo is 'ALL' OR contains UserID
-                        return item.visible === 'ALL' || item.visible.includes(user.id);
+                        // 1. 获取该产品的 CLIENT 列内容
+                        const allowedClients = item.clientStr;
+                        
+                        // 2. 如果 CLIENT 列是空的，所有人都不可见（返回 false）
+                        if (!allowedClients || allowedClients === "") {
+                            return false;
+                        }
+
+                        // 3. 检查当前用户 ID 是否在 CLIENT 字符串中
+                        // 使用 includes 支持一个单元格里写多个客户 ID (例如: "GH98904,GH10328")
+                        return allowedClients.includes(user.id);
                     });
                 }
 
@@ -308,8 +327,8 @@
                 document.getElementById('loginSection').style.display = 'none';
                 document.getElementById('mainApp').style.display = 'block';
                 
-                // Diagnostics
-                document.getElementById('debugLog').innerText = `Database: ${rawData.length} | Visible to you: ${filteredData.length}`;
+                // 调试信息
+                document.getElementById('debugLog').innerText = `Database: ${rawData.length} | Visible to ${user.id}: ${filteredData.length}`;
                 
                 search();
             } else {
@@ -317,14 +336,14 @@
             }
         }
 
-        // --- SEARCH ---
+        // --- 搜索功能 ---
         function search() {
             const term = document.getElementById('searchInput').value.toUpperCase().trim();
             const container = document.getElementById('resultsList');
             let data = filteredData;
 
             if (data.length === 0) {
-                container.innerHTML = `<div class="text-center text-muted mt-5">No products available for your account.</div>`;
+                container.innerHTML = `<div class="text-center text-muted mt-5">No products assigned to your account.</div>`;
                 return;
             }
 
@@ -341,7 +360,7 @@
                 return;
             }
 
-            // Render Max 50
+            // 限制渲染前 50 条以保持流畅
             let html = "";
             data.slice(0, 50).forEach(item => {
                 let badge = "";
@@ -354,8 +373,6 @@
                     priceDisplay = `<span class="p-orig small">${item.price}</span><span class="text-danger fw-bold">${item.promo}</span>`;
                 }
 
-                // Use Code as unique ID for onclick (Safe because we filter duplicates usually)
-                // Note: passing item.code directly requires quotes
                 html += `
                 <div class="result-item" onclick="app.openDetail('${item.code}')">
                     <div class="d-flex justify-content-between mb-1">
@@ -373,7 +390,7 @@
             container.innerHTML = html;
         }
 
-        // --- DETAIL ---
+        // --- 详情页 ---
         function openDetail(code) {
             curItem = filteredData.find(i => i.code === code);
             if (!curItem) return;
@@ -383,10 +400,11 @@
             document.getElementById('mType').innerText = curItem.type;
             
             const img = document.getElementById('mImg');
+            // 图片路径逻辑：确保你的图片是 jpg 并且放在 images 文件夹下
             img.src = `images/${curItem.code}.jpg`;
             img.style.display = 'block';
 
-            // Price Logic
+            // 价格逻辑
             const pBox = document.getElementById('mPriceBox');
             const hasPromo = curItem.promo > 0 && curItem.promo < curItem.price;
             
@@ -398,7 +416,7 @@
                 document.getElementById('mPromoAlert').style.display = 'none';
             }
 
-            // Stock Logic
+            // 库存逻辑
             const sBox = document.getElementById('mStockBox');
             const actions = document.getElementById('mCartActions');
             const outMsg = document.getElementById('mOutMsg');
@@ -417,7 +435,7 @@
             pModal.show();
         }
 
-        // --- CART ---
+        // --- 购物车逻辑 ---
         function adjQty(d) {
             let v = parseInt(document.getElementById('mQty').value) + d;
             if (v < 1) v = 1;
@@ -508,14 +526,17 @@
             updBadge();
             cModal.hide();
         }
-
-        function viewImage(src) {
-            if(!src || src.includes('placeholder')) return;
-            document.getElementById('fullImage').src = src;
-            document.getElementById('fullImageView').style.display = 'flex';
+        
+        // 图片放大
+        function zoomImg(src) {
+             // 简单的图片查看器逻辑
+             const viewer = document.getElementById('fullImageView');
+             const fullImg = document.getElementById('fullImage');
+             fullImg.src = src;
+             viewer.style.display = 'flex';
         }
 
-        return { init, login, search, openDetail, viewImage, adjQty, addToCart, openCart, delItem, send };
+        return { init, login, search, openDetail, zoomImg, adjQty, addToCart, openCart, delItem, send };
     })();
 
     document.addEventListener('DOMContentLoaded', app.init);
