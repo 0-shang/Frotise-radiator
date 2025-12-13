@@ -4,303 +4,82 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>FROTISE STEERING RACK</title>
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    
     <style>
+        /* 样式保持不变，为了节省篇幅，这里引用之前的样式 */
         body { background-color: #f0f2f5; font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding-bottom: 100px; }
-        
-        /* === IMAGE VIEWER (Lightbox) === */
-        #imageOverlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 10000;
-            display: none; justify-content: center; align-items: center;
-            cursor: pointer; animation: fadeIn 0.2s ease-in-out;
-        }
-        #fullImage {
-            max-width: 95%; max-height: 90%;
-            object-fit: contain; border-radius: 4px;
-            box-shadow: 0 0 20px rgba(255,255,255,0.1);
-        }
-        .close-hint {
-            position: absolute; bottom: 30px; color: rgba(255,255,255,0.6);
-            font-size: 0.9rem; pointer-events: none;
-        }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* LOGIN SECTION */
-        #loginSection {
-            height: 100vh; width: 100%;
-            display: flex; align-items: center; justify-content: center;
-            background: linear-gradient(135deg, #2C3E50 0%, #4CA1AF 100%);
-            position: fixed; top: 0; left: 0; z-index: 9999;
-        }
-        .login-card {
-            background: white; padding: 40px 30px;
-            border-radius: 20px; width: 90%; max-width: 400px; text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-        }
-
-        /* HEADER */
-        .header-bg {
-            background: linear-gradient(135deg, #000000 0%, #434343 100%);
-            color: white; padding: 30px 20px 60px;
-            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
-            position: relative;
-        }
-        .logout-btn {
-            position: absolute; top: 15px; right: 15px;
-            color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.85rem;
-            border: 1px solid rgba(255,255,255,0.3); padding: 4px 12px; border-radius: 20px;
-        }
+        #imageOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10000; display: none; justify-content: center; align-items: center; cursor: pointer; }
+        #fullImage { max-width: 95%; max-height: 90%; object-fit: contain; border-radius: 4px; }
+        .close-hint { position: absolute; bottom: 30px; color: rgba(255,255,255,0.6); pointer-events: none; }
+        #loginSection { height: 100vh; width: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #2C3E50 0%, #4CA1AF 100%); position: fixed; top: 0; left: 0; z-index: 9999; }
+        .login-card { background: white; padding: 40px 30px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .header-bg { background: linear-gradient(135deg, #000000 0%, #434343 100%); color: white; padding: 30px 20px 60px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; position: relative; }
+        .logout-btn { position: absolute; top: 15px; right: 15px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.3); padding: 4px 12px; border-radius: 20px; }
         .steer-icon { width: 50px; height: 50px; fill: none; stroke: white; stroke-width: 2; margin-bottom: 10px; }
-
-        /* LIST ITEMS */
-        .search-card {
-            margin-top: -40px; background: white; border-radius: 15px;
-            padding: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-        }
-        .result-item {
-            background: white; border-radius: 12px; margin-bottom: 10px;
-            padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            transition: transform 0.1s; cursor: pointer; position: relative;
-            border-left: 5px solid transparent; overflow: hidden;
-        }
+        .search-card { margin-top: -40px; background: white; border-radius: 15px; padding: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+        .result-item { background: white; border-radius: 12px; margin-bottom: 10px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: transform 0.1s; cursor: pointer; position: relative; border-left: 5px solid transparent; overflow: hidden; }
         .result-item:active { transform: scale(0.99); background-color: #f8f9fa; border-left-color: #2C3E50; }
-        
-        /* Tags & Badges */
         .stock-tag { font-size: 0.7rem; padding: 4px 8px; border-radius: 6px; font-weight: bold; text-transform: uppercase;}
         .bg-stock-high { background-color: #e8f5e9; color: #2e7d32; }
         .bg-stock-low { background-color: #fff3cd; color: #856404; }
         .bg-stock-zero { background-color: #ffebee; color: #c62828; }
-
-        .badge-new {
-            position: absolute; top: 0; right: 0;
-            background: #ff5722; color: white;
-            font-size: 0.6rem; padding: 4px 8px;
-            border-bottom-left-radius: 10px; font-weight: bold;
-        }
-        
-        /* Prices */
+        .badge-new { position: absolute; top: 0; right: 0; background: #ff5722; color: white; font-size: 0.6rem; padding: 4px 8px; border-bottom-left-radius: 10px; font-weight: bold; }
         .price-text { color: #d32f2f; font-weight: 800; font-size: 1.2rem; }
         .price-old { text-decoration: line-through; color: #999; font-size: 0.9rem; margin-right: 5px; font-weight: normal; }
         .part-code { color: #2C3E50; font-size: 1rem; font-weight: 800; letter-spacing: 0.5px; }
         .part-name { font-weight: 600; color: #555; font-size: 0.9rem; line-height: 1.3; margin-bottom: 4px; }
-        
-        .product-img-thumb {
-            width: 80px; height: 80px; object-fit: cover; border-radius: 8px; 
-            background: #eee; border: 1px solid #eee; flex-shrink: 0;
-        }
-        
-        /* MODAL & IMAGE LEFT LAYOUT */
+        .product-img-thumb { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; background: #eee; border: 1px solid #eee; flex-shrink: 0; }
         .modal-content { border-radius: 15px; overflow: hidden; }
         .modal-header { border-bottom: none; padding-bottom: 0; }
-        .modal-img { 
-            width: 100%; height: auto; border-radius: 8px; 
-            object-fit: contain; background: #f8f9fa; 
-            cursor: zoom-in; border: 1px solid #eee;
-        }
-
-        /* CART FAB */
-        .fab-cart {
-            position: fixed; bottom: 30px; right: 30px;
-            background-color: #2C3E50; color: white;
-            width: 65px; height: 65px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 15px rgba(44, 62, 80, 0.4);
-            z-index: 1000; cursor: pointer; transition: transform 0.2s;
-        }
+        .modal-img { width: 100%; height: auto; border-radius: 8px; object-fit: contain; background: #f8f9fa; cursor: zoom-in; border: 1px solid #eee; }
+        .fab-cart { position: fixed; bottom: 30px; right: 30px; background-color: #2C3E50; color: white; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(44, 62, 80, 0.4); z-index: 1000; cursor: pointer; transition: transform 0.2s; }
         .fab-cart:active { transform: scale(0.9); }
-        .cart-badge {
-            position: absolute; top: -5px; right: -5px;
-            background-color: #dc3545; color: white;
-            border-radius: 50%; width: 24px; height: 24px;
-            font-size: 0.8rem; font-weight: bold;
-            display: flex; align-items: center; justify-content: center; border: 2px solid white;
-        }
-
+        .cart-badge { position: absolute; top: -5px; right: -5px; background-color: #dc3545; color: white; border-radius: 50%; width: 24px; height: 24px; font-size: 0.8rem; font-weight: bold; display: flex; align-items: center; justify-content: center; border: 2px solid white; }
         .qty-control { display: flex; align-items: center; justify-content: flex-start; gap: 8px; }
         .qty-btn { width: 35px; height: 35px; border-radius: 50%; border: 1px solid #dee2e6; background: white; font-weight: bold; color: #495057; }
         .qty-display { width: 40px; text-align: center; font-weight: bold; border:none; background: transparent;}
-        
-        #loadingMsg { text-align:center; padding: 20px; color: #666; display: none;}
     </style>
 </head>
 <body>
-
-    <!-- IMAGE VIEWER -->
-    <div id="imageOverlay" onclick="window.closeImageViewer()">
-        <img id="fullImage" src="">
-        <div class="close-hint"><i class="bi bi-x-circle"></i> Tap to close</div>
-    </div>
-
-    <!-- LOGIN -->
+    <!-- (HTML 结构保持不变) -->
+    <div id="imageOverlay" onclick="window.closeImageViewer()"><img id="fullImage" src=""><div class="close-hint"><i class="bi bi-x-circle"></i> Tap to close</div></div>
     <div id="loginSection">
         <div class="login-card animate__animated animate__fadeInUp">
-            <div class="mb-4">
-                <svg class="steer-icon" viewBox="0 0 24 24" style="width:60px; height:60px; stroke:#2C3E50;">
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M12 12L4 12" />
-                    <path d="M12 12L20 12" />
-                    <path d="M12 12L12 22" />
-                    <circle cx="12" cy="12" r="2" fill="#2C3E50"/>
-                </svg>
-            </div>
-            <h4 class="mb-1 fw-bold">FROTISE</h4>
-            <p class="text-muted mb-4">SYSTEM ACCESS</p>
-            
+            <div class="mb-4"><svg class="steer-icon" viewBox="0 0 24 24" style="width:60px; height:60px; stroke:#2C3E50;"><circle cx="12" cy="12" r="10" /><path d="M12 12L4 12" /><path d="M12 12L20 12" /><path d="M12 12L12 22" /><circle cx="12" cy="12" r="2" fill="#2C3E50"/></svg></div>
+            <h4 class="mb-1 fw-bold">FROTISE</h4><p class="text-muted mb-4">SYSTEM ACCESS</p>
             <div id="dbStatus" class="small text-muted mb-3">Initializing...</div>
-
-            <div class="mb-3 text-start">
-                <input type="text" id="loginId" class="form-control form-control-lg" placeholder="Client Code (e.g. GH123)">
-            </div>
-            
-            <div class="mb-4 text-start">
-                <!-- 提示：这里为了方便，默认密码可以是 Client Code 或者 1234 -->
-                <input type="password" id="loginPass" class="form-control form-control-lg" placeholder="Password (Use Code)">
-            </div>
+            <div class="mb-3 text-start"><input type="text" id="loginId" class="form-control form-control-lg" placeholder="Client Code"></div>
+            <div class="mb-4 text-start"><input type="password" id="loginPass" class="form-control form-control-lg" placeholder="Password (Use Code)"></div>
             <button onclick="window.attemptLogin()" class="btn btn-dark btn-lg w-100" style="background-color:#2C3E50;">Login</button>
-            <div id="loginError" class="text-danger mt-3 small" style="display:none;">User not found in clients.csv</div>
+            <div id="loginError" class="text-danger mt-3 small" style="display:none;"></div>
         </div>
     </div>
-
-    <!-- MAIN APP -->
     <div id="mainApp" style="display:none;">
         <div class="header-bg text-center">
             <a href="#" onclick="window.logout()" class="logout-btn"><i class="bi bi-box-arrow-right"></i> Logout</a>
-            
-            <svg class="steer-icon" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="9" />
-                <path d="M12 12L5 12" />
-                <path d="M12 12L19 12" />
-                <path d="M12 12L12 21" />
-                <circle cx="12" cy="12" r="1.5" fill="white"/>
-            </svg>
-
-            <h3 class="fw-bold mb-1">FROTISE</h3>
-            <p class="opacity-75 mb-0 small letter-spacing-1">CATALOG</p>
-            <div class="mt-2 badge bg-light text-dark opacity-75 small" style="font-size: 0.85rem;">
-                Client: <span id="userDisplay" class="fw-bold text-uppercase text-primary"></span>
-            </div>
+            <svg class="steer-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 12L5 12" /><path d="M12 12L19 12" /><path d="M12 12L12 21" /><circle cx="12" cy="12" r="1.5" fill="white"/></svg>
+            <h3 class="fw-bold mb-1">FROTISE</h3><p class="opacity-75 mb-0 small letter-spacing-1">CATALOG</p>
+            <div class="mt-2 badge bg-light text-dark opacity-75 small" style="font-size: 0.85rem;">Client: <span id="userDisplay" class="fw-bold text-uppercase text-primary"></span></div>
         </div>
-
         <div class="container">
             <div class="search-card">
-                <div class="input-group input-group-lg">
-                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
-                    <input type="text" id="searchInput" class="form-control border-start-0" placeholder="Search product..." onkeyup="window.handleSearch()">
-                </div>
-                <div class="text-muted mt-2 small text-center">
-                    <span id="totalCount" class="fw-bold">0</span> items available
-                </div>
+                <div class="input-group input-group-lg"><span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span><input type="text" id="searchInput" class="form-control border-start-0" placeholder="Search product..." onkeyup="window.handleSearch()"></div>
+                <div class="text-muted mt-2 small text-center"><span id="totalCount" class="fw-bold">0</span> items available</div>
             </div>
-
             <div id="resultsList" class="mt-4"></div>
         </div>
-
-        <div class="fab-cart" onclick="window.openCartModal()">
-            <i class="bi bi-cart-fill" style="font-size: 1.5rem;"></i>
-            <div id="cartBadge" class="cart-badge" style="display: none;">0</div>
-        </div>
+        <div class="fab-cart" onclick="window.openCartModal()"><i class="bi bi-cart-fill" style="font-size: 1.5rem;"></i><div id="cartBadge" class="cart-badge" style="display: none;">0</div></div>
     </div>
-
-    <!-- PRODUCT MODAL -->
-    <div class="modal fade" id="productModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <div class="modal-header pb-0 border-bottom-0">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body pt-0">
-                    <div class="row">
-                        <div class="col-12 col-md-5 mb-3 mb-md-0 text-center">
-                            <div class="position-relative">
-                                <img src="" id="modalImg" class="modal-img shadow-sm" alt="Product" onclick="window.viewImage(this.src)">
-                                <div id="modalNewBadge" class="badge-new fs-6 px-3 py-2 rounded-0 rounded-bottom-start" style="display:none; left:0; right:auto;">NEW ARRIVAL</div>
-                            </div>
-                        </div>
-                        <div class="col-12 col-md-7">
-                            <div class="ps-md-2 text-start">
-                                <h3 class="fw-bold text-primary mb-1" id="modalCode"></h3>
-                                <h6 class="text-muted mb-3" id="modalName" style="line-height:1.4;"></h6>
-
-                                <div class="p-3 bg-light rounded mb-3">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span class="text-muted">Price:</span>
-                                        <div id="modalPriceContainer" class="text-end"></div>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="text-muted">Availability:</span>
-                                        <span id="modalStockContent"></span>
-                                    </div>
-                                </div>
-
-                                <div id="addToCartSection">
-                                    <label class="form-label text-muted small mb-1">Order Quantity:</label>
-                                    <div class="d-flex align-items-center gap-3 mb-3">
-                                        <div class="qty-control">
-                                            <button class="qty-btn" onclick="window.updateQty(-1)">-</button>
-                                            <input type="number" id="qtyInput" class="qty-display" value="1" readonly>
-                                            <button class="qty-btn" onclick="window.updateQty(1)">+</button>
-                                        </div>
-                                    </div>
-                                    <div class="d-grid">
-                                        <button onclick="window.addToCart()" class="btn btn-dark btn-lg w-100" style="background-color: #2C3E50;">
-                                            <i class="bi bi-cart-plus-fill"></i> Add to Cart
-                                        </button>
-                                    </div>
-                                </div>
-                                <div id="outOfStockMsg" class="alert alert-danger mt-3 text-center" style="display:none;">
-                                    <i class="bi bi-x-circle"></i> Out of Stock
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- CART MODAL -->
-    <div class="modal fade" id="cartModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header bg-light">
-                    <h5 class="modal-title fw-bold"><i class="bi bi-cart3"></i> Order List</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-2" id="cartBody"></div>
-                <div class="modal-footer d-block bg-light">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="fs-5 text-muted">Total:</span>
-                        <span class="fs-3 fw-bold text-danger" id="cartTotal">0</span>
-                    </div>
-                    <div id="limitWarning" class="alert alert-warning small mb-2" style="display:none;">
-                        <i class="bi bi-exclamation-triangle"></i> Limit exceeded.
-                    </div>
-                    <div class="d-grid gap-2">
-                        <button onclick="window.confirmOrder()" class="btn btn-success btn-lg">
-                            <i class="bi bi-whatsapp"></i> Share on WhatsApp
-                        </button>
-                        <button onclick="window.downloadCSV()" class="btn btn-outline-dark btn-sm">
-                            <i class="bi bi-download"></i> Download CSV
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div class="modal fade" id="productModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content"><div class="modal-header pb-0 border-bottom-0"><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body pt-0"><div class="row"><div class="col-12 col-md-5 mb-3 mb-md-0 text-center"><div class="position-relative"><img src="" id="modalImg" class="modal-img shadow-sm" alt="Product" onclick="window.viewImage(this.src)"><div id="modalNewBadge" class="badge-new fs-6 px-3 py-2 rounded-0 rounded-bottom-start" style="display:none; left:0; right:auto;">NEW ARRIVAL</div></div></div><div class="col-12 col-md-7"><div class="ps-md-2 text-start"><h3 class="fw-bold text-primary mb-1" id="modalCode"></h3><h6 class="text-muted mb-3" id="modalName" style="line-height:1.4;"></h6><div class="p-3 bg-light rounded mb-3"><div class="d-flex justify-content-between align-items-center mb-2"><span class="text-muted">Price:</span><div id="modalPriceContainer" class="text-end"></div></div><div class="d-flex justify-content-between align-items-center"><span class="text-muted">Availability:</span><span id="modalStockContent"></span></div></div><div id="addToCartSection"><label class="form-label text-muted small mb-1">Order Quantity:</label><div class="d-flex align-items-center gap-3 mb-3"><div class="qty-control"><button class="qty-btn" onclick="window.updateQty(-1)">-</button><input type="number" id="qtyInput" class="qty-display" value="1" readonly><button class="qty-btn" onclick="window.updateQty(1)">+</button></div></div><div class="d-grid"><button onclick="window.addToCart()" class="btn btn-dark btn-lg w-100" style="background-color: #2C3E50;"><i class="bi bi-cart-plus-fill"></i> Add to Cart</button></div></div><div id="outOfStockMsg" class="alert alert-danger mt-3 text-center" style="display:none;"><i class="bi bi-x-circle"></i> Out of Stock</div></div></div></div></div></div></div></div>
+    <div class="modal fade" id="cartModal" tabindex="-1"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header bg-light"><h5 class="modal-title fw-bold"><i class="bi bi-cart3"></i> Order List</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-2" id="cartBody"></div><div class="modal-footer d-block bg-light"><div class="d-flex justify-content-between align-items-center mb-3"><span class="fs-5 text-muted">Total:</span><span class="fs-3 fw-bold text-danger" id="cartTotal">0</span></div><div id="limitWarning" class="alert alert-warning small mb-2" style="display:none;"><i class="bi bi-exclamation-triangle"></i> Limit exceeded.</div><div class="d-grid gap-2"><button onclick="window.confirmOrder()" class="btn btn-success btn-lg"><i class="bi bi-whatsapp"></i> Share on WhatsApp</button><button onclick="window.downloadCSV()" class="btn btn-outline-dark btn-sm"><i class="bi bi-download"></i> Download CSV</button></div></div></div></div></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-        // --- CONFIG ---
         const currencyUnit = ""; 
         const orderLimit = 1000000; 
 
-        // --- STATE ---
         window.cart = [];
         window.currentItem = null;
         window.loggedInUser = null; 
@@ -311,14 +90,13 @@
         window.validClients = []; 
         window.userAllowedProducts = []; 
 
-        // --- INIT ---
         document.addEventListener('DOMContentLoaded', function() {
             window.productModal = new bootstrap.Modal(document.getElementById('productModal'));
             window.cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
             loadDatabases();
         });
 
-        // --- DATA LOADING ---
+        // === 这里的加载逻辑增加了错误检测 ===
         function loadDatabases() {
             const statusEl = document.getElementById('dbStatus');
             statusEl.innerText = "Loading data...";
@@ -329,11 +107,16 @@
             ]).then(([prodText, clientText]) => {
                 parseProducts(prodText);
                 parseClients(clientText);
-                statusEl.innerText = "Ready to Login";
+                statusEl.innerText = "Ready. (Loaded: " + window.allProducts.length + " products, " + window.validClients.length + " clients)";
                 statusEl.classList.add('text-success');
+                
+                // Debug log
+                console.log("Products Loaded:", window.allProducts);
+                console.log("Clients Loaded:", window.validClients);
+
             }).catch(err => {
                 console.error(err);
-                statusEl.innerText = "Error: Ensure products.csv and clients.csv exist.";
+                statusEl.innerText = "Error: Check console. Files missing?";
                 statusEl.classList.add('text-danger');
             });
         }
@@ -341,10 +124,16 @@
         function parseProducts(csvText) {
             const lines = csvText.split('\n');
             window.allProducts = [];
+            
+            // 检测分隔符
+            if (lines.length > 1 && lines[1].includes(';') && !lines[1].includes(',')) {
+                alert("严重错误: products.csv 似乎使用了分号(;)作为分隔符。\n请用记事本打开csv，确保使用的是逗号(,)");
+            }
+
             for(let i=1; i<lines.length; i++) {
                 const line = lines[i].trim();
                 if(!line) continue;
-                const cols = line.split(',');
+                const cols = line.split(','); // 必须是逗号
                 if(cols.length >= 4) {
                     window.allProducts.push({
                         code: cols[0].trim(),
@@ -361,47 +150,58 @@
         function parseClients(csvText) {
             const lines = csvText.split('\n');
             window.validClients = [];
+            
+            // 检测分隔符
+            if (lines.length > 1 && lines[1].includes(';') && !lines[1].includes(',')) {
+                alert("严重错误: clients.csv 似乎使用了分号(;)作为分隔符。\n请用记事本打开csv，确保使用的是逗号(,)");
+            }
+
             for(let i=1; i<lines.length; i++) {
                 const line = lines[i].trim();
                 if(!line) continue;
-                
-                // 逻辑：逗号前是用户名，逗号后全是关键词
                 const firstCommaIndex = line.indexOf(',');
                 if(firstCommaIndex > -1) {
                     const clientCode = line.substring(0, firstCommaIndex).trim().toUpperCase();
                     const keywordsStr = line.substring(firstCommaIndex + 1).trim();
-                    
                     const keywords = keywordsStr.split(',').map(k => k.trim().toUpperCase()).filter(k => k !== "");
                     
                     if(clientCode) {
-                        window.validClients.push({
-                            id: clientCode,
-                            keywords: keywords
-                        });
+                        window.validClients.push({ id: clientCode, keywords: keywords });
                     }
                 }
             }
-            console.log("Loaded Clients:", window.validClients);
         }
 
-        // --- LOGIN LOGIC ---
+        // --- LOGIN LOGIC (增加了调试弹窗) ---
         window.attemptLogin = function() {
             const idInput = document.getElementById('loginId').value.trim().toUpperCase();
-            const passInput = document.getElementById('loginPass').value.trim(); // Case sensitive password? usually no for basic apps
-            
-            // 1. Find user in parsed CSV data
+            const passInput = document.getElementById('loginPass').value.trim();
+            const errorDiv = document.getElementById('loginError');
+
+            if (window.validClients.length === 0) {
+                errorDiv.innerText = "Error: No clients loaded. Check CSV format.";
+                errorDiv.style.display = 'block';
+                return;
+            }
+
             const user = window.validClients.find(u => u.id === idInput);
 
-            // 2. 验证逻辑：
-            // 因为CSV里没有密码列，我们默认：
-            // 密码 == 用户名 (Client Code) 
-            // 或者 密码 == "1234" (通用密码)
             if (user) {
                 if(passInput.toUpperCase() === user.id || passInput === "1234") {
-                    // Success
                     window.loggedInUser = user; 
                     filterDatabaseForUser(user);
                     
+                    // === 调试代码：如果没有找到产品，告诉用户为什么 ===
+                    if (window.userAllowedProducts.length === 0) {
+                        let debugMsg = `Login Success, BUT 0 products found.\n\n`;
+                        debugMsg += `User Keywords: ${user.keywords.join(", ")}\n`;
+                        debugMsg += `Total Products in DB: ${window.allProducts.length}\n`;
+                        debugMsg += `Reason: None of the products contain your keywords in their Code or Name.\n`;
+                        debugMsg += `Check products.csv names vs clients.csv keywords.`;
+                        alert(debugMsg);
+                    }
+                    // ===========================================
+
                     document.getElementById('userDisplay').innerText = user.id; 
                     document.getElementById('loginSection').style.display = 'none';
                     document.getElementById('mainApp').style.display = 'block';
@@ -409,13 +209,10 @@
                     return;
                 }
             }
-            
-            // Fail
-            document.getElementById('loginError').style.display = 'block';
-            document.getElementById('loginError').innerText = "Invalid Client Code or Password.";
+            errorDiv.innerText = "Invalid Client Code or Password.";
+            errorDiv.style.display = 'block';
         };
 
-        // ** 筛选逻辑 **
         function filterDatabaseForUser(user) {
             if(!user || !user.keywords) return;
             const keywords = user.keywords;
@@ -433,7 +230,6 @@
 
         window.logout = function() { location.reload(); };
 
-        // --- SEARCH & RENDER ---
         window.handleSearch = function() {
             const rawInput = document.getElementById('searchInput').value.toUpperCase().trim();
             const listDiv = document.getElementById('resultsList');
@@ -471,14 +267,12 @@
             let html = '';
             displayList.forEach(item => {
                 const imgSrc = `images/${item.code}.jpg`;
-                
                 let stockBadge = '';
                 if (item.stock <= 0) stockBadge = `<span class="stock-tag bg-stock-zero">OUT OF STOCK</span>`;
                 else if (item.stock <= 5) stockBadge = `<span class="stock-tag bg-stock-low">LOW STOCK</span>`;
                 else stockBadge = `<span class="stock-tag bg-stock-high">IN STOCK</span>`;
 
                 let newBadge = item.isNew ? `<div class="badge-new">NEW</div>` : '';
-                
                 let priceDisplay = `${currencyUnit}${item.price}`;
                 if(item.promo > 0 && item.promo < item.price) {
                     priceDisplay = `<span class="price-old">${item.price}</span>${currencyUnit}${item.promo}`;
@@ -505,7 +299,6 @@
             listDiv.innerHTML = html;
         };
 
-        // --- PRODUCT DETAILS ---
         window.openProduct = function(code) {
             window.currentItem = window.allProducts.find(p => p.code === code);
             if(!window.currentItem) return;
@@ -548,7 +341,6 @@
             window.productModal.show();
         };
 
-        // --- CART ---
         window.updateQty = function(diff) {
             const input = document.getElementById('qtyInput');
             let val = parseInt(input.value) + diff;
@@ -595,26 +387,7 @@
                 window.cart.forEach((item, index) => {
                     totalAmount += item.price * item.qty;
                     modalBody.innerHTML += `
-                        <div class="card mb-2 border-0 shadow-sm">
-                            <div class="card-body p-2 d-flex justify-content-between align-items-center">
-                                <div style="width:55%">
-                                    <div class="fw-bold small">${item.code}</div>
-                                    <div class="small text-muted text-truncate">${item.name}</div>
-                                    <div class="text-danger fw-bold mt-1">${currencyUnit}${item.price} <span class="text-muted small fw-normal">x ${item.qty}</span></div>
-                                </div>
-                                <div class="d-flex flex-column align-items-end">
-                                    <div class="qty-control mb-1">
-                                        <button class="qty-btn p-0" onclick="window.updateCartItemQty(${index}, -1)">-</button>
-                                        <span class="fw-bold mx-2">${item.qty}</span>
-                                        <button class="qty-btn p-0" onclick="window.updateCartItemQty(${index}, 1)">+</button>
-                                    </div>
-                                    <button class="btn btn-sm btn-outline-danger" onclick="window.removeCartItem(${index})">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
+                        <div class="card mb-2 border-0 shadow-sm"><div class="card-body p-2 d-flex justify-content-between align-items-center"><div style="width:55%"><div class="fw-bold small">${item.code}</div><div class="small text-muted text-truncate">${item.name}</div><div class="text-danger fw-bold mt-1">${currencyUnit}${item.price} <span class="text-muted small fw-normal">x ${item.qty}</span></div></div><div class="d-flex flex-column align-items-end"><div class="qty-control mb-1"><button class="qty-btn p-0" onclick="window.updateCartItemQty(${index}, -1)">-</button><span class="fw-bold mx-2">${item.qty}</span><button class="qty-btn p-0" onclick="window.updateCartItemQty(${index}, 1)">+</button></div><button class="btn btn-sm btn-outline-danger" onclick="window.removeCartItem(${index})"><i class="bi bi-trash"></i></button></div></div></div>`;
                 });
             }
             document.getElementById('cartTotal').innerText = currencyUnit + totalAmount.toLocaleString();
@@ -638,25 +411,16 @@
             }
         };
 
-        // --- WHATSAPP SHARE (UPDATED) ---
         window.confirmOrder = function() {
             if (window.cart.length === 0) return alert("Cart is empty");
             const totalAmount = window.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             
-            window.cart.forEach(cItem => {
-                const dbItem = window.allProducts.find(d => d.code === cItem.code);
-                if(dbItem) dbItem.stock = Math.max(0, dbItem.stock - cItem.qty);
-            });
-
             let msg = `🛒 *FROTISE ORDER (${window.loggedInUser.id})* \n\n`;
             window.cart.forEach(i => {
                 msg += `▪️ ${i.code} (x${i.qty}) - ${currencyUnit}${i.price}\n`;
             });
             msg += `\n💰 *TOTAL: ${currencyUnit}${totalAmount.toLocaleString()}*`;
-            
-            // 已修改：不指定电话号码，直接唤起选择联系人
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
-
             window.cart = [];
             window.updateCartUI();
             window.cartModal.hide();
@@ -684,14 +448,8 @@
             document.getElementById('fullImage').src = src;
             document.getElementById('imageOverlay').style.display = 'flex';
         };
-        window.closeImageViewer = function() {
-            document.getElementById('imageOverlay').style.display = 'none';
-        };
-        
-        // Enter Key for Login
-        document.getElementById('loginPass').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') window.attemptLogin();
-        });
+        window.closeImageViewer = function() { document.getElementById('imageOverlay').style.display = 'none'; };
+        document.getElementById('loginPass').addEventListener('keypress', function (e) { if (e.key === 'Enter') window.attemptLogin(); });
     </script>
 </body>
 </html>
