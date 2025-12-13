@@ -154,14 +154,15 @@
             <div id="dbStatus" class="small text-muted mb-3">Initializing...</div>
 
             <div class="mb-3 text-start">
-                <input type="text" id="loginId" class="form-control form-control-lg" placeholder="Client Code">
+                <input type="text" id="loginId" class="form-control form-control-lg" placeholder="Client Code (e.g. GH123)">
             </div>
-            <!-- Password hidden/auto-filled as per workflow, currently just use "0000" or simple check -->
+            
             <div class="mb-4 text-start">
-                <input type="password" id="loginPass" class="form-control form-control-lg" placeholder="Password (Default: 0000)">
+                <!-- 提示：这里为了方便，默认密码可以是 Client Code 或者 1234 -->
+                <input type="password" id="loginPass" class="form-control form-control-lg" placeholder="Password (Use Code)">
             </div>
             <button onclick="window.attemptLogin()" class="btn btn-dark btn-lg w-100" style="background-color:#2C3E50;">Login</button>
-            <div id="loginError" class="text-danger mt-3 small" style="display:none;">Invalid credentials or loading error.</div>
+            <div id="loginError" class="text-danger mt-3 small" style="display:none;">User not found in clients.csv</div>
         </div>
     </div>
 
@@ -189,7 +190,7 @@
             <div class="search-card">
                 <div class="input-group input-group-lg">
                     <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
-                    <input type="text" id="searchInput" class="form-control border-start-0" placeholder="Search within your access..." onkeyup="window.handleSearch()">
+                    <input type="text" id="searchInput" class="form-control border-start-0" placeholder="Search product..." onkeyup="window.handleSearch()">
                 </div>
                 <div class="text-muted mt-2 small text-center">
                     <span id="totalCount" class="fw-bold">0</span> items available
@@ -281,7 +282,7 @@
                     </div>
                     <div class="d-grid gap-2">
                         <button onclick="window.confirmOrder()" class="btn btn-success btn-lg">
-                            <i class="bi bi-whatsapp"></i> Send to WhatsApp
+                            <i class="bi bi-whatsapp"></i> Share on WhatsApp
                         </button>
                         <button onclick="window.downloadCSV()" class="btn btn-outline-dark btn-sm">
                             <i class="bi bi-download"></i> Download CSV
@@ -297,9 +298,7 @@
     <script>
         // --- CONFIG ---
         const currencyUnit = ""; 
-        const myWhatsAppNumber = "0550584720"; 
         const orderLimit = 1000000; 
-        const defaultPassword = "0000"; // Simple default password for all users
 
         // --- STATE ---
         window.cart = [];
@@ -308,9 +307,9 @@
         window.productModal = null;
         window.cartModal = null;
         
-        window.allProducts = []; // The full DB
-        window.validClients = []; // The client list
-        window.userAllowedProducts = []; // The filtered list for the current user
+        window.allProducts = []; 
+        window.validClients = []; 
+        window.userAllowedProducts = []; 
 
         // --- INIT ---
         document.addEventListener('DOMContentLoaded', function() {
@@ -319,7 +318,7 @@
             loadDatabases();
         });
 
-        // --- DATA LOADING (Read both CSVs) ---
+        // --- DATA LOADING ---
         function loadDatabases() {
             const statusEl = document.getElementById('dbStatus');
             statusEl.innerText = "Loading data...";
@@ -330,11 +329,11 @@
             ]).then(([prodText, clientText]) => {
                 parseProducts(prodText);
                 parseClients(clientText);
-                statusEl.innerText = "System Ready.";
+                statusEl.innerText = "Ready to Login";
                 statusEl.classList.add('text-success');
             }).catch(err => {
                 console.error(err);
-                statusEl.innerText = "Error loading database.";
+                statusEl.innerText = "Error: Ensure products.csv and clients.csv exist.";
                 statusEl.classList.add('text-danger');
             });
         }
@@ -345,7 +344,6 @@
             for(let i=1; i<lines.length; i++) {
                 const line = lines[i].trim();
                 if(!line) continue;
-                // CSV Split logic (basic comma split)
                 const cols = line.split(',');
                 if(cols.length >= 4) {
                     window.allProducts.push({
@@ -366,51 +364,62 @@
             for(let i=1; i<lines.length; i++) {
                 const line = lines[i].trim();
                 if(!line) continue;
-                // Basic CSV parser for Client, Keywords
-                const firstComma = line.indexOf(',');
-                if(firstComma > -1) {
-                    const clientCode = line.substring(0, firstComma).trim();
-                    const keywordsStr = line.substring(firstComma + 1).trim();
-                    // Clean keywords
+                
+                // 逻辑：逗号前是用户名，逗号后全是关键词
+                const firstCommaIndex = line.indexOf(',');
+                if(firstCommaIndex > -1) {
+                    const clientCode = line.substring(0, firstCommaIndex).trim().toUpperCase();
+                    const keywordsStr = line.substring(firstCommaIndex + 1).trim();
+                    
                     const keywords = keywordsStr.split(',').map(k => k.trim().toUpperCase()).filter(k => k !== "");
                     
-                    window.validClients.push({
-                        id: clientCode,
-                        keywords: keywords
-                    });
+                    if(clientCode) {
+                        window.validClients.push({
+                            id: clientCode,
+                            keywords: keywords
+                        });
+                    }
                 }
             }
+            console.log("Loaded Clients:", window.validClients);
         }
 
-        // --- LOGIN & FILTERING LOGIC ---
+        // --- LOGIN LOGIC ---
         window.attemptLogin = function() {
-            const idInput = document.getElementById('loginId').value.trim();
-            const passInput = document.getElementById('loginPass').value.trim();
+            const idInput = document.getElementById('loginId').value.trim().toUpperCase();
+            const passInput = document.getElementById('loginPass').value.trim(); // Case sensitive password? usually no for basic apps
             
-            // Validate user exists in Client CSV
+            // 1. Find user in parsed CSV data
             const user = window.validClients.find(u => u.id === idInput);
 
-            // Simple Password Check (Defaults to "0000" if you didn't ask for a password column)
-            if (user && (passInput === defaultPassword || passInput === user.id)) {
-                window.loggedInUser = user; 
-                filterDatabaseForUser(user);
-                
-                document.getElementById('userDisplay').innerText = user.id; 
-                document.getElementById('loginSection').style.display = 'none';
-                document.getElementById('mainApp').style.display = 'block';
-                window.handleSearch(); 
-            } else {
-                document.getElementById('loginError').style.display = 'block';
+            // 2. 验证逻辑：
+            // 因为CSV里没有密码列，我们默认：
+            // 密码 == 用户名 (Client Code) 
+            // 或者 密码 == "1234" (通用密码)
+            if (user) {
+                if(passInput.toUpperCase() === user.id || passInput === "1234") {
+                    // Success
+                    window.loggedInUser = user; 
+                    filterDatabaseForUser(user);
+                    
+                    document.getElementById('userDisplay').innerText = user.id; 
+                    document.getElementById('loginSection').style.display = 'none';
+                    document.getElementById('mainApp').style.display = 'block';
+                    window.handleSearch();
+                    return;
+                }
             }
+            
+            // Fail
+            document.getElementById('loginError').style.display = 'block';
+            document.getElementById('loginError').innerText = "Invalid Client Code or Password.";
         };
 
-        // ** CORE LOGIC: Filter products based on Client Keywords **
+        // ** 筛选逻辑 **
         function filterDatabaseForUser(user) {
             if(!user || !user.keywords) return;
-            
             const keywords = user.keywords;
             
-            // If keyword is 'ALL', show everything
             if(keywords.includes('ALL')) {
                 window.userAllowedProducts = [...window.allProducts];
                 return;
@@ -418,7 +427,6 @@
 
             window.userAllowedProducts = window.allProducts.filter(item => {
                 const searchStr = (item.code + " " + item.name).toUpperCase();
-                // Check if ANY of the user's keywords are present in the product string
                 return keywords.some(key => searchStr.includes(key));
             });
         }
@@ -429,7 +437,7 @@
         window.handleSearch = function() {
             const rawInput = document.getElementById('searchInput').value.toUpperCase().trim();
             const listDiv = document.getElementById('resultsList');
-            const sourceData = window.userAllowedProducts; // Only search within allowed items
+            const sourceData = window.userAllowedProducts; 
 
             document.getElementById('totalCount').innerText = sourceData.length;
 
@@ -440,7 +448,6 @@
 
             let results = [];
             if(rawInput.length === 0) {
-                // Show all allowed if no search term
                 results = sourceData;
             } else if (rawInput === 'STOCK') {
                 results = sourceData.filter(i => i.stock > 0);
@@ -459,13 +466,10 @@
                 return;
             }
 
-            // Limit display for performance if empty search
             const displayList = (rawInput === "") ? results.slice(0, 50) : results;
 
             let html = '';
             displayList.forEach(item => {
-                // Find original index in source to handle clicks correctly
-                // Note: We pass the item itself to openProduct now to be safer
                 const imgSrc = `images/${item.code}.jpg`;
                 
                 let stockBadge = '';
@@ -475,7 +479,6 @@
 
                 let newBadge = item.isNew ? `<div class="badge-new">NEW</div>` : '';
                 
-                // Price Logic
                 let priceDisplay = `${currencyUnit}${item.price}`;
                 if(item.promo > 0 && item.promo < item.price) {
                     priceDisplay = `<span class="price-old">${item.price}</span>${currencyUnit}${item.promo}`;
@@ -519,14 +522,13 @@
 
             document.getElementById('qtyInput').value = 1;
             
-            // Price Display in Modal
             let finalPrice = item.price;
             let priceHtml = `<span class="fs-3 fw-bold text-dark">${currencyUnit}${item.price}</span>`;
             if(item.promo > 0 && item.promo < item.price) {
                 finalPrice = item.promo;
                 priceHtml = `<span class="text-decoration-line-through text-muted me-2 fs-5">${item.price}</span><span class="fs-3 fw-bold text-danger">${currencyUnit}${item.promo}</span>`;
             }
-            window.currentItem.finalPrice = finalPrice; // Store for cart
+            window.currentItem.finalPrice = finalPrice; 
             document.getElementById('modalPriceContainer').innerHTML = priceHtml;
 
             const statusDiv = document.getElementById('modalStockContent');
@@ -546,7 +548,7 @@
             window.productModal.show();
         };
 
-        // --- CART FUNCTIONS ---
+        // --- CART ---
         window.updateQty = function(diff) {
             const input = document.getElementById('qtyInput');
             let val = parseInt(input.value) + diff;
@@ -564,7 +566,6 @@
                 if((exist.qty + qty) > item.stock) return alert('Total exceeds stock limit');
                 exist.qty += qty;
             } else {
-                // Use finalPrice (handles promo)
                 window.cart.push({...item, qty: qty, price: item.finalPrice});
             }
             window.updateCartUI();
@@ -637,11 +638,11 @@
             }
         };
 
+        // --- WHATSAPP SHARE (UPDATED) ---
         window.confirmOrder = function() {
             if (window.cart.length === 0) return alert("Cart is empty");
             const totalAmount = window.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             
-            // Deduct local stock logic (optional visualization)
             window.cart.forEach(cItem => {
                 const dbItem = window.allProducts.find(d => d.code === cItem.code);
                 if(dbItem) dbItem.stock = Math.max(0, dbItem.stock - cItem.qty);
@@ -652,7 +653,9 @@
                 msg += `▪️ ${i.code} (x${i.qty}) - ${currencyUnit}${i.price}\n`;
             });
             msg += `\n💰 *TOTAL: ${currencyUnit}${totalAmount.toLocaleString()}*`;
-            window.open(`https://wa.me/${myWhatsAppNumber}?text=${encodeURIComponent(msg)}`, '_blank');
+            
+            // 已修改：不指定电话号码，直接唤起选择联系人
+            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
 
             window.cart = [];
             window.updateCartUI();
@@ -676,7 +679,6 @@
             document.body.removeChild(link);
         };
 
-        // --- IMAGE VIEWER ---
         window.viewImage = function(src) {
             if(!src || src.includes('placeholder')) return;
             document.getElementById('fullImage').src = src;
@@ -685,6 +687,11 @@
         window.closeImageViewer = function() {
             document.getElementById('imageOverlay').style.display = 'none';
         };
+        
+        // Enter Key for Login
+        document.getElementById('loginPass').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') window.attemptLogin();
+        });
     </script>
 </body>
 </html>
