@@ -1,14 +1,20 @@
 <!DOCTYPE html>
-<html lang="en" translate="no"> <!-- 1. 禁止浏览器翻译提示 -->
+<html lang="en" translate="no">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="google" content="notranslate"> <!-- 1. 禁止谷歌翻译 -->
+    <meta name="google" content="notranslate">
     <title>FROTISE STEERING RACK</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入 Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     
     <style>
+        /* === 核心配色 (Frotise Blue) === */
+        :root {
+            --frotise-blue: #004a99; /* 这是一个标准的深蓝色，如果不准，您可以把这个颜色代码改成您Logo的具体颜色 */
+        }
+
         body { background-color: #f0f2f5; font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding-bottom: 100px; }
         
         /* === 图片查看器 === */
@@ -25,7 +31,8 @@
         #loginSection {
             height: 100vh; width: 100%;
             display: flex; align-items: center; justify-content: center;
-            background: linear-gradient(135deg, #2C3E50 0%, #4CA1AF 100%);
+            /* 3. 背景色改为蓝色 */
+            background: var(--frotise-blue);
             position: fixed; top: 0; left: 0; z-index: 9999;
         }
         .login-card {
@@ -33,38 +40,60 @@
             border-radius: 20px; width: 90%; max-width: 400px; text-align: center;
             box-shadow: 0 20px 40px rgba(0,0,0,0.4);
         }
-        /* 7. Logo 样式 */
-        .login-logo { max-width: 150px; height: auto; margin-bottom: 20px; }
+        .login-logo { max-width: 180px; height: auto; margin-bottom: 20px; }
 
-        /* === 顶部 Header === */
+        /* === 主页顶部 Header === */
         .header-bg {
-            background: linear-gradient(135deg, #000000 0%, #434343 100%);
-            color: white; padding: 30px 20px 60px;
+            /* 3. 背景色改为蓝色 */
+            background: var(--frotise-blue);
+            color: white; padding: 20px 20px 50px; /* 调整了内边距 */
             border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
             position: relative;
         }
-        .logout-btn {
-            position: absolute; top: 15px; right: 15px;
-            color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.85rem;
-            border: 1px solid rgba(255,255,255,0.3); padding: 4px 12px; border-radius: 20px;
-        }
         
-        /* === 搜索栏与过滤 === */
-        .search-card {
-            margin-top: -40px; background: white; border-radius: 15px;
-            padding: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        /* 4. Logout 左上角 */
+        .logout-btn {
+            position: absolute; top: 20px; left: 20px;
+            color: rgba(255,255,255,0.9); text-decoration: none; font-size: 1.2rem;
         }
 
-        /* === 列表项 (3. 移除了图片) === */
+        /* 4. 铃铛 右上角 */
+        .notif-btn {
+            position: absolute; top: 20px; right: 20px;
+            color: white; font-size: 1.4rem; cursor: pointer;
+        }
+        /* 红点提示 */
+        .notif-dot {
+            position: absolute; top: -2px; right: -2px;
+            width: 10px; height: 10px; background-color: #ff3b30;
+            border-radius: 50%; border: 2px solid var(--frotise-blue);
+            display: none; /* 默认隐藏，有日期时显示 */
+        }
+        
+        /* === 搜索栏 === */
+        .search-card {
+            margin-top: -35px; background: white; border-radius: 15px;
+            padding: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        /* 1. 过滤按钮样式优化 */
+        .filter-btn {
+            background-color: #f0f2f5; color: #555; border: 1px solid #ced4da;
+            border-left: none; padding: 0 15px;
+        }
+        .filter-btn:hover, .filter-btn:focus {
+            background-color: #e2e6ea; color: #333;
+        }
+
+        /* === 列表项 === */
         .result-item {
             background: white; border-radius: 12px; margin-bottom: 10px;
             padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             transition: transform 0.1s; cursor: pointer; position: relative;
             border-left: 5px solid transparent; overflow: hidden;
         }
-        .result-item:active { transform: scale(0.99); background-color: #f8f9fa; border-left-color: #2C3E50; }
+        .result-item:active { transform: scale(0.99); background-color: #f8f9fa; border-left-color: var(--frotise-blue); }
         
-        /* 标签与价格 */
         .stock-tag { font-size: 0.7rem; padding: 4px 8px; border-radius: 6px; font-weight: bold; text-transform: uppercase;}
         .bg-stock-high { background-color: #e8f5e9; color: #2e7d32; }
         .bg-stock-low { background-color: #fff3cd; color: #856404; }
@@ -93,10 +122,10 @@
         /* === 购物车悬浮按钮 === */
         .fab-cart {
             position: fixed; bottom: 30px; right: 30px;
-            background-color: #2C3E50; color: white;
+            background-color: var(--frotise-blue); color: white;
             width: 65px; height: 65px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 15px rgba(44, 62, 80, 0.4);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             z-index: 1000; cursor: pointer; transition: transform 0.2s;
         }
         .fab-cart:active { transform: scale(0.9); }
@@ -112,10 +141,7 @@
         .qty-btn { width: 35px; height: 35px; border-radius: 50%; border: 1px solid #dee2e6; background: white; font-weight: bold; color: #495057; }
         .qty-display { width: 40px; text-align: center; font-weight: bold; border:none; background: transparent;}
         
-        /* 6. 右对齐 Quantity 样式 */
-        .right-aligned-controls {
-            display: flex; flex-direction: column; align-items: flex-end;
-        }
+        .right-aligned-controls { display: flex; flex-direction: column; align-items: flex-end; }
     </style>
 </head>
 <body>
@@ -125,43 +151,42 @@
         <img id="fullImage" src="">
     </div>
 
-    <!-- 登录区域 -->
+    <!-- 登录界面 -->
     <div id="loginSection">
         <div class="login-card animate__animated animate__fadeInUp">
-            <!-- 7. 换成了 logo.png -->
-            <img src="logo.png" alt="Logo" class="login-logo" onerror="this.style.display='none'">
-            <!-- 备用图标 (如果logo没加载出来显示这个) -->
-            <div id="backupIcon" style="display:none;" class="mb-4">
-               <i class="bi bi-shield-lock-fill fs-1 text-secondary"></i>
-            </div>
+            <img src="logo.png" alt="Logo" class="login-logo" onerror="this.style.display='none'; document.getElementById('backupText').style.display='block'">
+            <h2 id="backupText" class="fw-bold mb-4" style="display:none; color:var(--frotise-blue)">FROTISE</h2>
             
             <h4 class="mb-1 fw-bold">SYSTEM ACCESS</h4>
             <p class="text-muted mb-4 small">Please login to continue</p>
             
-            <!-- 7. 移除了显示的 Loading 文本，但在后台默默加载 -->
             <div id="dbStatus" style="display:none;"></div> 
 
             <div class="mb-3 text-start">
                 <input type="text" id="loginId" class="form-control form-control-lg" placeholder="Client Code">
             </div>
             <div class="mb-4 text-start">
-                <!-- 2. 现在是真实密码验证 -->
                 <input type="password" id="loginPass" class="form-control form-control-lg" placeholder="Password">
             </div>
-            <button onclick="window.attemptLogin()" class="btn btn-dark btn-lg w-100" style="background-color:#2C3E50;">Login</button>
+            <button onclick="window.attemptLogin()" class="btn btn-dark btn-lg w-100" style="background-color:var(--frotise-blue); border:none;">Login</button>
             <div id="loginError" class="text-danger mt-3 small" style="display:none;"></div>
         </div>
     </div>
 
-    <!-- 主程序 -->
+    <!-- 主界面 -->
     <div id="mainApp" style="display:none;">
         <div class="header-bg text-center">
-            <a href="#" onclick="window.logout()" class="logout-btn"><i class="bi bi-box-arrow-right"></i> Logout</a>
+            <!-- 4. 左上角 Logout -->
+            <a href="#" onclick="window.logout()" class="logout-btn"><i class="bi bi-box-arrow-left"></i></a>
             
-            <!-- 小图标 -->
-            <svg style="width:50px; height:50px; fill:none; stroke:white; stroke-width:2; margin-bottom:10px;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 12L5 12" /><path d="M12 12L19 12" /><path d="M12 12L12 21" /><circle cx="12" cy="12" r="1.5" fill="white"/></svg>
+            <!-- 4. 右上角 铃铛 -->
+            <div class="notif-btn" onclick="window.showNewGoodsInfo()">
+                <i class="bi bi-bell-fill"></i>
+                <div id="notifDot" class="notif-dot"></div>
+            </div>
 
-            <h3 class="fw-bold mb-1">FROTISE</h3>
+            <!-- 3. 上方的 Logo 去掉了，只留文字 -->
+            <h2 class="fw-bold mb-0 mt-2">FROTISE</h2>
             <p class="opacity-75 mb-0 small letter-spacing-1">PRODUCT CATALOG</p>
             <div class="mt-2 badge bg-light text-dark opacity-75 small">
                 Client: <span id="userDisplay" class="fw-bold text-uppercase text-primary"></span>
@@ -170,12 +195,13 @@
 
         <div class="container">
             <div class="search-card">
-                <!-- 4. 搜索框 + 过滤按钮 -->
                 <div class="input-group input-group-lg">
                     <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
                     <input type="text" id="searchInput" class="form-control border-start-0" placeholder="Search..." onkeyup="window.handleSearch()">
-                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-funnel-fill"></i>
+                    
+                    <!-- 1. 优化后的过滤按钮 -->
+                    <button class="btn btn-sm filter-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-funnel"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="#" onclick="window.applyFilter('ALL')">Show All</a></li>
@@ -183,8 +209,9 @@
                         <li><a class="dropdown-item" href="#" onclick="window.applyFilter('NEW')">New Items Only</a></li>
                     </ul>
                 </div>
-                <div class="text-muted mt-2 small text-center">
-                    <span id="totalCount" class="fw-bold">0</span> items found <span id="filterLabel" class="badge bg-secondary ms-1" style="display:none;"></span>
+                <!-- 3. 移除了 "xxx items found" 文字 -->
+                <div class="text-center mt-2">
+                    <span id="filterLabel" class="badge bg-secondary" style="display:none;"></span>
                 </div>
             </div>
 
@@ -197,7 +224,7 @@
         </div>
     </div>
 
-    <!-- 产品详情弹窗 -->
+    <!-- 产品详情 Modal -->
     <div class="modal fade" id="productModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
@@ -206,7 +233,6 @@
                 </div>
                 <div class="modal-body pt-0">
                     <div class="row">
-                        <!-- 3. 图片只在详情页显示 -->
                         <div class="col-12 col-md-5 mb-3 mb-md-0 text-center">
                             <div class="position-relative">
                                 <img src="" id="modalImg" class="modal-img shadow-sm" alt="Product" onclick="window.viewImage(this.src)">
@@ -230,7 +256,6 @@
                                     </div>
                                 </div>
 
-                                <!-- 6. 数量和按钮靠右显示 -->
                                 <div id="addToCartSection" class="right-aligned-controls">
                                     <div class="mb-2 text-end">
                                         <label class="form-label text-muted small mb-1 d-block">Order Quantity:</label>
@@ -241,7 +266,7 @@
                                         </div>
                                     </div>
                                     <div class="w-100">
-                                        <button onclick="window.addToCart()" class="btn btn-dark btn-lg w-100" style="background-color: #2C3E50;">
+                                        <button onclick="window.addToCart()" class="btn btn-dark btn-lg w-100" style="background-color: var(--frotise-blue);">
                                             <i class="bi bi-cart-plus-fill"></i> Add to Cart
                                         </button>
                                     </div>
@@ -257,7 +282,7 @@
         </div>
     </div>
 
-    <!-- 购物车弹窗 -->
+    <!-- 购物车 Modal -->
     <div class="modal fade" id="cartModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-scrollable">
             <div class="modal-content">
@@ -287,11 +312,9 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-        // --- 基础配置 ---
         const currencyUnit = ""; 
         const orderLimit = 1000000; 
 
-        // --- 全局状态 ---
         window.cart = [];
         window.currentItem = null;
         window.loggedInUser = null; 
@@ -301,23 +324,17 @@
         window.allProducts = []; 
         window.validClients = []; 
         window.userAllowedProducts = []; 
-        window.currentFilter = 'ALL'; // 4. 当前过滤器状态
+        window.currentFilter = 'ALL'; 
+        
+        // 4. 全局变量存储新货日期
+        window.newArrivalDate = null;
 
         document.addEventListener('DOMContentLoaded', function() {
             window.productModal = new bootstrap.Modal(document.getElementById('productModal'));
             window.cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
-            
-            // Logo 检查
-            const img = document.querySelector('.login-logo');
-            img.onerror = function() {
-                img.style.display = 'none';
-                document.getElementById('backupIcon').style.display = 'block';
-            };
-
             loadDatabases();
         });
 
-        // --- 1. 数据加载 ---
         async function loadDatabases() {
             const statusEl = document.getElementById('dbStatus');
             try {
@@ -328,7 +345,6 @@
 
                 if (!prodRes.ok || !clientRes.ok) throw new Error("File missing");
 
-                // 使用 GBK 解码器 (解决中文系统Excel乱码)
                 const decoder = new TextDecoder("gbk");
                 const prodBuffer = await prodRes.arrayBuffer();
                 const clientBuffer = await clientRes.arrayBuffer();
@@ -338,8 +354,6 @@
                 parseProducts(prodText);
                 parseClients(clientText);
 
-                console.log("System Ready"); // 7. 不在界面显示，只在控制台显示
-
             } catch (err) {
                 console.error(err);
                 statusEl.style.display = 'block';
@@ -348,11 +362,20 @@
             }
         }
 
-        // --- 2. 解析产品 (5. NEW=1) ---
         function parseProducts(csvText) {
             const lines = csvText.split(/\r?\n/);
             window.allProducts = [];
             
+            // 4. 读取表头行 (第一行) 的第7列 (索引6) 获取日期
+            if (lines.length > 0) {
+                const headerLine = lines[0].replace(/"/g, "");
+                const headerCols = headerLine.split(',');
+                // 检查 G1 (第7列) 是否有日期
+                if (headerCols.length >= 7 && headerCols[6].trim() !== "") {
+                    window.newArrivalDate = headerCols[6].trim();
+                }
+            }
+
             for(let i = 1; i < lines.length; i++) {
                 let line = lines[i].trim();
                 if(!line) continue;
@@ -361,7 +384,6 @@
                 const cols = cleanLine.split(',');
 
                 if(cols.length >= 4) {
-                    // 5. 检查 NEW 列是否为 1
                     const newFlagRaw = cols[5] ? cols[5].trim() : "0";
                     const isNewItem = (newFlagRaw === '1' || newFlagRaw.toUpperCase() === 'YES');
 
@@ -377,8 +399,6 @@
             }
         }
 
-        // --- 3. 解析客户 (2. 增加了密码列) ---
-        // 格式: CLIENT, PASSWORD, KEYWORDS...
         function parseClients(csvText) {
             const lines = csvText.split(/\r?\n/);
             window.validClients = [];
@@ -392,17 +412,13 @@
 
                 if(parts.length >= 2) {
                     const clientCode = parts[0].trim().toUpperCase();
-                    
-                    // 2. 第二列是密码
                     const password = parts[1].trim(); 
-                    
-                    // 第三列开始是关键词
                     const keywords = parts.slice(2).map(k => k.trim().toUpperCase()).filter(k => k !== "");
                     
                     if(clientCode) {
                         window.validClients.push({ 
                             id: clientCode, 
-                            pass: password, // 保存密码
+                            pass: password, 
                             keywords: keywords 
                         });
                     }
@@ -410,7 +426,6 @@
             }
         }
 
-        // --- 4. 登录逻辑 (2. 密码验证) ---
         window.attemptLogin = function() {
             const idInput = document.getElementById('loginId').value.trim().toUpperCase();
             const passInput = document.getElementById('loginPass').value.trim();
@@ -424,16 +439,19 @@
 
             const user = window.validClients.find(u => u.id === idInput);
 
-            // 2. 验证密码
             if (user && (passInput === user.pass)) {
                 window.loggedInUser = user; 
                 
-                // 筛选产品
                 window.userAllowedProducts = window.allProducts.filter(item => {
                     const searchStr = (item.code + " " + item.name).toUpperCase();
                     if (user.keywords.includes('ALL')) return true;
                     return user.keywords.some(key => searchStr.includes(key));
                 });
+
+                // 4. 检查是否有新货日期，显示红点
+                if (window.newArrivalDate) {
+                    document.getElementById('notifDot').style.display = 'block';
+                }
 
                 document.getElementById('userDisplay').innerText = user.id; 
                 document.getElementById('loginSection').style.display = 'none';
@@ -445,7 +463,15 @@
             }
         };
 
-        // --- 5. 过滤功能 (4. Filter Button) ---
+        // 4. 点击铃铛显示消息
+        window.showNewGoodsInfo = function() {
+            if (window.newArrivalDate) {
+                alert(`📢 NEW GOODS ARRIVED ON: ${window.newArrivalDate}`);
+            } else {
+                alert("No new arrival notifications.");
+            }
+        };
+
         window.applyFilter = function(filterType) {
             window.currentFilter = filterType;
             const badge = document.getElementById('filterLabel');
@@ -461,20 +487,17 @@
             window.handleSearch();
         };
 
-        // --- 6. 搜索与列表 ---
         window.handleSearch = function() {
             const rawInput = document.getElementById('searchInput').value.toUpperCase().trim();
             const listDiv = document.getElementById('resultsList');
             let data = window.userAllowedProducts; 
 
-            // 4. 应用过滤器
             if (window.currentFilter === 'STOCK') {
                 data = data.filter(i => i.stock > 0);
             } else if (window.currentFilter === 'NEW') {
                 data = data.filter(i => i.isNew);
             }
 
-            // 应用搜索词
             let results = data;
             if(rawInput.length > 0) {
                 const terms = rawInput.split(/\s+/);
@@ -484,19 +507,16 @@
                 });
             }
             
-            document.getElementById('totalCount').innerText = results.length;
+            // 2. 移除 "slice" 限制，显示全部
+            const displayList = results; 
 
-            if (results.length === 0) {
+            if (displayList.length === 0) {
                 listDiv.innerHTML = '<div class="text-center mt-5 text-muted">No items found.</div>';
                 return;
             }
 
-            // 限制显示数量，提升性能
-            const displayList = results.slice(0, 100);
-
             let html = '';
             displayList.forEach(item => {
-                // 3. 移除了列表右侧的图片
                 let stockBadge = item.stock <= 0 ? `<span class="stock-tag bg-stock-zero">OUT OF STOCK</span>` : 
                                 (item.stock <= 5 ? `<span class="stock-tag bg-stock-low">LOW STOCK</span>` : `<span class="stock-tag bg-stock-high">IN STOCK</span>`);
 
@@ -517,7 +537,6 @@
                 </div>`;
             });
             
-            if(results.length > 100) html += `<div class="text-center small text-muted mt-3">Showing top 100 results...</div>`;
             listDiv.innerHTML = html;
         };
 
@@ -537,7 +556,6 @@
                 `<span class="text-decoration-line-through text-muted me-2 fs-5">${item.price}</span><span class="fs-3 fw-bold text-danger">${currencyUnit}${item.promo}</span>` :
                 `<span class="fs-3 fw-bold text-dark">${currencyUnit}${item.price}</span>`;
 
-            // 6. 逻辑检查
             const btnSection = document.getElementById('addToCartSection');
             const msgSection = document.getElementById('outOfStockMsg');
 
@@ -546,7 +564,7 @@
                 msgSection.style.display = 'block';
                 document.getElementById('modalStockContent').innerHTML = `<span class="badge bg-danger">Out of Stock</span>`;
             } else {
-                btnSection.style.display = 'flex'; // 确保是flex显示
+                btnSection.style.display = 'flex'; 
                 msgSection.style.display = 'none';
                 document.getElementById('modalStockContent').innerHTML = `<span class="badge bg-success">Stock: ${item.stock}</span>`;
             }
@@ -611,7 +629,6 @@
 
         window.confirmOrder = function() {
             if (window.cart.length === 0) return;
-            // 前端扣库存演示
             window.cart.forEach(cItem => {
                 const dbItem = window.allProducts.find(d => d.code === cItem.code);
                 if(dbItem) dbItem.stock = Math.max(0, dbItem.stock - cItem.qty);
