@@ -1,82 +1,292 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" translate="no"> <!-- 1. 禁止浏览器翻译提示 -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="google" content="notranslate"> <!-- 1. 禁止谷歌翻译 -->
     <title>FROTISE STEERING RACK</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    
     <style>
-        /* 样式保持不变，为了节省篇幅，这里引用之前的样式 */
         body { background-color: #f0f2f5; font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding-bottom: 100px; }
-        #imageOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10000; display: none; justify-content: center; align-items: center; cursor: pointer; }
-        #fullImage { max-width: 95%; max-height: 90%; object-fit: contain; border-radius: 4px; }
-        .close-hint { position: absolute; bottom: 30px; color: rgba(255,255,255,0.6); pointer-events: none; }
-        #loginSection { height: 100vh; width: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #2C3E50 0%, #4CA1AF 100%); position: fixed; top: 0; left: 0; z-index: 9999; }
-        .login-card { background: white; padding: 40px 30px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
-        .header-bg { background: linear-gradient(135deg, #000000 0%, #434343 100%); color: white; padding: 30px 20px 60px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; position: relative; }
-        .logout-btn { position: absolute; top: 15px; right: 15px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.3); padding: 4px 12px; border-radius: 20px; }
-        .steer-icon { width: 50px; height: 50px; fill: none; stroke: white; stroke-width: 2; margin-bottom: 10px; }
-        .search-card { margin-top: -40px; background: white; border-radius: 15px; padding: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
-        .result-item { background: white; border-radius: 12px; margin-bottom: 10px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: transform 0.1s; cursor: pointer; position: relative; border-left: 5px solid transparent; overflow: hidden; }
+        
+        /* === 图片查看器 === */
+        #imageOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 10000;
+            display: none; justify-content: center; align-items: center;
+            cursor: pointer; animation: fadeIn 0.2s ease-in-out;
+        }
+        #fullImage { max-width: 95%; max-height: 90%; object-fit: contain; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* === 登录界面 === */
+        #loginSection {
+            height: 100vh; width: 100%;
+            display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #2C3E50 0%, #4CA1AF 100%);
+            position: fixed; top: 0; left: 0; z-index: 9999;
+        }
+        .login-card {
+            background: white; padding: 40px 30px;
+            border-radius: 20px; width: 90%; max-width: 400px; text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+        /* 7. Logo 样式 */
+        .login-logo { max-width: 150px; height: auto; margin-bottom: 20px; }
+
+        /* === 顶部 Header === */
+        .header-bg {
+            background: linear-gradient(135deg, #000000 0%, #434343 100%);
+            color: white; padding: 30px 20px 60px;
+            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
+            position: relative;
+        }
+        .logout-btn {
+            position: absolute; top: 15px; right: 15px;
+            color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.85rem;
+            border: 1px solid rgba(255,255,255,0.3); padding: 4px 12px; border-radius: 20px;
+        }
+        
+        /* === 搜索栏与过滤 === */
+        .search-card {
+            margin-top: -40px; background: white; border-radius: 15px;
+            padding: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        /* === 列表项 (3. 移除了图片) === */
+        .result-item {
+            background: white; border-radius: 12px; margin-bottom: 10px;
+            padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: transform 0.1s; cursor: pointer; position: relative;
+            border-left: 5px solid transparent; overflow: hidden;
+        }
         .result-item:active { transform: scale(0.99); background-color: #f8f9fa; border-left-color: #2C3E50; }
+        
+        /* 标签与价格 */
         .stock-tag { font-size: 0.7rem; padding: 4px 8px; border-radius: 6px; font-weight: bold; text-transform: uppercase;}
         .bg-stock-high { background-color: #e8f5e9; color: #2e7d32; }
         .bg-stock-low { background-color: #fff3cd; color: #856404; }
         .bg-stock-zero { background-color: #ffebee; color: #c62828; }
-        .badge-new { position: absolute; top: 0; right: 0; background: #ff5722; color: white; font-size: 0.6rem; padding: 4px 8px; border-bottom-left-radius: 10px; font-weight: bold; }
+        
+        .badge-new {
+            position: absolute; top: 0; right: 0;
+            background: #ff5722; color: white;
+            font-size: 0.6rem; padding: 4px 8px;
+            border-bottom-left-radius: 10px; font-weight: bold;
+        }
+        
         .price-text { color: #d32f2f; font-weight: 800; font-size: 1.2rem; }
         .price-old { text-decoration: line-through; color: #999; font-size: 0.9rem; margin-right: 5px; font-weight: normal; }
-        .part-code { color: #2C3E50; font-size: 1rem; font-weight: 800; letter-spacing: 0.5px; }
-        .part-name { font-weight: 600; color: #555; font-size: 0.9rem; line-height: 1.3; margin-bottom: 4px; }
-        .product-img-thumb { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; background: #eee; border: 1px solid #eee; flex-shrink: 0; }
+        .part-code { color: #2C3E50; font-size: 1.1rem; font-weight: 800; letter-spacing: 0.5px; }
+        .part-name { font-weight: 600; color: #555; font-size: 0.95rem; line-height: 1.3; margin-bottom: 4px; }
+        
+        /* === 弹窗 === */
         .modal-content { border-radius: 15px; overflow: hidden; }
-        .modal-header { border-bottom: none; padding-bottom: 0; }
-        .modal-img { width: 100%; height: auto; border-radius: 8px; object-fit: contain; background: #f8f9fa; cursor: zoom-in; border: 1px solid #eee; }
-        .fab-cart { position: fixed; bottom: 30px; right: 30px; background-color: #2C3E50; color: white; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(44, 62, 80, 0.4); z-index: 1000; cursor: pointer; transition: transform 0.2s; }
+        .modal-img { 
+            width: 100%; height: auto; border-radius: 8px; 
+            object-fit: contain; background: #f8f9fa; 
+            cursor: zoom-in; border: 1px solid #eee;
+        }
+
+        /* === 购物车悬浮按钮 === */
+        .fab-cart {
+            position: fixed; bottom: 30px; right: 30px;
+            background-color: #2C3E50; color: white;
+            width: 65px; height: 65px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 15px rgba(44, 62, 80, 0.4);
+            z-index: 1000; cursor: pointer; transition: transform 0.2s;
+        }
         .fab-cart:active { transform: scale(0.9); }
-        .cart-badge { position: absolute; top: -5px; right: -5px; background-color: #dc3545; color: white; border-radius: 50%; width: 24px; height: 24px; font-size: 0.8rem; font-weight: bold; display: flex; align-items: center; justify-content: center; border: 2px solid white; }
-        .qty-control { display: flex; align-items: center; justify-content: flex-start; gap: 8px; }
+        .cart-badge {
+            position: absolute; top: -5px; right: -5px;
+            background-color: #dc3545; color: white;
+            border-radius: 50%; width: 24px; height: 24px;
+            font-size: 0.8rem; font-weight: bold;
+            display: flex; align-items: center; justify-content: center; border: 2px solid white;
+        }
+
+        .qty-control { display: flex; align-items: center; gap: 8px; }
         .qty-btn { width: 35px; height: 35px; border-radius: 50%; border: 1px solid #dee2e6; background: white; font-weight: bold; color: #495057; }
         .qty-display { width: 40px; text-align: center; font-weight: bold; border:none; background: transparent;}
+        
+        /* 6. 右对齐 Quantity 样式 */
+        .right-aligned-controls {
+            display: flex; flex-direction: column; align-items: flex-end;
+        }
     </style>
 </head>
 <body>
-    <!-- (HTML 结构保持不变) -->
-    <div id="imageOverlay" onclick="window.closeImageViewer()"><img id="fullImage" src=""><div class="close-hint"><i class="bi bi-x-circle"></i> Tap to close</div></div>
+
+    <!-- 图片放大 -->
+    <div id="imageOverlay" onclick="window.closeImageViewer()">
+        <img id="fullImage" src="">
+    </div>
+
+    <!-- 登录区域 -->
     <div id="loginSection">
         <div class="login-card animate__animated animate__fadeInUp">
-            <div class="mb-4"><svg class="steer-icon" viewBox="0 0 24 24" style="width:60px; height:60px; stroke:#2C3E50;"><circle cx="12" cy="12" r="10" /><path d="M12 12L4 12" /><path d="M12 12L20 12" /><path d="M12 12L12 22" /><circle cx="12" cy="12" r="2" fill="#2C3E50"/></svg></div>
-            <h4 class="mb-1 fw-bold">FROTISE</h4><p class="text-muted mb-4">SYSTEM ACCESS</p>
-            <div id="dbStatus" class="small text-muted mb-3">Initializing...</div>
-            <div class="mb-3 text-start"><input type="text" id="loginId" class="form-control form-control-lg" placeholder="Client Code"></div>
-            <div class="mb-4 text-start"><input type="password" id="loginPass" class="form-control form-control-lg" placeholder="Password (Use Code)"></div>
+            <!-- 7. 换成了 logo.png -->
+            <img src="logo.png" alt="Logo" class="login-logo" onerror="this.style.display='none'">
+            <!-- 备用图标 (如果logo没加载出来显示这个) -->
+            <div id="backupIcon" style="display:none;" class="mb-4">
+               <i class="bi bi-shield-lock-fill fs-1 text-secondary"></i>
+            </div>
+            
+            <h4 class="mb-1 fw-bold">SYSTEM ACCESS</h4>
+            <p class="text-muted mb-4 small">Please login to continue</p>
+            
+            <!-- 7. 移除了显示的 Loading 文本，但在后台默默加载 -->
+            <div id="dbStatus" style="display:none;"></div> 
+
+            <div class="mb-3 text-start">
+                <input type="text" id="loginId" class="form-control form-control-lg" placeholder="Client Code">
+            </div>
+            <div class="mb-4 text-start">
+                <!-- 2. 现在是真实密码验证 -->
+                <input type="password" id="loginPass" class="form-control form-control-lg" placeholder="Password">
+            </div>
             <button onclick="window.attemptLogin()" class="btn btn-dark btn-lg w-100" style="background-color:#2C3E50;">Login</button>
             <div id="loginError" class="text-danger mt-3 small" style="display:none;"></div>
         </div>
     </div>
+
+    <!-- 主程序 -->
     <div id="mainApp" style="display:none;">
         <div class="header-bg text-center">
             <a href="#" onclick="window.logout()" class="logout-btn"><i class="bi bi-box-arrow-right"></i> Logout</a>
-            <svg class="steer-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 12L5 12" /><path d="M12 12L19 12" /><path d="M12 12L12 21" /><circle cx="12" cy="12" r="1.5" fill="white"/></svg>
-            <h3 class="fw-bold mb-1">FROTISE</h3><p class="opacity-75 mb-0 small letter-spacing-1">CATALOG</p>
-            <div class="mt-2 badge bg-light text-dark opacity-75 small" style="font-size: 0.85rem;">Client: <span id="userDisplay" class="fw-bold text-uppercase text-primary"></span></div>
+            
+            <!-- 小图标 -->
+            <svg style="width:50px; height:50px; fill:none; stroke:white; stroke-width:2; margin-bottom:10px;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 12L5 12" /><path d="M12 12L19 12" /><path d="M12 12L12 21" /><circle cx="12" cy="12" r="1.5" fill="white"/></svg>
+
+            <h3 class="fw-bold mb-1">FROTISE</h3>
+            <p class="opacity-75 mb-0 small letter-spacing-1">PRODUCT CATALOG</p>
+            <div class="mt-2 badge bg-light text-dark opacity-75 small">
+                Client: <span id="userDisplay" class="fw-bold text-uppercase text-primary"></span>
+            </div>
         </div>
+
         <div class="container">
             <div class="search-card">
-                <div class="input-group input-group-lg"><span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span><input type="text" id="searchInput" class="form-control border-start-0" placeholder="Search product..." onkeyup="window.handleSearch()"></div>
-                <div class="text-muted mt-2 small text-center"><span id="totalCount" class="fw-bold">0</span> items available</div>
+                <!-- 4. 搜索框 + 过滤按钮 -->
+                <div class="input-group input-group-lg">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+                    <input type="text" id="searchInput" class="form-control border-start-0" placeholder="Search..." onkeyup="window.handleSearch()">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-funnel-fill"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#" onclick="window.applyFilter('ALL')">Show All</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="window.applyFilter('STOCK')">In Stock Only</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="window.applyFilter('NEW')">New Items Only</a></li>
+                    </ul>
+                </div>
+                <div class="text-muted mt-2 small text-center">
+                    <span id="totalCount" class="fw-bold">0</span> items found <span id="filterLabel" class="badge bg-secondary ms-1" style="display:none;"></span>
+                </div>
             </div>
+
             <div id="resultsList" class="mt-4"></div>
         </div>
-        <div class="fab-cart" onclick="window.openCartModal()"><i class="bi bi-cart-fill" style="font-size: 1.5rem;"></i><div id="cartBadge" class="cart-badge" style="display: none;">0</div></div>
+
+        <div class="fab-cart" onclick="window.openCartModal()">
+            <i class="bi bi-cart-fill" style="font-size: 1.5rem;"></i>
+            <div id="cartBadge" class="cart-badge" style="display: none;">0</div>
+        </div>
     </div>
-    <div class="modal fade" id="productModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content"><div class="modal-header pb-0 border-bottom-0"><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body pt-0"><div class="row"><div class="col-12 col-md-5 mb-3 mb-md-0 text-center"><div class="position-relative"><img src="" id="modalImg" class="modal-img shadow-sm" alt="Product" onclick="window.viewImage(this.src)"><div id="modalNewBadge" class="badge-new fs-6 px-3 py-2 rounded-0 rounded-bottom-start" style="display:none; left:0; right:auto;">NEW ARRIVAL</div></div></div><div class="col-12 col-md-7"><div class="ps-md-2 text-start"><h3 class="fw-bold text-primary mb-1" id="modalCode"></h3><h6 class="text-muted mb-3" id="modalName" style="line-height:1.4;"></h6><div class="p-3 bg-light rounded mb-3"><div class="d-flex justify-content-between align-items-center mb-2"><span class="text-muted">Price:</span><div id="modalPriceContainer" class="text-end"></div></div><div class="d-flex justify-content-between align-items-center"><span class="text-muted">Availability:</span><span id="modalStockContent"></span></div></div><div id="addToCartSection"><label class="form-label text-muted small mb-1">Order Quantity:</label><div class="d-flex align-items-center gap-3 mb-3"><div class="qty-control"><button class="qty-btn" onclick="window.updateQty(-1)">-</button><input type="number" id="qtyInput" class="qty-display" value="1" readonly><button class="qty-btn" onclick="window.updateQty(1)">+</button></div></div><div class="d-grid"><button onclick="window.addToCart()" class="btn btn-dark btn-lg w-100" style="background-color: #2C3E50;"><i class="bi bi-cart-plus-fill"></i> Add to Cart</button></div></div><div id="outOfStockMsg" class="alert alert-danger mt-3 text-center" style="display:none;"><i class="bi bi-x-circle"></i> Out of Stock</div></div></div></div></div></div></div></div>
-    <div class="modal fade" id="cartModal" tabindex="-1"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header bg-light"><h5 class="modal-title fw-bold"><i class="bi bi-cart3"></i> Order List</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-2" id="cartBody"></div><div class="modal-footer d-block bg-light"><div class="d-flex justify-content-between align-items-center mb-3"><span class="fs-5 text-muted">Total:</span><span class="fs-3 fw-bold text-danger" id="cartTotal">0</span></div><div id="limitWarning" class="alert alert-warning small mb-2" style="display:none;"><i class="bi bi-exclamation-triangle"></i> Limit exceeded.</div><div class="d-grid gap-2"><button onclick="window.confirmOrder()" class="btn btn-success btn-lg"><i class="bi bi-whatsapp"></i> Share on WhatsApp</button><button onclick="window.downloadCSV()" class="btn btn-outline-dark btn-sm"><i class="bi bi-download"></i> Download CSV</button></div></div></div></div></div>
+
+    <!-- 产品详情弹窗 -->
+    <div class="modal fade" id="productModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header pb-0 border-bottom-0">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body pt-0">
+                    <div class="row">
+                        <!-- 3. 图片只在详情页显示 -->
+                        <div class="col-12 col-md-5 mb-3 mb-md-0 text-center">
+                            <div class="position-relative">
+                                <img src="" id="modalImg" class="modal-img shadow-sm" alt="Product" onclick="window.viewImage(this.src)">
+                                <div id="modalNewBadge" class="badge-new fs-6 px-3 py-2 rounded-0 rounded-bottom-start" style="display:none; left:0; right:auto;">NEW ARRIVAL</div>
+                                <div class="text-muted small mt-2"><i class="bi bi-zoom-in"></i> Tap image to enlarge</div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-7">
+                            <div class="ps-md-2 text-start">
+                                <h3 class="fw-bold text-primary mb-1" id="modalCode"></h3>
+                                <h6 class="text-muted mb-3" id="modalName" style="line-height:1.4;"></h6>
+
+                                <div class="p-3 bg-light rounded mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="text-muted">Price:</span>
+                                        <div id="modalPriceContainer" class="text-end"></div>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-muted">Availability:</span>
+                                        <span id="modalStockContent"></span>
+                                    </div>
+                                </div>
+
+                                <!-- 6. 数量和按钮靠右显示 -->
+                                <div id="addToCartSection" class="right-aligned-controls">
+                                    <div class="mb-2 text-end">
+                                        <label class="form-label text-muted small mb-1 d-block">Order Quantity:</label>
+                                        <div class="qty-control justify-content-end">
+                                            <button class="qty-btn" onclick="window.updateQty(-1)">-</button>
+                                            <input type="number" id="qtyInput" class="qty-display" value="1" readonly>
+                                            <button class="qty-btn" onclick="window.updateQty(1)">+</button>
+                                        </div>
+                                    </div>
+                                    <div class="w-100">
+                                        <button onclick="window.addToCart()" class="btn btn-dark btn-lg w-100" style="background-color: #2C3E50;">
+                                            <i class="bi bi-cart-plus-fill"></i> Add to Cart
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="outOfStockMsg" class="alert alert-danger mt-3 text-center" style="display:none;">
+                                    <i class="bi bi-x-circle"></i> Out of Stock
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 购物车弹窗 -->
+    <div class="modal fade" id="cartModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-cart3"></i> Order List</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-2" id="cartBody"></div>
+                <div class="modal-footer d-block bg-light">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="fs-5 text-muted">Total:</span>
+                        <span class="fs-3 fw-bold text-danger" id="cartTotal">0</span>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button onclick="window.confirmOrder()" class="btn btn-success btn-lg">
+                            <i class="bi bi-whatsapp"></i> Share on WhatsApp
+                        </button>
+                        <button onclick="window.downloadCSV()" class="btn btn-outline-dark btn-sm">
+                            <i class="bi bi-download"></i> Download CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-   <script>
+    <script>
         // --- 基础配置 ---
         const currencyUnit = ""; 
         const orderLimit = 1000000; 
@@ -91,44 +301,54 @@
         window.allProducts = []; 
         window.validClients = []; 
         window.userAllowedProducts = []; 
+        window.currentFilter = 'ALL'; // 4. 当前过滤器状态
 
         document.addEventListener('DOMContentLoaded', function() {
             window.productModal = new bootstrap.Modal(document.getElementById('productModal'));
             window.cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
+            
+            // Logo 检查
+            const img = document.querySelector('.login-logo');
+            img.onerror = function() {
+                img.style.display = 'none';
+                document.getElementById('backupIcon').style.display = 'block';
+            };
+
             loadDatabases();
         });
 
-        // --- 1. 数据加载逻辑 ---
+        // --- 1. 数据加载 ---
         async function loadDatabases() {
             const statusEl = document.getElementById('dbStatus');
-            statusEl.innerText = "Loading CSV files...";
-            
             try {
                 const [prodRes, clientRes] = await Promise.all([
                     fetch('products.csv?v=' + Date.now()),
                     fetch('clients.csv?v=' + Date.now())
                 ]);
 
-                if (!prodRes.ok || !clientRes.ok) throw new Error("File not found on server");
+                if (!prodRes.ok || !clientRes.ok) throw new Error("File missing");
 
-                const prodText = await prodRes.text();
-                const clientText = await clientRes.text();
+                // 使用 GBK 解码器 (解决中文系统Excel乱码)
+                const decoder = new TextDecoder("gbk");
+                const prodBuffer = await prodRes.arrayBuffer();
+                const clientBuffer = await clientRes.arrayBuffer();
+                const prodText = decoder.decode(prodBuffer);
+                const clientText = decoder.decode(clientBuffer);
 
                 parseProducts(prodText);
                 parseClients(clientText);
 
-                statusEl.innerText = `Ready. (${window.allProducts.length} Products, ${window.validClients.length} Clients)`;
-                statusEl.classList.remove('text-danger');
-                statusEl.classList.add('text-success');
+                console.log("System Ready"); // 7. 不在界面显示，只在控制台显示
 
             } catch (err) {
-                console.error("Load Error:", err);
-                statusEl.innerText = "Error: Cannot load CSV files. Make sure they are in the same folder.";
-                statusEl.classList.add('text-danger');
+                console.error(err);
+                statusEl.style.display = 'block';
+                statusEl.innerText = "Error loading database.";
+                statusEl.className = 'text-danger mb-3';
             }
         }
 
-        // --- 2. 解析产品逻辑 (彻底清洗引号) ---
+        // --- 2. 解析产品 (5. NEW=1) ---
         function parseProducts(csvText) {
             const lines = csvText.split(/\r?\n/);
             window.allProducts = [];
@@ -136,25 +356,29 @@
             for(let i = 1; i < lines.length; i++) {
                 let line = lines[i].trim();
                 if(!line) continue;
-
-                // 核心：先删掉所有双引号，再按逗号切割
+                
                 const cleanLine = line.replace(/"/g, "");
                 const cols = cleanLine.split(',');
 
                 if(cols.length >= 4) {
+                    // 5. 检查 NEW 列是否为 1
+                    const newFlagRaw = cols[5] ? cols[5].trim() : "0";
+                    const isNewItem = (newFlagRaw === '1' || newFlagRaw.toUpperCase() === 'YES');
+
                     window.allProducts.push({
                         code: cols[0].trim(),
-                        name: cols[1].trim(),
+                        name: cols[1].trim(), 
                         stock: parseInt(cols[2].trim()) || 0,
                         price: parseFloat(cols[3].trim()) || 0,
                         promo: cols[4] ? parseFloat(cols[4].trim()) : 0,
-                        isNew: cols[5] ? (cols[5].trim().toUpperCase() === 'YES') : false
+                        isNew: isNewItem
                     });
                 }
             }
         }
 
-        // --- 3. 解析客户逻辑 (彻底清洗引号) ---
+        // --- 3. 解析客户 (2. 增加了密码列) ---
+        // 格式: CLIENT, PASSWORD, KEYWORDS...
         function parseClients(csvText) {
             const lines = csvText.split(/\r?\n/);
             window.validClients = [];
@@ -163,57 +387,53 @@
                 let line = lines[i].trim();
                 if(!line) continue;
 
-                // 核心：先删掉所有双引号
                 const cleanLine = line.replace(/"/g, "");
                 const parts = cleanLine.split(',');
 
                 if(parts.length >= 2) {
                     const clientCode = parts[0].trim().toUpperCase();
-                    // 剩下的所有列都是关键词
-                    const keywords = parts.slice(1)
-                                          .map(k => k.trim().toUpperCase())
-                                          .filter(k => k !== "");
+                    
+                    // 2. 第二列是密码
+                    const password = parts[1].trim(); 
+                    
+                    // 第三列开始是关键词
+                    const keywords = parts.slice(2).map(k => k.trim().toUpperCase()).filter(k => k !== "");
                     
                     if(clientCode) {
-                        window.validClients.push({ id: clientCode, keywords: keywords });
+                        window.validClients.push({ 
+                            id: clientCode, 
+                            pass: password, // 保存密码
+                            keywords: keywords 
+                        });
                     }
                 }
             }
         }
 
-        // --- 4. 登录与关键词过滤 ---
+        // --- 4. 登录逻辑 (2. 密码验证) ---
         window.attemptLogin = function() {
             const idInput = document.getElementById('loginId').value.trim().toUpperCase();
             const passInput = document.getElementById('loginPass').value.trim();
             const errorDiv = document.getElementById('loginError');
-
+            
             if (window.validClients.length === 0) {
-                alert("Error: No clients loaded from clients.csv. Please check the file.");
+                errorDiv.innerText = "System loading... please wait.";
+                errorDiv.style.display = 'block';
                 return;
             }
 
             const user = window.validClients.find(u => u.id === idInput);
 
-            if (user && (passInput.toUpperCase() === user.id || passInput === "1234")) {
+            // 2. 验证密码
+            if (user && (passInput === user.pass)) {
                 window.loggedInUser = user; 
                 
-                // 过滤逻辑：只要产品名或代码包含任何一个关键词
+                // 筛选产品
                 window.userAllowedProducts = window.allProducts.filter(item => {
                     const searchStr = (item.code + " " + item.name).toUpperCase();
                     if (user.keywords.includes('ALL')) return true;
                     return user.keywords.some(key => searchStr.includes(key));
                 });
-
-                // 调试弹窗：帮助你检查数据
-                if (window.userAllowedProducts.length === 0) {
-                    let debugMsg = `LOGIN SUCCESS, BUT 0 PRODUCTS FOUND.\n\n`;
-                    debugMsg += `Your Keywords: ${JSON.stringify(user.keywords)}\n\n`;
-                    debugMsg += `System sees first 2 products in DB:\n`;
-                    window.allProducts.slice(0, 2).forEach(p => {
-                        debugMsg += `- ${p.code} | ${p.name}\n`;
-                    });
-                    alert(debugMsg);
-                }
 
                 document.getElementById('userDisplay').innerText = user.id; 
                 document.getElementById('loginSection').style.display = 'none';
@@ -225,37 +445,58 @@
             }
         };
 
-        // --- 5. 搜索功能 ---
+        // --- 5. 过滤功能 (4. Filter Button) ---
+        window.applyFilter = function(filterType) {
+            window.currentFilter = filterType;
+            const badge = document.getElementById('filterLabel');
+            if(filterType === 'ALL') {
+                badge.style.display = 'none';
+            } else if (filterType === 'STOCK') {
+                badge.innerText = "IN STOCK ONLY";
+                badge.style.display = 'inline-block';
+            } else if (filterType === 'NEW') {
+                badge.innerText = "NEW ITEMS ONLY";
+                badge.style.display = 'inline-block';
+            }
+            window.handleSearch();
+        };
+
+        // --- 6. 搜索与列表 ---
         window.handleSearch = function() {
             const rawInput = document.getElementById('searchInput').value.toUpperCase().trim();
             const listDiv = document.getElementById('resultsList');
-            const sourceData = window.userAllowedProducts; 
+            let data = window.userAllowedProducts; 
 
-            document.getElementById('totalCount').innerText = sourceData.length;
-
-            let results = sourceData;
-            if(rawInput.length > 0) {
-                if (rawInput === 'STOCK') {
-                    results = sourceData.filter(i => i.stock > 0);
-                } else if (rawInput === 'NEW') {
-                    results = sourceData.filter(i => i.isNew);
-                } else {
-                    const terms = rawInput.split(/\s+/);
-                    results = sourceData.filter(item => {
-                        const text = (item.code + " " + item.name).toUpperCase();
-                        return terms.every(term => text.includes(term));
-                    });
-                }
+            // 4. 应用过滤器
+            if (window.currentFilter === 'STOCK') {
+                data = data.filter(i => i.stock > 0);
+            } else if (window.currentFilter === 'NEW') {
+                data = data.filter(i => i.isNew);
             }
+
+            // 应用搜索词
+            let results = data;
+            if(rawInput.length > 0) {
+                const terms = rawInput.split(/\s+/);
+                results = data.filter(item => {
+                    const text = (item.code + " " + item.name).toUpperCase();
+                    return terms.every(term => text.includes(term));
+                });
+            }
+            
+            document.getElementById('totalCount').innerText = results.length;
 
             if (results.length === 0) {
                 listDiv.innerHTML = '<div class="text-center mt-5 text-muted">No items found.</div>';
                 return;
             }
 
+            // 限制显示数量，提升性能
+            const displayList = results.slice(0, 100);
+
             let html = '';
-            results.forEach(item => {
-                const imgSrc = `images/${item.code}.jpg`;
+            displayList.forEach(item => {
+                // 3. 移除了列表右侧的图片
                 let stockBadge = item.stock <= 0 ? `<span class="stock-tag bg-stock-zero">OUT OF STOCK</span>` : 
                                 (item.stock <= 5 ? `<span class="stock-tag bg-stock-low">LOW STOCK</span>` : `<span class="stock-tag bg-stock-high">IN STOCK</span>`);
 
@@ -273,13 +514,14 @@
                         <div class="part-name text-muted mt-1">${item.name}</div>
                         <div class="price-text text-end mt-1">${priceDisplay}</div>
                     </div>
-                    <img src="${imgSrc}" class="product-img-thumb ms-3" onerror="this.src='https://via.placeholder.com/80?text=No+Img'">
                 </div>`;
             });
+            
+            if(results.length > 100) html += `<div class="text-center small text-muted mt-3">Showing top 100 results...</div>`;
             listDiv.innerHTML = html;
         };
 
-        // --- 6. 其他 UI 功能 (详情、购物车等) ---
+        // --- 7. 交互功能 ---
         window.openProduct = function(code) {
             window.currentItem = window.allProducts.find(p => p.code === code);
             const item = window.currentItem;
@@ -295,9 +537,19 @@
                 `<span class="text-decoration-line-through text-muted me-2 fs-5">${item.price}</span><span class="fs-3 fw-bold text-danger">${currencyUnit}${item.promo}</span>` :
                 `<span class="fs-3 fw-bold text-dark">${currencyUnit}${item.price}</span>`;
 
-            document.getElementById('addToCartSection').style.display = item.stock <= 0 ? 'none' : 'block';
-            document.getElementById('outOfStockMsg').style.display = item.stock <= 0 ? 'block' : 'none';
-            document.getElementById('modalStockContent').innerHTML = `<span class="badge ${item.stock <= 0 ? 'bg-danger' : 'bg-success'}">Stock: ${item.stock}</span>`;
+            // 6. 逻辑检查
+            const btnSection = document.getElementById('addToCartSection');
+            const msgSection = document.getElementById('outOfStockMsg');
+
+            if(item.stock <= 0) {
+                btnSection.style.display = 'none';
+                msgSection.style.display = 'block';
+                document.getElementById('modalStockContent').innerHTML = `<span class="badge bg-danger">Out of Stock</span>`;
+            } else {
+                btnSection.style.display = 'flex'; // 确保是flex显示
+                msgSection.style.display = 'none';
+                document.getElementById('modalStockContent').innerHTML = `<span class="badge bg-success">Stock: ${item.stock}</span>`;
+            }
             
             window.productModal.show();
         };
@@ -315,7 +567,7 @@
             const item = window.currentItem;
             const exist = window.cart.find(c => c.code === item.code);
             if(exist) {
-                if((exist.qty + qty) > item.stock) return alert('Exceeds stock');
+                if((exist.qty + qty) > item.stock) return alert('Exceeds stock limit');
                 exist.qty += qty;
             } else {
                 window.cart.push({...item, qty: qty, price: item.finalPrice});
@@ -336,13 +588,13 @@
             modalBody.innerHTML = '';
             let total = 0;
             if (window.cart.length === 0) {
-                modalBody.innerHTML = '<p class="text-center py-5">Cart is empty</p>';
+                modalBody.innerHTML = '<p class="text-center py-5 text-muted">Cart is empty</p>';
             } else {
                 window.cart.forEach((item, index) => {
                     total += item.price * item.qty;
                     modalBody.innerHTML += `
                         <div class="card mb-2 border-0 shadow-sm"><div class="card-body p-2 d-flex justify-content-between align-items-center">
-                            <div style="width:60%"><div class="fw-bold small">${item.code}</div><div class="small text-muted">${item.name}</div></div>
+                            <div style="width:60%"><div class="fw-bold small">${item.code}</div><div class="small text-muted text-truncate">${item.name}</div></div>
                             <div class="text-end"><div>${item.qty} x ${item.price}</div><button class="btn btn-sm text-danger" onclick="window.removeCartItem(${index})">Remove</button></div>
                         </div></div>`;
                 });
@@ -359,9 +611,20 @@
 
         window.confirmOrder = function() {
             if (window.cart.length === 0) return;
+            // 前端扣库存演示
+            window.cart.forEach(cItem => {
+                const dbItem = window.allProducts.find(d => d.code === cItem.code);
+                if(dbItem) dbItem.stock = Math.max(0, dbItem.stock - cItem.qty);
+            });
+
             let msg = `🛒 *FROTISE ORDER (${window.loggedInUser.id})*\n\n`;
             window.cart.forEach(i => msg += `▪️ ${i.code} (x${i.qty}) - ${i.price}\n`);
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+            
+            window.cart = [];
+            window.updateCartUI();
+            window.cartModal.hide();
+            window.handleSearch();
         };
 
         window.downloadCSV = function() {
@@ -370,8 +633,14 @@
         };
 
         window.logout = function() { location.reload(); };
-        window.viewImage = function(src) { document.getElementById('fullImage').src = src; document.getElementById('imageOverlay').style.display = 'flex'; };
+        window.viewImage = function(src) { 
+            if(!src) return;
+            document.getElementById('fullImage').src = src; 
+            document.getElementById('imageOverlay').style.display = 'flex'; 
+        };
         window.closeImageViewer = function() { document.getElementById('imageOverlay').style.display = 'none'; };
+        
+        document.getElementById('loginPass').addEventListener('keypress', function (e) { if (e.key === 'Enter') window.attemptLogin(); });
     </script>
 </body>
 </html>
