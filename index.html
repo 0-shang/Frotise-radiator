@@ -6,13 +6,12 @@
     <meta name="google" content="notranslate">
     <title>FROTISE STEERING RACK</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- 引入 Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     
     <style>
-        /* === 核心配色 (Frotise Blue) === */
+        /* === 核心配色 === */
         :root {
-            --frotise-blue: #004a99; /* 这是一个标准的深蓝色，如果不准，您可以把这个颜色代码改成您Logo的具体颜色 */
+            --frotise-blue: #004a99; 
         }
 
         body { background-color: #f0f2f5; font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding-bottom: 100px; }
@@ -31,7 +30,6 @@
         #loginSection {
             height: 100vh; width: 100%;
             display: flex; align-items: center; justify-content: center;
-            /* 3. 背景色改为蓝色 */
             background: var(--frotise-blue);
             position: fixed; top: 0; left: 0; z-index: 9999;
         }
@@ -44,30 +42,26 @@
 
         /* === 主页顶部 Header === */
         .header-bg {
-            /* 3. 背景色改为蓝色 */
             background: var(--frotise-blue);
-            color: white; padding: 20px 20px 50px; /* 调整了内边距 */
+            color: white; padding: 20px 20px 50px;
             border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
             position: relative;
         }
         
-        /* 4. Logout 左上角 */
         .logout-btn {
             position: absolute; top: 20px; left: 20px;
             color: rgba(255,255,255,0.9); text-decoration: none; font-size: 1.2rem;
         }
 
-        /* 4. 铃铛 右上角 */
         .notif-btn {
             position: absolute; top: 20px; right: 20px;
             color: white; font-size: 1.4rem; cursor: pointer;
         }
-        /* 红点提示 */
         .notif-dot {
             position: absolute; top: -2px; right: -2px;
             width: 10px; height: 10px; background-color: #ff3b30;
             border-radius: 50%; border: 2px solid var(--frotise-blue);
-            display: none; /* 默认隐藏，有日期时显示 */
+            display: none; 
         }
         
         /* === 搜索栏 === */
@@ -76,13 +70,19 @@
             padding: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);
         }
 
-        /* 1. 过滤按钮样式优化 */
+        /* 1. 修复过滤按钮闪烁问题 */
         .filter-btn {
             background-color: #f0f2f5; color: #555; border: 1px solid #ced4da;
-            border-left: none; padding: 0 15px;
+            border-left: none; padding: 0 15px; transition: background-color 0.2s;
         }
-        .filter-btn:hover, .filter-btn:focus {
-            background-color: #e2e6ea; color: #333;
+        /* 强制覆盖 Bootstrap 的 focus/active 样式，防止变蓝 */
+        .filter-btn:hover { background-color: #e2e6ea; color: #333; }
+        .filter-btn:active, .filter-btn:focus, .filter-btn.show, .btn-check:checked + .btn {
+            background-color: #dbe0e5 !important;
+            color: #333 !important;
+            border-color: #ced4da !important;
+            box-shadow: none !important; /* 去掉光晕 */
+            outline: none !important;
         }
 
         /* === 列表项 === */
@@ -176,16 +176,13 @@
     <!-- 主界面 -->
     <div id="mainApp" style="display:none;">
         <div class="header-bg text-center">
-            <!-- 4. 左上角 Logout -->
             <a href="#" onclick="window.logout()" class="logout-btn"><i class="bi bi-box-arrow-left"></i></a>
             
-            <!-- 4. 右上角 铃铛 -->
             <div class="notif-btn" onclick="window.showNewGoodsInfo()">
                 <i class="bi bi-bell-fill"></i>
                 <div id="notifDot" class="notif-dot"></div>
             </div>
 
-            <!-- 3. 上方的 Logo 去掉了，只留文字 -->
             <h2 class="fw-bold mb-0 mt-2">FROTISE</h2>
             <p class="opacity-75 mb-0 small letter-spacing-1">PRODUCT CATALOG</p>
             <div class="mt-2 badge bg-light text-dark opacity-75 small">
@@ -199,7 +196,6 @@
                     <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
                     <input type="text" id="searchInput" class="form-control border-start-0" placeholder="Search..." onkeyup="window.handleSearch()">
                     
-                    <!-- 1. 优化后的过滤按钮 -->
                     <button class="btn btn-sm filter-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
                         <i class="bi bi-funnel"></i>
                     </button>
@@ -209,7 +205,6 @@
                         <li><a class="dropdown-item" href="#" onclick="window.applyFilter('NEW')">New Items Only</a></li>
                     </ul>
                 </div>
-                <!-- 3. 移除了 "xxx items found" 文字 -->
                 <div class="text-center mt-2">
                     <span id="filterLabel" class="badge bg-secondary" style="display:none;"></span>
                 </div>
@@ -221,6 +216,24 @@
         <div class="fab-cart" onclick="window.openCartModal()">
             <i class="bi bi-cart-fill" style="font-size: 1.5rem;"></i>
             <div id="cartBadge" class="cart-badge" style="display: none;">0</div>
+        </div>
+    </div>
+
+    <!-- 3. 新货通知自定义 Modal (替代原生 alert) -->
+    <div class="modal fade" id="notificationModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" style="color:var(--frotise-blue)"><i class="bi bi-bell-fill"></i> New Arrival</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <p id="notificationText" class="fs-5 mb-0"></p>
+                </div>
+                <div class="modal-footer border-0 pt-0 justify-content-center">
+                    <button type="button" class="btn btn-dark px-4" data-bs-dismiss="modal" style="background-color:var(--frotise-blue)">OK</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -320,18 +333,27 @@
         window.loggedInUser = null; 
         window.productModal = null;
         window.cartModal = null;
+        window.notificationModal = null; // 新增通知弹窗对象
         
         window.allProducts = []; 
         window.validClients = []; 
         window.userAllowedProducts = []; 
         window.currentFilter = 'ALL'; 
         
-        // 4. 全局变量存储新货日期
         window.newArrivalDate = null;
 
         document.addEventListener('DOMContentLoaded', function() {
             window.productModal = new bootstrap.Modal(document.getElementById('productModal'));
             window.cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
+            window.notificationModal = new bootstrap.Modal(document.getElementById('notificationModal'));
+
+            // Logo 检查
+            const img = document.querySelector('.login-logo');
+            img.onerror = function() {
+                img.style.display = 'none';
+                document.getElementById('backupIcon').style.display = 'block';
+            };
+
             loadDatabases();
         });
 
@@ -354,6 +376,8 @@
                 parseProducts(prodText);
                 parseClients(clientText);
 
+                console.log("System Ready");
+
             } catch (err) {
                 console.error(err);
                 statusEl.style.display = 'block';
@@ -366,11 +390,9 @@
             const lines = csvText.split(/\r?\n/);
             window.allProducts = [];
             
-            // 4. 读取表头行 (第一行) 的第7列 (索引6) 获取日期
             if (lines.length > 0) {
                 const headerLine = lines[0].replace(/"/g, "");
                 const headerCols = headerLine.split(',');
-                // 检查 G1 (第7列) 是否有日期
                 if (headerCols.length >= 7 && headerCols[6].trim() !== "") {
                     window.newArrivalDate = headerCols[6].trim();
                 }
@@ -448,7 +470,6 @@
                     return user.keywords.some(key => searchStr.includes(key));
                 });
 
-                // 4. 检查是否有新货日期，显示红点
                 if (window.newArrivalDate) {
                     document.getElementById('notifDot').style.display = 'block';
                 }
@@ -463,13 +484,15 @@
             }
         };
 
-        // 4. 点击铃铛显示消息
+        // 3. 显示新货通知 (自定义 Modal)
         window.showNewGoodsInfo = function() {
+            const textEl = document.getElementById('notificationText');
             if (window.newArrivalDate) {
-                alert(`📢 NEW GOODS ARRIVED ON: ${window.newArrivalDate}`);
+                textEl.innerText = `NEW GOODS ARRIVED ON: ${window.newArrivalDate}`;
             } else {
-                alert("No new arrival notifications.");
+                textEl.innerText = "No new arrival notifications.";
             }
+            window.notificationModal.show();
         };
 
         window.applyFilter = function(filterType) {
@@ -507,7 +530,6 @@
                 });
             }
             
-            // 2. 移除 "slice" 限制，显示全部
             const displayList = results; 
 
             if (displayList.length === 0) {
@@ -540,7 +562,6 @@
             listDiv.innerHTML = html;
         };
 
-        // --- 7. 交互功能 ---
         window.openProduct = function(code) {
             window.currentItem = window.allProducts.find(p => p.code === code);
             const item = window.currentItem;
@@ -558,15 +579,21 @@
 
             const btnSection = document.getElementById('addToCartSection');
             const msgSection = document.getElementById('outOfStockMsg');
+            const stockContent = document.getElementById('modalStockContent');
 
+            // 2. 隐藏具体库存逻辑
             if(item.stock <= 0) {
                 btnSection.style.display = 'none';
                 msgSection.style.display = 'block';
-                document.getElementById('modalStockContent').innerHTML = `<span class="badge bg-danger">Out of Stock</span>`;
+                stockContent.innerHTML = `<span class="badge bg-danger">OUT OF STOCK</span>`;
             } else {
                 btnSection.style.display = 'flex'; 
                 msgSection.style.display = 'none';
-                document.getElementById('modalStockContent').innerHTML = `<span class="badge bg-success">Stock: ${item.stock}</span>`;
+                if(item.stock <= 10) {
+                    stockContent.innerHTML = `<span class="badge bg-warning text-dark">LESS THAN 10</span>`;
+                } else {
+                    stockContent.innerHTML = `<span class="badge bg-success">IN STOCK</span>`;
+                }
             }
             
             window.productModal.show();
