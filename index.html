@@ -12,9 +12,16 @@
         /* === 核心配色 === */
         :root {
             --frotise-blue: #004a99; 
+            --app-bg: #f0f2f5;
         }
 
-        body { background-color: #f0f2f5; font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding-bottom: 100px; }
+        /* 优化：初始背景色设为蓝色，防止白屏闪烁 */
+        body { 
+            background-color: var(--frotise-blue); 
+            font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            padding-bottom: 100px; 
+            transition: background-color 0.3s ease; /* 增加颜色切换动画 */
+        }
         
         /* === 图片查看器 === */
         #imageOverlay {
@@ -32,6 +39,7 @@
             display: flex; align-items: center; justify-content: center;
             background: var(--frotise-blue);
             position: fixed; top: 0; left: 0; z-index: 9999;
+            transition: opacity 0.3s ease;
         }
         .login-card {
             background: white; padding: 40px 30px;
@@ -51,6 +59,7 @@
         .logout-btn {
             position: absolute; top: 20px; left: 20px;
             color: rgba(255,255,255,0.9); text-decoration: none; font-size: 1.2rem;
+            cursor: pointer;
         }
 
         .notif-btn {
@@ -70,18 +79,16 @@
             padding: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);
         }
 
-        /* 1. 修复过滤按钮闪烁问题 */
         .filter-btn {
             background-color: #f0f2f5; color: #555; border: 1px solid #ced4da;
             border-left: none; padding: 0 15px; transition: background-color 0.2s;
         }
-        /* 强制覆盖 Bootstrap 的 focus/active 样式，防止变蓝 */
         .filter-btn:hover { background-color: #e2e6ea; color: #333; }
         .filter-btn:active, .filter-btn:focus, .filter-btn.show, .btn-check:checked + .btn {
             background-color: #dbe0e5 !important;
             color: #333 !important;
             border-color: #ced4da !important;
-            box-shadow: none !important; /* 去掉光晕 */
+            box-shadow: none !important; 
             outline: none !important;
         }
 
@@ -146,7 +153,6 @@
 </head>
 <body>
 
-    <!-- 图片放大 -->
     <div id="imageOverlay" onclick="window.closeImageViewer()">
         <img id="fullImage" src="">
     </div>
@@ -176,6 +182,7 @@
     <!-- 主界面 -->
     <div id="mainApp" style="display:none;">
         <div class="header-bg text-center">
+            <!-- Logout 按钮改为调用 resetApp -->
             <a href="#" onclick="window.logout()" class="logout-btn"><i class="bi bi-box-arrow-left"></i></a>
             
             <div class="notif-btn" onclick="window.showNewGoodsInfo()">
@@ -219,7 +226,7 @@
         </div>
     </div>
 
-    <!-- 3. 新货通知自定义 Modal (替代原生 alert) -->
+    <!-- 通知 Modal -->
     <div class="modal fade" id="notificationModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -333,7 +340,7 @@
         window.loggedInUser = null; 
         window.productModal = null;
         window.cartModal = null;
-        window.notificationModal = null; // 新增通知弹窗对象
+        window.notificationModal = null; 
         
         window.allProducts = []; 
         window.validClients = []; 
@@ -347,7 +354,6 @@
             window.cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
             window.notificationModal = new bootstrap.Modal(document.getElementById('notificationModal'));
 
-            // Logo 检查
             const img = document.querySelector('.login-logo');
             img.onerror = function() {
                 img.style.display = 'none';
@@ -464,6 +470,9 @@
             if (user && (passInput === user.pass)) {
                 window.loggedInUser = user; 
                 
+                // 1. 切换背景色为灰色 (应用内背景)
+                document.body.style.backgroundColor = "#f0f2f5";
+
                 window.userAllowedProducts = window.allProducts.filter(item => {
                     const searchStr = (item.code + " " + item.name).toUpperCase();
                     if (user.keywords.includes('ALL')) return true;
@@ -484,7 +493,24 @@
             }
         };
 
-        // 3. 显示新货通知 (自定义 Modal)
+        // 柔性登出: 瞬间重置，不刷新页面
+        window.logout = function() {
+            // 清理状态
+            window.loggedInUser = null;
+            window.cart = [];
+            window.userAllowedProducts = [];
+            document.getElementById('loginPass').value = '';
+            document.getElementById('loginError').style.display = 'none';
+            document.getElementById('cartBadge').style.display = 'none';
+            
+            // 切换回蓝色背景
+            document.body.style.backgroundColor = "var(--frotise-blue)";
+
+            // 切换界面
+            document.getElementById('mainApp').style.display = 'none';
+            document.getElementById('loginSection').style.display = 'flex';
+        };
+
         window.showNewGoodsInfo = function() {
             const textEl = document.getElementById('notificationText');
             if (window.newArrivalDate) {
@@ -581,7 +607,6 @@
             const msgSection = document.getElementById('outOfStockMsg');
             const stockContent = document.getElementById('modalStockContent');
 
-            // 2. 隐藏具体库存逻辑
             if(item.stock <= 0) {
                 btnSection.style.display = 'none';
                 msgSection.style.display = 'block';
@@ -676,7 +701,6 @@
             window.open("data:text/csv;charset=utf-8," + encodeURI(csv));
         };
 
-        window.logout = function() { location.reload(); };
         window.viewImage = function(src) { 
             if(!src) return;
             document.getElementById('fullImage').src = src; 
