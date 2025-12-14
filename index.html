@@ -22,25 +22,30 @@
             --app-bg: #f0f2f5;
         }
 
-        /* 基础设置：防止横向滚动和闪烁 */
+        /* 基础设置 */
         html, body {
             height: 100%;
             overflow-x: hidden;
-            background-color: #ffffff; /* 默认白色背景，适配启动页 */
+            background-color: #ffffff;
             font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            user-select: none; -webkit-user-select: none; /* 禁止长按 */
+            user-select: none; -webkit-user-select: none;
         }
 
-        /* === 2. 自定义启动页 (Splash Screen) === */
+        /* === 启动页 (Splash Screen) === */
         #splashScreen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: #ffffff;
-            z-index: 20000; /* 最高层级 */
-            display: flex; align-items: center; justify-content: center;
+            z-index: 20000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
             transition: opacity 0.5s ease-out;
         }
         .splash-logo {
             width: 60%; max-width: 250px; height: auto;
+            animation: pulse 2s infinite;
+        }
+        /* 备用文字，防止logo挂了显示空白 */
+        .splash-text {
+            display: none; color: var(--frotise-blue); font-weight: bold; font-size: 2rem; letter-spacing: 2px;
             animation: pulse 2s infinite;
         }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
@@ -54,13 +59,13 @@
         }
         #fullImage { max-width: 95%; max-height: 90%; object-fit: contain; }
 
-        /* === 登录界面 (全屏覆盖) === */
+        /* === 登录界面 === */
         #loginSection {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; align-items: center; justify-content: center;
-            background-color: var(--frotise-blue); /* 蓝色背景 */
+            background-color: var(--frotise-blue);
             z-index: 9000;
-            display: none; /* 默认隐藏，由JS控制显示 */
+            display: none; 
         }
         .login-card {
             background: white; padding: 40px 30px;
@@ -71,7 +76,7 @@
 
         /* === 主程序界面 === */
         #mainApp {
-            display: none; /* 默认隐藏 */
+            display: none; 
             min-height: 100vh;
             background-color: var(--app-bg);
             padding-bottom: 100px;
@@ -154,16 +159,18 @@
         .qty-display { width: 35px; text-align: center; font-weight: bold; border:none; background: transparent; padding:0;}
         .right-aligned-controls { display: flex; flex-direction: column; align-items: flex-end; }
         
-        /* Modal 通用 */
         .modal-content { border-radius: 15px; overflow: hidden; }
         .modal-img { width: 100%; border-radius: 8px; background: #f8f9fa; border: 1px solid #eee; }
     </style>
 </head>
 <body>
 
-    <!-- 2. 自定义启动页 (解决白屏和美观问题) -->
+    <!-- 启动页 (Safety Timeout 已添加) -->
     <div id="splashScreen">
-        <img src="logo.png" alt="FROTISE" class="splash-logo">
+        <!-- 如果图片加载失败，显示文字 FROTISE -->
+        <img src="logo.png" alt="FROTISE" class="splash-logo" onerror="this.style.display='none'; document.querySelector('.splash-text').style.display='block';">
+        <div class="splash-text">FROTISE</div>
+        <div id="loadingStatus" style="margin-top:20px; color:#666; font-size:0.8rem;">Loading...</div>
     </div>
 
     <div id="imageOverlay" onclick="window.closeImageViewer()">
@@ -330,7 +337,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-        // PWA Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW fail', err)));
         }
@@ -349,16 +355,32 @@
         window.userAllowedProducts = []; 
         window.currentFilter = 'ALL'; 
         window.newArrivalDate = null;
+        
+        // 标记数据是否加载完成
+        window.isDataLoaded = false;
 
         document.addEventListener('DOMContentLoaded', function() {
             window.productModal = new bootstrap.Modal(document.getElementById('productModal'));
             window.cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
             window.notificationModal = new bootstrap.Modal(document.getElementById('notificationModal'));
             
+            // 核心修复 1: 强制超时保护
+            // 如果 3 秒后数据还没加载完，强制关闭启动页显示登录界面
+            setTimeout(() => {
+                const splash = document.getElementById('splashScreen');
+                if (splash && splash.style.display !== 'none' && !window.isDataLoaded) {
+                    console.warn("Safety timeout triggered.");
+                    hideSplashScreen();
+                    // 只有在没有自动登录的情况下才显示登录页
+                    if (!window.loggedInUser) {
+                        document.getElementById('loginSection').style.display = 'flex';
+                    }
+                }
+            }, 3000);
+
             loadDatabases();
         });
 
-        // 1. 初始化加载
         async function loadDatabases() {
             try {
                 const [prodRes, clientRes] = await Promise.all([
@@ -375,30 +397,30 @@
                 parseProducts(decoder.decode(prodBuffer));
                 parseClients(decoder.decode(clientBuffer));
 
-                // 3. 检查持久化登录状态
+                window.isDataLoaded = true; // 标记加载成功
+
                 checkPersistentLogin();
 
             } catch (err) {
                 console.error(err);
-                alert("Error loading data. Please verify network connection.");
-                // 出错也要隐藏启动页，否则用户卡死在Logo
-                hideSplashScreen(); 
-                document.getElementById('loginSection').style.display = 'flex';
+                document.getElementById('loadingStatus').innerText = "Network Error. Please refresh.";
+                // 出错后强制显示登录页，允许重试
+                setTimeout(() => {
+                    hideSplashScreen();
+                    document.getElementById('loginSection').style.display = 'flex';
+                }, 1000);
             }
         }
 
-        // 3. 检查 localStorage 实现自动登录
         function checkPersistentLogin() {
             const savedUser = localStorage.getItem('frotiseUser');
             if (savedUser) {
                 const userObj = JSON.parse(savedUser);
-                // 重新验证该用户是否仍在 clients.csv 中 (可选，防止用户被删后仍能登录)
                 const validUser = window.validClients.find(u => u.id === userObj.id && u.pass === userObj.pass);
                 
                 if (validUser) {
-                    performLogin(validUser, false); // false 表示不需要动画淡入
+                    performLogin(validUser, true); 
                 } else {
-                    // 用户无效，清除缓存显示登录页
                     localStorage.removeItem('frotiseUser');
                     showLoginScreen();
                 }
@@ -465,7 +487,6 @@
             }
         }
 
-        // 点击登录按钮
         window.attemptLogin = function() {
             const idInput = document.getElementById('loginId').value.trim().toUpperCase();
             const passInput = document.getElementById('loginPass').value.trim();
@@ -474,17 +495,15 @@
             const user = window.validClients.find(u => u.id === idInput);
 
             if (user && (passInput === user.pass)) {
-                // 保存登录状态到 localStorage
                 localStorage.setItem('frotiseUser', JSON.stringify(user));
-                performLogin(user, true);
+                performLogin(user, false); // 手动登录不需要淡出动画，因为已经在登录页了
             } else {
                 errorDiv.innerText = "Invalid Client Code or Password.";
                 errorDiv.style.display = 'block';
             }
         };
 
-        // 执行登录逻辑 (处理界面切换)
-        function performLogin(user, animate) {
+        function performLogin(user, isAutoLogin) {
             window.loggedInUser = user; 
             
             window.userAllowedProducts = window.allProducts.filter(item => {
@@ -496,15 +515,14 @@
             if (window.newArrivalDate) document.getElementById('notifDot').style.display = 'block';
             document.getElementById('userDisplay').innerText = user.id; 
 
-            // 4. 解决闪烁：先隐藏所有，再显示主页
-            if(animate) hideSplashScreen(); // 确保启动页已消失
+            if(isAutoLogin) hideSplashScreen();
+            
             document.getElementById('loginSection').style.display = 'none';
             document.getElementById('mainApp').style.display = 'block';
             
             window.handleSearch();
         }
 
-        // 3. Logout 需要清除 localStorage
         window.logout = function() {
             localStorage.removeItem('frotiseUser');
             window.loggedInUser = null;
@@ -639,7 +657,6 @@
             badge.style.display = count > 0 ? 'flex' : 'none';
         };
 
-        // 5. 购物车界面升级 (加减号 + 垃圾桶)
         window.openCartModal = function() {
             const modalBody = document.getElementById('cartBody');
             modalBody.innerHTML = '';
@@ -675,19 +692,18 @@
             window.cartModal.show();
         };
 
-        // 5. 购物车内修改数量
         window.changeCartQty = function(index, change) {
             const item = window.cart[index];
             const originalItem = window.allProducts.find(p => p.code === item.code);
             const maxStock = originalItem ? originalItem.stock : 999;
             
             let newQty = item.qty + change;
-            if (newQty < 1) return; // 最小为1
+            if (newQty < 1) return; 
             if (newQty > maxStock) return alert("Exceeds stock limit");
             
             item.qty = newQty;
-            window.openCartModal(); // 重新渲染购物车
-            window.updateCartUI();  // 更新外部角标
+            window.openCartModal(); 
+            window.updateCartUI(); 
         };
 
         window.removeCartItem = function(index) {
