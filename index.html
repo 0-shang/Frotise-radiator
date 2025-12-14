@@ -2,79 +2,94 @@
 <html lang="en" translate="no">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="google" content="notranslate">
+    <title>FROTISE CATALOG</title>
     
-    <!-- PWA 必要设置 -->
-    <title>FROTISE STEERING RACK</title>
+    <!-- PWA 配置 -->
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#004a99">
+    <meta name="theme-color" content="#ffffff">
     <link rel="apple-touch-icon" href="icon-192.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     
     <style>
-        /* === 核心配色 === */
+        /* === 核心变量 === */
         :root {
             --frotise-blue: #004a99; 
             --app-bg: #f0f2f5;
         }
 
-        /* 优化：初始背景色设为蓝色，防止白屏闪烁 */
-        body { 
-            background-color: var(--frotise-blue); 
-            font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            padding-bottom: 100px; 
-            transition: background-color 0.3s ease;
-            /* 禁止长按选中文本，更像原生App */
-            user-select: none;
-            -webkit-user-select: none;
+        /* 基础设置：防止横向滚动和闪烁 */
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+            background-color: #ffffff; /* 默认白色背景，适配启动页 */
+            font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            user-select: none; -webkit-user-select: none; /* 禁止长按 */
         }
-        
+
+        /* === 2. 自定义启动页 (Splash Screen) === */
+        #splashScreen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #ffffff;
+            z-index: 20000; /* 最高层级 */
+            display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.5s ease-out;
+        }
+        .splash-logo {
+            width: 60%; max-width: 250px; height: auto;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
+
         /* === 图片查看器 === */
         #imageOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.95); z-index: 10000;
             display: none; justify-content: center; align-items: center;
-            cursor: pointer; animation: fadeIn 0.2s ease-in-out;
+            cursor: pointer;
         }
         #fullImage { max-width: 95%; max-height: 90%; object-fit: contain; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* === 登录界面 === */
+        /* === 登录界面 (全屏覆盖) === */
         #loginSection {
-            height: 100vh; width: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; align-items: center; justify-content: center;
-            background: var(--frotise-blue);
-            position: fixed; top: 0; left: 0; z-index: 9999;
-            transition: opacity 0.3s ease;
+            background-color: var(--frotise-blue); /* 蓝色背景 */
+            z-index: 9000;
+            display: none; /* 默认隐藏，由JS控制显示 */
         }
         .login-card {
             background: white; padding: 40px 30px;
-            border-radius: 20px; width: 90%; max-width: 400px; text-align: center;
+            border-radius: 20px; width: 85%; max-width: 400px; text-align: center;
             box-shadow: 0 20px 40px rgba(0,0,0,0.4);
         }
         .login-logo { max-width: 180px; height: auto; margin-bottom: 20px; }
 
-        /* === 主页顶部 Header === */
+        /* === 主程序界面 === */
+        #mainApp {
+            display: none; /* 默认隐藏 */
+            min-height: 100vh;
+            background-color: var(--app-bg);
+            padding-bottom: 100px;
+        }
+
+        /* Header */
         .header-bg {
             background: var(--frotise-blue);
             color: white; padding: 20px 20px 50px;
             border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
             position: relative;
-            /* 适配 iPhone 顶部刘海 */
             padding-top: max(20px, env(safe-area-inset-top));
         }
         
         .logout-btn {
             position: absolute; top: max(20px, env(safe-area-inset-top)); left: 20px;
-            color: rgba(255,255,255,0.9); text-decoration: none; font-size: 1.2rem;
-            cursor: pointer;
+            color: rgba(255,255,255,0.9); font-size: 1.2rem; cursor: pointer;
         }
-
         .notif-btn {
             position: absolute; top: max(20px, env(safe-area-inset-top)); right: 20px;
             color: white; font-size: 1.4rem; cursor: pointer;
@@ -82,73 +97,49 @@
         .notif-dot {
             position: absolute; top: -2px; right: -2px;
             width: 10px; height: 10px; background-color: #ff3b30;
-            border-radius: 50%; border: 2px solid var(--frotise-blue);
-            display: none; 
+            border-radius: 50%; border: 2px solid var(--frotise-blue); display: none;
         }
-        
-        /* === 搜索栏 === */
+
+        /* 搜索框 */
         .search-card {
             margin-top: -35px; background: white; border-radius: 15px;
             padding: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);
         }
-
         .filter-btn {
             background-color: #f0f2f5; color: #555; border: 1px solid #ced4da;
-            border-left: none; padding: 0 15px; transition: background-color 0.2s;
+            border-left: none; padding: 0 15px;
         }
-        .filter-btn:hover { background-color: #e2e6ea; color: #333; }
-        .filter-btn:active, .filter-btn:focus, .filter-btn.show, .btn-check:checked + .btn {
-            background-color: #dbe0e5 !important;
-            color: #333 !important;
-            border-color: #ced4da !important;
-            box-shadow: none !important; 
-            outline: none !important;
-        }
+        .filter-btn:hover, .filter-btn:active { background-color: #e2e6ea; color: #333; }
 
-        /* === 列表项 === */
+        /* 产品列表 */
         .result-item {
             background: white; border-radius: 12px; margin-bottom: 10px;
             padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            transition: transform 0.1s; cursor: pointer; position: relative;
-            border-left: 5px solid transparent; overflow: hidden;
+            cursor: pointer; position: relative; border-left: 5px solid transparent; overflow: hidden;
         }
-        .result-item:active { transform: scale(0.99); background-color: #f8f9fa; border-left-color: var(--frotise-blue); }
+        .result-item:active { background-color: #f8f9fa; border-left-color: var(--frotise-blue); }
         
         .stock-tag { font-size: 0.7rem; padding: 4px 8px; border-radius: 6px; font-weight: bold; text-transform: uppercase;}
         .bg-stock-high { background-color: #e8f5e9; color: #2e7d32; }
         .bg-stock-low { background-color: #fff3cd; color: #856404; }
         .bg-stock-zero { background-color: #ffebee; color: #c62828; }
-        
         .badge-new {
-            position: absolute; top: 0; right: 0;
-            background: #ff5722; color: white;
-            font-size: 0.6rem; padding: 4px 8px;
-            border-bottom-left-radius: 10px; font-weight: bold;
+            position: absolute; top: 0; right: 0; background: #ff5722; color: white;
+            font-size: 0.6rem; padding: 4px 8px; border-bottom-left-radius: 10px; font-weight: bold;
         }
-        
         .price-text { color: #d32f2f; font-weight: 800; font-size: 1.2rem; }
         .price-old { text-decoration: line-through; color: #999; font-size: 0.9rem; margin-right: 5px; font-weight: normal; }
-        .part-code { color: #2C3E50; font-size: 1.1rem; font-weight: 800; letter-spacing: 0.5px; }
-        .part-name { font-weight: 600; color: #555; font-size: 0.95rem; line-height: 1.3; margin-bottom: 4px; }
-        
-        /* === 弹窗 === */
-        .modal-content { border-radius: 15px; overflow: hidden; }
-        .modal-img { 
-            width: 100%; height: auto; border-radius: 8px; 
-            object-fit: contain; background: #f8f9fa; 
-            cursor: zoom-in; border: 1px solid #eee;
-        }
+        .part-code { color: #2C3E50; font-size: 1.1rem; font-weight: 800; }
+        .part-name { font-weight: 600; color: #555; font-size: 0.95rem; margin-bottom: 4px; }
 
-        /* === 购物车悬浮按钮 === */
+        /* 悬浮购物车 */
         .fab-cart {
             position: fixed; bottom: 30px; right: 30px;
             background-color: var(--frotise-blue); color: white;
             width: 65px; height: 65px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            z-index: 1000; cursor: pointer; transition: transform 0.2s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); z-index: 1000; cursor: pointer;
         }
-        .fab-cart:active { transform: scale(0.9); }
         .cart-badge {
             position: absolute; top: -5px; right: -5px;
             background-color: #dc3545; color: white;
@@ -157,14 +148,23 @@
             display: flex; align-items: center; justify-content: center; border: 2px solid white;
         }
 
-        .qty-control { display: flex; align-items: center; gap: 8px; }
-        .qty-btn { width: 35px; height: 35px; border-radius: 50%; border: 1px solid #dee2e6; background: white; font-weight: bold; color: #495057; }
-        .qty-display { width: 40px; text-align: center; font-weight: bold; border:none; background: transparent;}
-        
+        /* 数量控制器 */
+        .qty-control { display: flex; align-items: center; gap: 5px; }
+        .qty-btn { width: 32px; height: 32px; border-radius: 50%; border: 1px solid #dee2e6; background: white; font-weight: bold; color: #495057; display:flex; align-items:center; justify-content:center; padding:0; }
+        .qty-display { width: 35px; text-align: center; font-weight: bold; border:none; background: transparent; padding:0;}
         .right-aligned-controls { display: flex; flex-direction: column; align-items: flex-end; }
+        
+        /* Modal 通用 */
+        .modal-content { border-radius: 15px; overflow: hidden; }
+        .modal-img { width: 100%; border-radius: 8px; background: #f8f9fa; border: 1px solid #eee; }
     </style>
 </head>
 <body>
+
+    <!-- 2. 自定义启动页 (解决白屏和美观问题) -->
+    <div id="splashScreen">
+        <img src="logo.png" alt="FROTISE" class="splash-logo">
+    </div>
 
     <div id="imageOverlay" onclick="window.closeImageViewer()">
         <img id="fullImage" src="">
@@ -172,15 +172,10 @@
 
     <!-- 登录界面 -->
     <div id="loginSection">
-        <div class="login-card animate__animated animate__fadeInUp">
-            <img src="logo.png" alt="Logo" class="login-logo" onerror="this.style.display='none'; document.getElementById('backupText').style.display='block'">
-            <h2 id="backupText" class="fw-bold mb-4" style="display:none; color:var(--frotise-blue)">FROTISE</h2>
-            
+        <div class="login-card">
+            <img src="logo.png" alt="Logo" class="login-logo" onerror="this.style.display='none';">
             <h4 class="mb-1 fw-bold">SYSTEM ACCESS</h4>
             <p class="text-muted mb-4 small">Please login to continue</p>
-            
-            <div id="dbStatus" style="display:none;"></div> 
-
             <div class="mb-3 text-start">
                 <input type="text" id="loginId" class="form-control form-control-lg" placeholder="Client Code">
             </div>
@@ -193,15 +188,13 @@
     </div>
 
     <!-- 主界面 -->
-    <div id="mainApp" style="display:none;">
+    <div id="mainApp">
         <div class="header-bg text-center">
-            <a href="#" onclick="window.logout()" class="logout-btn"><i class="bi bi-box-arrow-left"></i></a>
-            
+            <a onclick="window.logout()" class="logout-btn"><i class="bi bi-box-arrow-left"></i></a>
             <div class="notif-btn" onclick="window.showNewGoodsInfo()">
                 <i class="bi bi-bell-fill"></i>
                 <div id="notifDot" class="notif-dot"></div>
             </div>
-
             <h2 class="fw-bold mb-0 mt-2">FROTISE</h2>
             <p class="opacity-75 mb-0 small letter-spacing-1">PRODUCT CATALOG</p>
             <div class="mt-2 badge bg-light text-dark opacity-75 small">
@@ -214,7 +207,6 @@
                 <div class="input-group input-group-lg">
                     <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
                     <input type="text" id="searchInput" class="form-control border-start-0" placeholder="Search..." onkeyup="window.handleSearch()">
-                    
                     <button class="btn btn-sm filter-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
                         <i class="bi bi-funnel"></i>
                     </button>
@@ -228,7 +220,6 @@
                     <span id="filterLabel" class="badge bg-secondary" style="display:none;"></span>
                 </div>
             </div>
-
             <div id="resultsList" class="mt-4"></div>
         </div>
 
@@ -269,14 +260,12 @@
                             <div class="position-relative">
                                 <img src="" id="modalImg" class="modal-img shadow-sm" alt="Product" onclick="window.viewImage(this.src)">
                                 <div id="modalNewBadge" class="badge-new fs-6 px-3 py-2 rounded-0 rounded-bottom-start" style="display:none; left:0; right:auto;">NEW ARRIVAL</div>
-                                <div class="text-muted small mt-2"><i class="bi bi-zoom-in"></i> Tap image to enlarge</div>
                             </div>
                         </div>
                         <div class="col-12 col-md-7">
                             <div class="ps-md-2 text-start">
                                 <h3 class="fw-bold text-primary mb-1" id="modalCode"></h3>
                                 <h6 class="text-muted mb-3" id="modalName" style="line-height:1.4;"></h6>
-
                                 <div class="p-3 bg-light rounded mb-3">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <span class="text-muted">Price:</span>
@@ -287,7 +276,6 @@
                                         <span id="modalStockContent"></span>
                                     </div>
                                 </div>
-
                                 <div id="addToCartSection" class="right-aligned-controls">
                                     <div class="mb-2 text-end">
                                         <label class="form-label text-muted small mb-1 d-block">Order Quantity:</label>
@@ -303,9 +291,7 @@
                                         </button>
                                     </div>
                                 </div>
-                                <div id="outOfStockMsg" class="alert alert-danger mt-3 text-center" style="display:none;">
-                                    <i class="bi bi-x-circle"></i> Out of Stock
-                                </div>
+                                <div id="outOfStockMsg" class="alert alert-danger mt-3 text-center" style="display:none;">Out of Stock</div>
                             </div>
                         </div>
                     </div>
@@ -344,18 +330,13 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-        // PWA Service Worker Registration
+        // PWA Service Worker
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('SW registered'))
-                    .catch(err => console.log('SW registration failed', err));
-            });
+            window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW fail', err)));
         }
 
         const currencyUnit = ""; 
-        const orderLimit = 1000000; 
-
+        
         window.cart = [];
         window.currentItem = null;
         window.loggedInUser = null; 
@@ -367,25 +348,18 @@
         window.validClients = []; 
         window.userAllowedProducts = []; 
         window.currentFilter = 'ALL'; 
-        
         window.newArrivalDate = null;
 
         document.addEventListener('DOMContentLoaded', function() {
             window.productModal = new bootstrap.Modal(document.getElementById('productModal'));
             window.cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
             window.notificationModal = new bootstrap.Modal(document.getElementById('notificationModal'));
-
-            const img = document.querySelector('.login-logo');
-            img.onerror = function() {
-                img.style.display = 'none';
-                document.getElementById('backupIcon').style.display = 'block';
-            };
-
+            
             loadDatabases();
         });
 
+        // 1. 初始化加载
         async function loadDatabases() {
-            const statusEl = document.getElementById('dbStatus');
             try {
                 const [prodRes, clientRes] = await Promise.all([
                     fetch('products.csv?v=' + Date.now()),
@@ -397,20 +371,52 @@
                 const decoder = new TextDecoder("gbk");
                 const prodBuffer = await prodRes.arrayBuffer();
                 const clientBuffer = await clientRes.arrayBuffer();
-                const prodText = decoder.decode(prodBuffer);
-                const clientText = decoder.decode(clientBuffer);
+                
+                parseProducts(decoder.decode(prodBuffer));
+                parseClients(decoder.decode(clientBuffer));
 
-                parseProducts(prodText);
-                parseClients(clientText);
-
-                console.log("System Ready");
+                // 3. 检查持久化登录状态
+                checkPersistentLogin();
 
             } catch (err) {
                 console.error(err);
-                statusEl.style.display = 'block';
-                statusEl.innerText = "Error loading database.";
-                statusEl.className = 'text-danger mb-3';
+                alert("Error loading data. Please verify network connection.");
+                // 出错也要隐藏启动页，否则用户卡死在Logo
+                hideSplashScreen(); 
+                document.getElementById('loginSection').style.display = 'flex';
             }
+        }
+
+        // 3. 检查 localStorage 实现自动登录
+        function checkPersistentLogin() {
+            const savedUser = localStorage.getItem('frotiseUser');
+            if (savedUser) {
+                const userObj = JSON.parse(savedUser);
+                // 重新验证该用户是否仍在 clients.csv 中 (可选，防止用户被删后仍能登录)
+                const validUser = window.validClients.find(u => u.id === userObj.id && u.pass === userObj.pass);
+                
+                if (validUser) {
+                    performLogin(validUser, false); // false 表示不需要动画淡入
+                } else {
+                    // 用户无效，清除缓存显示登录页
+                    localStorage.removeItem('frotiseUser');
+                    showLoginScreen();
+                }
+            } else {
+                showLoginScreen();
+            }
+        }
+
+        function showLoginScreen() {
+            hideSplashScreen();
+            document.getElementById('loginSection').style.display = 'flex';
+            document.getElementById('mainApp').style.display = 'none';
+        }
+
+        function hideSplashScreen() {
+            const splash = document.getElementById('splashScreen');
+            splash.style.opacity = '0';
+            setTimeout(() => { splash.style.display = 'none'; }, 500);
         }
 
         function parseProducts(csvText) {
@@ -418,8 +424,7 @@
             window.allProducts = [];
             
             if (lines.length > 0) {
-                const headerLine = lines[0].replace(/"/g, "");
-                const headerCols = headerLine.split(',');
+                const headerCols = lines[0].replace(/"/g, "").split(',');
                 if (headerCols.length >= 7 && headerCols[6].trim() !== "") {
                     window.newArrivalDate = headerCols[6].trim();
                 }
@@ -428,14 +433,9 @@
             for(let i = 1; i < lines.length; i++) {
                 let line = lines[i].trim();
                 if(!line) continue;
-                
-                const cleanLine = line.replace(/"/g, "");
-                const cols = cleanLine.split(',');
-
+                const cols = line.replace(/"/g, "").split(',');
                 if(cols.length >= 4) {
-                    const newFlagRaw = cols[5] ? cols[5].trim() : "0";
-                    const isNewItem = (newFlagRaw === '1' || newFlagRaw.toUpperCase() === 'YES');
-
+                    const isNewItem = (cols[5] && (cols[5].trim() === '1' || cols[5].trim().toUpperCase() === 'YES'));
                     window.allProducts.push({
                         code: cols[0].trim(),
                         name: cols[1].trim(), 
@@ -451,103 +451,84 @@
         function parseClients(csvText) {
             const lines = csvText.split(/\r?\n/);
             window.validClients = [];
-            
             for(let i = 1; i < lines.length; i++) {
                 let line = lines[i].trim();
                 if(!line) continue;
-
-                const cleanLine = line.replace(/"/g, "");
-                const parts = cleanLine.split(',');
-
+                const parts = line.replace(/"/g, "").split(',');
                 if(parts.length >= 2) {
-                    const clientCode = parts[0].trim().toUpperCase();
-                    const password = parts[1].trim(); 
-                    const keywords = parts.slice(2).map(k => k.trim().toUpperCase()).filter(k => k !== "");
-                    
-                    if(clientCode) {
-                        window.validClients.push({ 
-                            id: clientCode, 
-                            pass: password, 
-                            keywords: keywords 
-                        });
-                    }
+                    window.validClients.push({ 
+                        id: parts[0].trim().toUpperCase(), 
+                        pass: parts[1].trim(), 
+                        keywords: parts.slice(2).map(k => k.trim().toUpperCase()).filter(k => k !== "") 
+                    });
                 }
             }
         }
 
+        // 点击登录按钮
         window.attemptLogin = function() {
             const idInput = document.getElementById('loginId').value.trim().toUpperCase();
             const passInput = document.getElementById('loginPass').value.trim();
             const errorDiv = document.getElementById('loginError');
-            
-            if (window.validClients.length === 0) {
-                errorDiv.innerText = "System loading... please wait.";
-                errorDiv.style.display = 'block';
-                return;
-            }
 
             const user = window.validClients.find(u => u.id === idInput);
 
             if (user && (passInput === user.pass)) {
-                window.loggedInUser = user; 
-                
-                // 1. 切换背景色为灰色 (应用内背景)
-                document.body.style.backgroundColor = "#f0f2f5";
-
-                window.userAllowedProducts = window.allProducts.filter(item => {
-                    const searchStr = (item.code + " " + item.name).toUpperCase();
-                    if (user.keywords.includes('ALL')) return true;
-                    return user.keywords.some(key => searchStr.includes(key));
-                });
-
-                if (window.newArrivalDate) {
-                    document.getElementById('notifDot').style.display = 'block';
-                }
-
-                document.getElementById('userDisplay').innerText = user.id; 
-                document.getElementById('loginSection').style.display = 'none';
-                document.getElementById('mainApp').style.display = 'block';
-                window.handleSearch();
+                // 保存登录状态到 localStorage
+                localStorage.setItem('frotiseUser', JSON.stringify(user));
+                performLogin(user, true);
             } else {
                 errorDiv.innerText = "Invalid Client Code or Password.";
                 errorDiv.style.display = 'block';
             }
         };
 
+        // 执行登录逻辑 (处理界面切换)
+        function performLogin(user, animate) {
+            window.loggedInUser = user; 
+            
+            window.userAllowedProducts = window.allProducts.filter(item => {
+                const searchStr = (item.code + " " + item.name).toUpperCase();
+                if (user.keywords.includes('ALL')) return true;
+                return user.keywords.some(key => searchStr.includes(key));
+            });
+
+            if (window.newArrivalDate) document.getElementById('notifDot').style.display = 'block';
+            document.getElementById('userDisplay').innerText = user.id; 
+
+            // 4. 解决闪烁：先隐藏所有，再显示主页
+            if(animate) hideSplashScreen(); // 确保启动页已消失
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            
+            window.handleSearch();
+        }
+
+        // 3. Logout 需要清除 localStorage
         window.logout = function() {
+            localStorage.removeItem('frotiseUser');
             window.loggedInUser = null;
             window.cart = [];
             window.userAllowedProducts = [];
             document.getElementById('loginPass').value = '';
-            document.getElementById('loginError').style.display = 'none';
             document.getElementById('cartBadge').style.display = 'none';
             
-            document.body.style.backgroundColor = "var(--frotise-blue)";
-
             document.getElementById('mainApp').style.display = 'none';
             document.getElementById('loginSection').style.display = 'flex';
         };
 
         window.showNewGoodsInfo = function() {
             const textEl = document.getElementById('notificationText');
-            if (window.newArrivalDate) {
-                textEl.innerText = `NEW GOODS ARRIVED ON: ${window.newArrivalDate}`;
-            } else {
-                textEl.innerText = "No new arrival notifications.";
-            }
+            textEl.innerText = window.newArrivalDate ? `NEW GOODS ARRIVED ON: ${window.newArrivalDate}` : "No new arrival notifications.";
             window.notificationModal.show();
         };
 
         window.applyFilter = function(filterType) {
             window.currentFilter = filterType;
             const badge = document.getElementById('filterLabel');
-            if(filterType === 'ALL') {
-                badge.style.display = 'none';
-            } else if (filterType === 'STOCK') {
-                badge.innerText = "IN STOCK ONLY";
-                badge.style.display = 'inline-block';
-            } else if (filterType === 'NEW') {
-                badge.innerText = "NEW ITEMS ONLY";
+            if(filterType === 'ALL') badge.style.display = 'none';
+            else {
+                badge.innerText = filterType === 'STOCK' ? "IN STOCK ONLY" : "NEW ITEMS ONLY";
                 badge.style.display = 'inline-block';
             }
             window.handleSearch();
@@ -558,11 +539,8 @@
             const listDiv = document.getElementById('resultsList');
             let data = window.userAllowedProducts; 
 
-            if (window.currentFilter === 'STOCK') {
-                data = data.filter(i => i.stock > 0);
-            } else if (window.currentFilter === 'NEW') {
-                data = data.filter(i => i.isNew);
-            }
+            if (window.currentFilter === 'STOCK') data = data.filter(i => i.stock > 0);
+            else if (window.currentFilter === 'NEW') data = data.filter(i => i.isNew);
 
             let results = data;
             if(rawInput.length > 0) {
@@ -573,18 +551,15 @@
                 });
             }
             
-            const displayList = results; 
-
-            if (displayList.length === 0) {
+            if (results.length === 0) {
                 listDiv.innerHTML = '<div class="text-center mt-5 text-muted">No items found.</div>';
                 return;
             }
 
             let html = '';
-            displayList.forEach(item => {
+            results.forEach(item => {
                 let stockBadge = item.stock <= 0 ? `<span class="stock-tag bg-stock-zero">OUT OF STOCK</span>` : 
                                 (item.stock <= 5 ? `<span class="stock-tag bg-stock-low">LOW STOCK</span>` : `<span class="stock-tag bg-stock-high">IN STOCK</span>`);
-
                 let priceDisplay = (item.promo > 0 && item.promo < item.price) ? 
                                    `<span class="price-old">${item.price}</span>${currencyUnit}${item.promo}` : `${currencyUnit}${item.price}`;
 
@@ -601,7 +576,6 @@
                     </div>
                 </div>`;
             });
-            
             listDiv.innerHTML = html;
         };
 
@@ -631,13 +605,8 @@
             } else {
                 btnSection.style.display = 'flex'; 
                 msgSection.style.display = 'none';
-                if(item.stock <= 10) {
-                    stockContent.innerHTML = `<span class="badge bg-warning text-dark">LESS THAN 10</span>`;
-                } else {
-                    stockContent.innerHTML = `<span class="badge bg-success">IN STOCK</span>`;
-                }
+                stockContent.innerHTML = item.stock <= 10 ? `<span class="badge bg-warning text-dark">LESS THAN 10</span>` : `<span class="badge bg-success">IN STOCK</span>`;
             }
-            
             window.productModal.show();
         };
 
@@ -670,6 +639,7 @@
             badge.style.display = count > 0 ? 'flex' : 'none';
         };
 
+        // 5. 购物车界面升级 (加减号 + 垃圾桶)
         window.openCartModal = function() {
             const modalBody = document.getElementById('cartBody');
             modalBody.innerHTML = '';
@@ -680,14 +650,44 @@
                 window.cart.forEach((item, index) => {
                     total += item.price * item.qty;
                     modalBody.innerHTML += `
-                        <div class="card mb-2 border-0 shadow-sm"><div class="card-body p-2 d-flex justify-content-between align-items-center">
-                            <div style="width:60%"><div class="fw-bold small">${item.code}</div><div class="small text-muted text-truncate">${item.name}</div></div>
-                            <div class="text-end"><div>${item.qty} x ${item.price}</div><button class="btn btn-sm text-danger" onclick="window.removeCartItem(${index})">Remove</button></div>
-                        </div></div>`;
+                        <div class="card mb-2 border-0 shadow-sm">
+                            <div class="card-body p-2 d-flex justify-content-between align-items-center">
+                                <div style="width:50%">
+                                    <div class="fw-bold small">${item.code}</div>
+                                    <div class="small text-muted text-truncate">${item.name}</div>
+                                    <div class="text-danger fw-bold small mt-1">${item.price}</div>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <div class="qty-control me-3">
+                                        <button class="qty-btn" onclick="window.changeCartQty(${index}, -1)">-</button>
+                                        <span class="qty-display">${item.qty}</span>
+                                        <button class="qty-btn" onclick="window.changeCartQty(${index}, 1)">+</button>
+                                    </div>
+                                    <button class="btn btn-sm text-secondary" onclick="window.removeCartItem(${index})">
+                                        <i class="bi bi-trash-fill fs-5"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>`;
                 });
             }
             document.getElementById('cartTotal').innerText = total.toLocaleString();
             window.cartModal.show();
+        };
+
+        // 5. 购物车内修改数量
+        window.changeCartQty = function(index, change) {
+            const item = window.cart[index];
+            const originalItem = window.allProducts.find(p => p.code === item.code);
+            const maxStock = originalItem ? originalItem.stock : 999;
+            
+            let newQty = item.qty + change;
+            if (newQty < 1) return; // 最小为1
+            if (newQty > maxStock) return alert("Exceeds stock limit");
+            
+            item.qty = newQty;
+            window.openCartModal(); // 重新渲染购物车
+            window.updateCartUI();  // 更新外部角标
         };
 
         window.removeCartItem = function(index) {
@@ -698,15 +698,9 @@
 
         window.confirmOrder = function() {
             if (window.cart.length === 0) return;
-            window.cart.forEach(cItem => {
-                const dbItem = window.allProducts.find(d => d.code === cItem.code);
-                if(dbItem) dbItem.stock = Math.max(0, dbItem.stock - cItem.qty);
-            });
-
             let msg = `🛒 *FROTISE ORDER (${window.loggedInUser.id})*\n\n`;
             window.cart.forEach(i => msg += `▪️ ${i.code} (x${i.qty}) - ${i.price}\n`);
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
-            
             window.cart = [];
             window.updateCartUI();
             window.cartModal.hide();

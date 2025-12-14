@@ -3,9 +3,9 @@
   "short_name": "Frotise",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#004a99",
+  "background_color": "#ffffff",
   "theme_color": "#004a99",
-  "orientation": "portrait-primary",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "icon-192.png",
