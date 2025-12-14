@@ -1,10 +1,10 @@
 {
-  "name": "FROTISE SYSTEM",
+  "name": "FROTISE CATALOG",
   "short_name": "Frotise",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#0056b3",
+  "background_color": "#004a99",
+  "theme_color": "#004a99",
   "orientation": "portrait-primary",
   "icons": [
     {
