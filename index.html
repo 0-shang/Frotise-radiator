@@ -31,25 +31,6 @@
             user-select: none; -webkit-user-select: none;
         }
 
-        /* === 启动页 (Splash Screen) === */
-        #splashScreen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: #ffffff;
-            z-index: 20000;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: opacity 0.5s ease-out;
-        }
-        .splash-logo {
-            width: 60%; max-width: 250px; height: auto;
-            animation: pulse 2s infinite;
-        }
-        /* 备用文字，防止logo挂了显示空白 */
-        .splash-text {
-            display: none; color: var(--frotise-blue); font-weight: bold; font-size: 2rem; letter-spacing: 2px;
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
-
         /* === 图片查看器 === */
         #imageOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -65,7 +46,7 @@
             display: flex; align-items: center; justify-content: center;
             background-color: var(--frotise-blue);
             z-index: 9000;
-            display: none; 
+            display: none; /* JS控制显示 */
         }
         .login-card {
             background: white; padding: 40px 30px;
@@ -76,7 +57,7 @@
 
         /* === 主程序界面 === */
         #mainApp {
-            display: none; 
+            display: none; /* JS控制显示 */
             min-height: 100vh;
             background-color: var(--app-bg);
             padding-bottom: 100px;
@@ -110,11 +91,26 @@
             margin-top: -35px; background: white; border-radius: 15px;
             padding: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);
         }
+        
+        /* === 2. 修复过滤按钮闪烁 === */
         .filter-btn {
             background-color: #f0f2f5; color: #555; border: 1px solid #ced4da;
             border-left: none; padding: 0 15px;
         }
-        .filter-btn:hover, .filter-btn:active { background-color: #e2e6ea; color: #333; }
+        .filter-btn:hover { background-color: #e2e6ea; color: #333; }
+        
+        /* 强制覆盖 Bootstrap 所有的 active/focus/show 状态，防止蓝白闪烁 */
+        .filter-btn:active, 
+        .filter-btn:focus, 
+        .filter-btn.show, 
+        .btn-check:checked + .btn {
+            background-color: #e2e6ea !important;
+            color: #333 !important;
+            border-color: #ced4da !important;
+            box-shadow: none !important; 
+            outline: none !important;
+            background-image: none !important; /* 防止渐变闪烁 */
+        }
 
         /* 产品列表 */
         .result-item {
@@ -165,13 +161,7 @@
 </head>
 <body>
 
-    <!-- 启动页 (Safety Timeout 已添加) -->
-    <div id="splashScreen">
-        <!-- 如果图片加载失败，显示文字 FROTISE -->
-        <img src="logo.png" alt="FROTISE" class="splash-logo" onerror="this.style.display='none'; document.querySelector('.splash-text').style.display='block';">
-        <div class="splash-text">FROTISE</div>
-        <div id="loadingStatus" style="margin-top:20px; color:#666; font-size:0.8rem;">Loading...</div>
-    </div>
+    <!-- 1. 已删除 Splash Screen (启动页) HTML -->
 
     <div id="imageOverlay" onclick="window.closeImageViewer()">
         <img id="fullImage" src="">
@@ -227,7 +217,10 @@
                     <span id="filterLabel" class="badge bg-secondary" style="display:none;"></span>
                 </div>
             </div>
-            <div id="resultsList" class="mt-4"></div>
+            <div id="resultsList" class="mt-4">
+                <!-- 初始状态显示 Loading，避免主页空白 -->
+                <div class="text-center mt-5 text-muted small">Loading catalog...</div>
+            </div>
         </div>
 
         <div class="fab-cart" onclick="window.openCartModal()">
@@ -355,29 +348,30 @@
         window.userAllowedProducts = []; 
         window.currentFilter = 'ALL'; 
         window.newArrivalDate = null;
-        
-        // 标记数据是否加载完成
-        window.isDataLoaded = false;
 
         document.addEventListener('DOMContentLoaded', function() {
             window.productModal = new bootstrap.Modal(document.getElementById('productModal'));
             window.cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
             window.notificationModal = new bootstrap.Modal(document.getElementById('notificationModal'));
             
-            // 核心修复 1: 强制超时保护
-            // 如果 3 秒后数据还没加载完，强制关闭启动页显示登录界面
-            setTimeout(() => {
-                const splash = document.getElementById('splashScreen');
-                if (splash && splash.style.display !== 'none' && !window.isDataLoaded) {
-                    console.warn("Safety timeout triggered.");
-                    hideSplashScreen();
-                    // 只有在没有自动登录的情况下才显示登录页
-                    if (!window.loggedInUser) {
-                        document.getElementById('loginSection').style.display = 'flex';
-                    }
-                }
-            }, 3000);
+            // 1. 立即检查登录状态，决定显示哪个界面
+            // 这样页面一打开就是正确的界面，没有过渡动画
+            const savedUser = localStorage.getItem('frotiseUser');
+            if (savedUser) {
+                // 有登录记录：立即显示主页
+                document.getElementById('mainApp').style.display = 'block';
+                // 此时数据还没加载完，列表显示 Loading...
+                
+                // 恢复用户信息（暂时的，等CSV加载完会重新验证）
+                const userObj = JSON.parse(savedUser);
+                window.loggedInUser = userObj;
+                document.getElementById('userDisplay').innerText = userObj.id;
+            } else {
+                // 无登录记录：显示登录页
+                document.getElementById('loginSection').style.display = 'flex';
+            }
 
+            // 2. 开始后台加载数据
             loadDatabases();
         });
 
@@ -397,48 +391,34 @@
                 parseProducts(decoder.decode(prodBuffer));
                 parseClients(decoder.decode(clientBuffer));
 
-                window.isDataLoaded = true; // 标记加载成功
-
-                checkPersistentLogin();
+                // 数据加载完毕，重新验证用户权限并刷新列表
+                revalidateUser();
 
             } catch (err) {
                 console.error(err);
-                document.getElementById('loadingStatus').innerText = "Network Error. Please refresh.";
-                // 出错后强制显示登录页，允许重试
-                setTimeout(() => {
-                    hideSplashScreen();
-                    document.getElementById('loginSection').style.display = 'flex';
-                }, 1000);
+                // 如果数据加载失败，但用户停留在Loading页，给予提示
+                if(document.getElementById('mainApp').style.display === 'block') {
+                    document.getElementById('resultsList').innerHTML = '<div class="text-center mt-5 text-danger">Network Error. Please refresh.</div>';
+                }
             }
         }
 
-        function checkPersistentLogin() {
+        // 数据加载完后，刷新界面
+        function revalidateUser() {
             const savedUser = localStorage.getItem('frotiseUser');
             if (savedUser) {
                 const userObj = JSON.parse(savedUser);
+                // 在最新的客户列表中查找用户
                 const validUser = window.validClients.find(u => u.id === userObj.id && u.pass === userObj.pass);
                 
                 if (validUser) {
-                    performLogin(validUser, true); 
+                    // 用户有效，更新数据
+                    performLogin(validUser);
                 } else {
-                    localStorage.removeItem('frotiseUser');
-                    showLoginScreen();
+                    // 用户无效（可能被删除了），踢出
+                    logout();
                 }
-            } else {
-                showLoginScreen();
             }
-        }
-
-        function showLoginScreen() {
-            hideSplashScreen();
-            document.getElementById('loginSection').style.display = 'flex';
-            document.getElementById('mainApp').style.display = 'none';
-        }
-
-        function hideSplashScreen() {
-            const splash = document.getElementById('splashScreen');
-            splash.style.opacity = '0';
-            setTimeout(() => { splash.style.display = 'none'; }, 500);
         }
 
         function parseProducts(csvText) {
@@ -496,14 +476,19 @@
 
             if (user && (passInput === user.pass)) {
                 localStorage.setItem('frotiseUser', JSON.stringify(user));
-                performLogin(user, false); // 手动登录不需要淡出动画，因为已经在登录页了
+                
+                // 登录成功，切换界面
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                
+                performLogin(user);
             } else {
                 errorDiv.innerText = "Invalid Client Code or Password.";
                 errorDiv.style.display = 'block';
             }
         };
 
-        function performLogin(user, isAutoLogin) {
+        function performLogin(user) {
             window.loggedInUser = user; 
             
             window.userAllowedProducts = window.allProducts.filter(item => {
@@ -514,11 +499,6 @@
 
             if (window.newArrivalDate) document.getElementById('notifDot').style.display = 'block';
             document.getElementById('userDisplay').innerText = user.id; 
-
-            if(isAutoLogin) hideSplashScreen();
-            
-            document.getElementById('loginSection').style.display = 'none';
-            document.getElementById('mainApp').style.display = 'block';
             
             window.handleSearch();
         }
@@ -570,7 +550,11 @@
             }
             
             if (results.length === 0) {
-                listDiv.innerHTML = '<div class="text-center mt-5 text-muted">No items found.</div>';
+                // 只有当数据已经加载过（数组不为空），才显示 No items found
+                // 否则如果是初始空状态，保持 Loading...
+                if (window.allProducts.length > 0) {
+                    listDiv.innerHTML = '<div class="text-center mt-5 text-muted">No items found.</div>';
+                }
                 return;
             }
 
